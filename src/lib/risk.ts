@@ -94,6 +94,15 @@ export function appPalette(jurisdiction: string): AppPalette {
   return APP_PALETTES[deriveBand(jurisdiction)];
 }
 
+export function paletteForBand(band: RiskBand): AppPalette {
+  return APP_PALETTES[band];
+}
+
+/** The band actually in effect: a manual analyst override wins over the derived band. */
+export function effectiveBand(jurisdiction: string, override: RiskBand | null): RiskBand {
+  return override ?? deriveBand(jurisdiction);
+}
+
 export function reportPalette(band: RiskBand): ReportPalette {
   return REPORT_PALETTES[band];
 }

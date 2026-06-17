@@ -10,10 +10,28 @@ export function Section08Signoff() {
     <section className="hk-panel">
       <SectionHeader index="08" title="SIGN-OFF & AUTHORIZATION" shortHairline />
       <div className="hk-grid-4" style={{ gap: 10 }}>
-        <LabeledText label="PREPARED BY" placeholder="Name" value={signoff.preparedBy} onChange={(v) => setSignoff({ preparedBy: v })} />
-        <LabeledText label="PREPARED - ROLE" value={signoff.preparedRole} onChange={(v) => setSignoff({ preparedRole: v })} />
-        <LabeledText label="APPROVED BY" placeholder="Name" value={signoff.approvedBy} onChange={(v) => setSignoff({ approvedBy: v })} />
-        <LabeledText label="APPROVED - ROLE" value={signoff.approvedRole} onChange={(v) => setSignoff({ approvedRole: v })} />
+        <LabeledText
+          label="PREPARED BY"
+          placeholder="Name"
+          value={signoff.preparedBy}
+          onChange={(v) => setSignoff({ preparedBy: v })}
+        />
+        <LabeledText
+          label="PREPARED - ROLE"
+          value={signoff.preparedRole}
+          onChange={(v) => setSignoff({ preparedRole: v })}
+        />
+        <LabeledText
+          label="APPROVED BY"
+          placeholder="Name"
+          value={signoff.approvedBy}
+          onChange={(v) => setSignoff({ approvedBy: v })}
+        />
+        <LabeledText
+          label="APPROVED - ROLE"
+          value={signoff.approvedRole}
+          onChange={(v) => setSignoff({ approvedRole: v })}
+        />
       </div>
       <div
         style={{

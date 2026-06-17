@@ -4,6 +4,7 @@ import { useAssessment } from '@/store/useAssessment';
 import { Workstation } from '@/pages/Workstation';
 import { Report } from '@/pages/Report';
 import { LockGate } from '@/components/workstation/LockGate';
+import { ModalRoot } from '@/components/workstation/modals/ModalRoot';
 import { Toaster } from '@/components/ui/Toast';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/report" element={<Report />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <ModalRoot />
       {locked && <LockGate />}
       <Toaster />
     </>

@@ -20,8 +20,7 @@ export interface AuthResult {
  * Configured passphrase. Set `VITE_SESSION_PASSPHRASE` in `.env.local` to
  * override. The default keeps local/dev usable without configuration.
  */
-const EXPECTED_PASSPHRASE: string =
-  import.meta.env.VITE_SESSION_PASSPHRASE ?? 'sterling';
+const EXPECTED_PASSPHRASE: string = import.meta.env.VITE_SESSION_PASSPHRASE ?? 'sterling';
 
 /** Length-independent string comparison to avoid trivial timing leaks. */
 function safeEqual(a: string, b: string): boolean {
@@ -37,11 +36,24 @@ export async function authenticate(passphrase: string): Promise<AuthResult> {
     return { ok: false, error: 'Enter your passphrase to continue.' };
   }
 
-  // --- Swap this block for a real backend request in production. ---
-  const ok = safeEqual(candidate, EXPECTED_PASSPHRASE);
-  // ----------------------------------------------------------------
+  // If an auth endpoint is configured, verify server-side; otherwise fall back
+  // to the local configured passphrase. Either way the call sites are unchanged.
+  const endpoint = import.meta.env.VITE_AUTH_ENDPOINT;
+  if (endpoint) {
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passphrase: candidate }),
+      });
+      return res.ok
+        ? { ok: true }
+        : { ok: false, error: 'Incorrect passphrase — please try again.' };
+    } catch {
+      return { ok: false, error: 'Could not reach the authentication service.' };
+    }
+  }
 
-  return ok
-    ? { ok: true }
-    : { ok: false, error: 'Incorrect passphrase — please try again.' };
+  const ok = safeEqual(candidate, EXPECTED_PASSPHRASE);
+  return ok ? { ok: true } : { ok: false, error: 'Incorrect passphrase — please try again.' };
 }

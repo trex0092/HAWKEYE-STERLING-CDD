@@ -82,7 +82,14 @@ export function LockGate() {
             badge={<LockBadge size={14} strokeWidth={2.4} />}
             rings={[
               { inset: 0, width: 1.5, topColor: '#e85aff', rightColor: '#b07bff', durationS: 7 },
-              { inset: 10, topColor: 'transparent', bottomColor: '#7aa6ff', leftColor: '#36e0d0', durationS: 10, reverse: true },
+              {
+                inset: 10,
+                topColor: 'transparent',
+                bottomColor: '#7aa6ff',
+                leftColor: '#36e0d0',
+                durationS: 10,
+                reverse: true,
+              },
               { inset: -6, dashed: true, color: 'rgba(176,123,255,.3)', durationS: 24 },
             ]}
           />
@@ -129,7 +136,12 @@ export function LockGate() {
           onKeyDown={(e) => {
             if (e.key === 'Enter') submit();
           }}
-          style={{ fontSize: 15, padding: '15px 18px', borderRadius: 12, marginBottom: error ? 8 : 14 }}
+          style={{
+            fontSize: 15,
+            padding: '15px 18px',
+            borderRadius: 12,
+            marginBottom: error ? 8 : 14,
+          }}
         />
 
         {error && (

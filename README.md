@@ -15,10 +15,11 @@ runtime.
 
 - **React 18 + TypeScript + Vite**
 - **React Router** — `/` workstation, `/report` export view
-- **Zustand** — the assessment store (state + derived band)
+- **Zustand** — assessment store (state + derived band) with **localStorage persistence**
 - **lucide-react** — icon set (replaces the design's placeholder Unicode glyphs)
 - **CSS design tokens** — `src/styles/*` (variables, keyframes, component classes)
 - **Vitest + Testing Library** — runtime tests
+- **ESLint + Prettier** — linting/formatting; **GitHub Actions** CI
 
 ## Getting started
 
@@ -30,10 +31,12 @@ npm run dev        # http://localhost:5173
 Other scripts:
 
 ```bash
-npm run build      # type-check + production build
-npm run preview    # serve the production build
-npm run test       # run the Vitest suite
-npm run typecheck  # tsc --noEmit
+npm run build        # type-check + production build
+npm run preview      # serve the production build
+npm run test         # run the Vitest suite
+npm run typecheck    # tsc --noEmit
+npm run lint         # eslint
+npm run format       # prettier --write
 ```
 
 ### Unlocking the session
@@ -57,18 +60,38 @@ a backend call.
 3. **CDD Assessment Report** — the 2-page A4 export, rendered from live state.
    "Print / Export PDF" opens it and triggers the print dialog.
 
+## Actions & persistence
+
+The assessment autosaves to `localStorage` (the rail shows the last-saved time);
+the session lock always re-engages on reload. Right-rail actions:
+
+| Action                | Behaviour                                                             |
+| --------------------- | --------------------------------------------------------------------- |
+| `PRINT / EXPORT PDF`  | Opens the report and triggers print.                                  |
+| `COMPLETE ASSESSMENT` | Appends an auto-numbered, timestamped entry to the version log (§09). |
+| `REGISTER`            | Save/load assessments to a local register (modal).                    |
+| `ACTIVITY LOG`        | Shows the recorded activity timeline (modal).                         |
+| `SEND TO ASANA`       | POSTs to `VITE_ASANA_WEBHOOK_URL`; exports JSON if unconfigured.      |
+| `RESET`               | Restores clean screening/risk defaults.                               |
+| `RE-ASSESS`           | Re-screens all sanctions lists (stamps today).                        |
+| `RISK DATA`           | Shows the band/score mapping and colour legend (modal).               |
+
+The **▶ Analyst Override** control under the diligence pill lets an analyst pin
+the band (CDD/SDD/EDD) over the jurisdiction-derived value; it drives the avatar,
+pill and report.
+
 ## How it maps to the design
 
-| Design concept | Implementation |
-|---|---|
-| Risk map (jurisdiction → band) | `src/data/countries.ts` |
-| Band palette / score / labels | `src/lib/risk.ts` |
-| Section copy / option sets | `src/data/labels.ts` |
-| State model (incl. derived band) | `src/store/useAssessment.ts` |
-| Report view-model (+ sample fallbacks) | `src/lib/report.ts` |
-| Orbital medallions | `src/components/ui/OrbitalMedallion.tsx` |
-| Glyph → icon swap | `src/components/icons.tsx` |
-| Design tokens | `src/styles/tokens.css` |
+| Design concept                         | Implementation                           |
+| -------------------------------------- | ---------------------------------------- |
+| Risk map (jurisdiction → band)         | `src/data/countries.ts`                  |
+| Band palette / score / labels          | `src/lib/risk.ts`                        |
+| Section copy / option sets             | `src/data/labels.ts`                     |
+| State model (incl. derived band)       | `src/store/useAssessment.ts`             |
+| Report view-model (+ sample fallbacks) | `src/lib/report.ts`                      |
+| Orbital medallions                     | `src/components/ui/OrbitalMedallion.tsx` |
+| Glyph → icon swap                      | `src/components/icons.tsx`               |
+| Design tokens                          | `src/styles/tokens.css`                  |
 
 ## Project structure
 
@@ -88,10 +111,12 @@ src/
 
 ## Notes & next steps
 
-- **Persistence is not yet wired.** The store is fully controlled client state;
-  `COMPLETE ASSESSMENT`, `REGISTER`, `ACTIVITY LOG`, `SEND TO ASANA`, `RE-ASSESS`
-  and `RISK DATA` surface a toast and are ready to point at real services. `PRINT
-  / EXPORT PDF` and `RESET` are fully functional.
+- **Persistence is client-side** (`localStorage`). The integration seams
+  (`src/lib/auth.ts`, `src/lib/integrations/asana.ts`, `src/lib/register.ts`) are
+  isolated so they can be repointed at a real backend without touching the UI.
 - **`npm audit`** reports advisories only in dev tooling (the esbuild dev-server
   advisory via vite/vitest). They do not affect the production bundle; the only
   remediation is a breaking `vite@8` major, intentionally not taken.
+- **Visual fidelity** was matched by transcribing the design's exact tokens and
+  verified via the test suite; this environment can't run a browser to screenshot,
+  so a quick manual pass in `npm run dev` is recommended.

@@ -2,14 +2,18 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '@/App';
 import { useAssessment } from '@/store/useAssessment';
+import { useUI } from '@/store/useUI';
 import { deriveBand, appPalette, statusColor, levelColor, riskColor } from '@/lib/risk';
 import { formatCountdown } from '@/lib/format';
 import { buildReportModel } from '@/lib/report';
+import { getRegister, saveToRegister } from '@/lib/register';
 
 beforeEach(() => {
-  // Clean, locked session before each test.
+  // Clean, locked session + empty storage/UI before each test.
+  localStorage.clear();
   useAssessment.getState().reset();
-  useAssessment.setState({ locked: true, remaining: 3600 });
+  useAssessment.setState({ locked: true, remaining: 3600, activity: [], versions: [] });
+  useUI.setState({ modal: null, overrideOpen: false });
 });
 
 describe('risk derivation', () => {
@@ -21,9 +25,17 @@ describe('risk derivation', () => {
   });
 
   it('exposes the band palette (label / short / score)', () => {
-    expect(appPalette('United Kingdom')).toMatchObject({ short: 'CDD', score: 4, label: 'CDD — Customer Due Diligence' });
+    expect(appPalette('United Kingdom')).toMatchObject({
+      short: 'CDD',
+      score: 4,
+      label: 'CDD — Customer Due Diligence',
+    });
     expect(appPalette('United Arab Emirates')).toMatchObject({ short: 'SDD', score: 21 });
-    expect(appPalette('Iran')).toMatchObject({ short: 'EDD', score: 25, label: 'EDD — Enhanced Due Diligence' });
+    expect(appPalette('Iran')).toMatchObject({
+      short: 'EDD',
+      score: 25,
+      label: 'EDD — Enhanced Due Diligence',
+    });
   });
 
   it('recolours status values', () => {
@@ -134,6 +146,66 @@ describe('workstation', () => {
 
     fireEvent.click(screen.getAllByRole('button', { name: /REMOVE/ })[0]);
     expect(screen.queryByText('INDIVIDUAL #2')).not.toBeInTheDocument();
+  });
+});
+
+describe('wired actions', () => {
+  it('completeAssessment logs an auto-numbered version entry', () => {
+    expect(useAssessment.getState().versions).toHaveLength(0);
+    useAssessment.getState().completeAssessment();
+    const s = useAssessment.getState();
+    expect(s.versions).toHaveLength(1);
+    expect(s.versions[0]).toMatchObject({
+      ver: '01',
+      type: 'Initial',
+      summary: 'Assessment completed',
+    });
+    expect(s.completed).toBe(true);
+    expect(s.activity.length).toBeGreaterThan(0);
+  });
+
+  it('analyst override sets the effective band (over the jurisdiction)', () => {
+    useAssessment.getState().setOverrideBand('high'); // jurisdiction is UK (low)
+    const m = buildReportModel(useAssessment.getState());
+    expect(m.band).toBe('high');
+    expect(m.bannerRiskLabel).toBe('High Risk');
+  });
+
+  it('reassess stamps today on every sanctions row', () => {
+    useAssessment.getState().reassess();
+    expect(useAssessment.getState().sanctions.every((r) => r.date !== '')).toBe(true);
+  });
+});
+
+describe('register persistence', () => {
+  it('saves a snapshot and reloads it', () => {
+    useAssessment.getState().setAdmin({ referenceNumber: 'RA-TEST-001' });
+    useAssessment.getState().setEntity({ legalName: 'Acme DMCC' });
+    saveToRegister(useAssessment.getState().snapshot());
+
+    const recs = getRegister();
+    expect(recs).toHaveLength(1);
+    expect(recs[0].ref).toBe('RA-TEST-001');
+
+    useAssessment.getState().setEntity({ legalName: 'Changed' });
+    useAssessment.getState().restore(recs[0].snapshot);
+    expect(useAssessment.getState().entity.legalName).toBe('Acme DMCC');
+  });
+});
+
+describe('analyst override (UI)', () => {
+  it('recolours the diligence pill via the override popover', async () => {
+    useAssessment.setState({ locked: false });
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('CDD — Customer Due Diligence')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /ANALYST OVERRIDE/ }));
+    fireEvent.click(screen.getByRole('button', { name: /EDD — Enhanced/ }));
+    expect(await screen.findByText('EDD — Enhanced Due Diligence')).toBeInTheDocument();
   });
 });
 

@@ -30,8 +30,18 @@ function RKeyValue({ k, v, valueStyle }: { k: string; v: string; valueStyle?: CS
   );
 }
 
-const GRID3: CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px 22px', marginBottom: 24 };
-const GRID2: CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '14px 22px', marginBottom: 24 };
+const GRID3: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3,1fr)',
+  gap: '14px 22px',
+  marginBottom: 24,
+};
+const GRID2: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2,1fr)',
+  gap: '14px 22px',
+  marginBottom: 24,
+};
 
 export function Report() {
   const navigate = useNavigate();
@@ -72,11 +82,19 @@ export function Report() {
   return (
     <div className="hk-report-surface">
       <div className="hk-report-toolbar">
-        <button type="button" className="hk-toolbar-btn hk-toolbar-btn--ghost" onClick={() => navigate('/')}>
+        <button
+          type="button"
+          className="hk-toolbar-btn hk-toolbar-btn--ghost"
+          onClick={() => navigate('/')}
+        >
           <Back size={14} /> Back to workstation
         </button>
         <span className="title">CDD Assessment Report</span>
-        <button type="button" className="hk-toolbar-btn hk-toolbar-btn--primary" onClick={() => window.print()}>
+        <button
+          type="button"
+          className="hk-toolbar-btn hk-toolbar-btn--primary"
+          onClick={() => window.print()}
+        >
           <PrintExport size={14} /> Print / Export PDF
         </button>
       </div>
@@ -91,7 +109,9 @@ export function Report() {
             </div>
             <div style={{ flex: 1 }}>
               <div className="hk-r-wordmark">HAWKEYE STERLING</div>
-              <div className="hk-r-sub">Customer &amp; Counterparty Due Diligence — CDD Assessment Report</div>
+              <div className="hk-r-sub">
+                Customer &amp; Counterparty Due Diligence — CDD Assessment Report
+              </div>
             </div>
             <div className="hk-r-refblock">
               <div>
@@ -160,12 +180,18 @@ export function Report() {
                 <span>SCREENED</span>
               </div>
               {m.sanctions.map((r) => (
-                <div key={r.list} className="hk-r-row" style={{ gridTemplateColumns: SANC_COLS, padding: '8px 12px' }}>
+                <div
+                  key={r.list}
+                  className="hk-r-row"
+                  style={{ gridTemplateColumns: SANC_COLS, padding: '8px 12px' }}
+                >
                   <span style={{ color: '#15171f' }}>{r.list}</span>
                   <span className="hk-r-result" style={{ color: r.resultColor }}>
                     {r.result}
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#15171f' }}>{r.date}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#15171f' }}>
+                    {r.date}
+                  </span>
                 </div>
               ))}
             </div>
@@ -173,7 +199,11 @@ export function Report() {
             <RSectionHead index="04" title="ADVERSE MEDIA SCREENING" />
             <div>
               {m.adverse.map((r) => (
-                <div key={r.cat} className="hk-r-row" style={{ gridTemplateColumns: ADV_COLS, padding: '7px 12px' }}>
+                <div
+                  key={r.cat}
+                  className="hk-r-row"
+                  style={{ gridTemplateColumns: ADV_COLS, padding: '7px 12px' }}
+                >
                   <span style={{ color: '#15171f' }}>{r.cat}</span>
                   <span className="hk-r-result" style={{ color: r.findColor }}>
                     {r.find}
@@ -193,7 +223,14 @@ export function Report() {
         <div className="hk-report-page">
           <div className="hk-r-body">
             <RSectionHead index="05" title="IDENTIFICATIONS" />
-            <div style={{ border: '1px solid #e3e6ec', borderRadius: 10, padding: 16, marginBottom: 24 }}>
+            <div
+              style={{
+                border: '1px solid #e3e6ec',
+                borderRadius: 10,
+                padding: 16,
+                marginBottom: 24,
+              }}
+            >
               <div
                 style={{
                   fontFamily: 'var(--font-mono)',
@@ -205,7 +242,9 @@ export function Report() {
               >
                 INDIVIDUAL #1
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px 22px' }}>
+              <div
+                style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px 22px' }}
+              >
                 {m.person.map((r: KeyValue) => (
                   <RKeyValue key={r.k} k={r.k} v={r.v} valueStyle={{ fontSize: 12 }} />
                 ))}
@@ -215,7 +254,11 @@ export function Report() {
             <RSectionHead index="06" title="PROLIFERATION FINANCING (PF) ASSESSMENT" />
             <div style={{ marginBottom: 24 }}>
               {m.pf.map((r) => (
-                <div key={r.factor} className="hk-r-row" style={{ gridTemplateColumns: PF_COLS, padding: '7px 12px' }}>
+                <div
+                  key={r.factor}
+                  className="hk-r-row"
+                  style={{ gridTemplateColumns: PF_COLS, padding: '7px 12px' }}
+                >
                   <span style={{ color: '#15171f' }}>{r.factor}</span>
                   <span className="hk-r-result" style={{ color: r.levelColor }}>
                     {r.level}
@@ -225,20 +268,50 @@ export function Report() {
             </div>
 
             <RSectionHead index="07" title="RISK-BASED ASSESSMENT (RBA)" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22, marginBottom: 24 }}>
-              <RKeyValue k="OVERALL RISK" v={m.rbaOverall} valueStyle={{ fontSize: 14, fontWeight: 600, color: m.rbaOverallColor }} />
-              <RKeyValue k="CDD LEVEL" v={m.cddLevelName} valueStyle={{ fontSize: 14, fontWeight: 600 }} />
-              <RKeyValue k="DECISION" v={m.decision} valueStyle={{ fontSize: 14, fontWeight: 600, color: m.decisionColor }} />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3,1fr)',
+                gap: 22,
+                marginBottom: 24,
+              }}
+            >
+              <RKeyValue
+                k="OVERALL RISK"
+                v={m.rbaOverall}
+                valueStyle={{ fontSize: 14, fontWeight: 600, color: m.rbaOverallColor }}
+              />
+              <RKeyValue
+                k="CDD LEVEL"
+                v={m.cddLevelName}
+                valueStyle={{ fontSize: 14, fontWeight: 600 }}
+              />
+              <RKeyValue
+                k="DECISION"
+                v={m.decision}
+                valueStyle={{ fontSize: 14, fontWeight: 600, color: m.decisionColor }}
+              />
             </div>
 
             <RSectionHead index="08" title="SIGN-OFF & AUTHORIZATION" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 22, marginBottom: 14 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2,1fr)',
+                gap: 22,
+                marginBottom: 14,
+              }}
+            >
               <div className="hk-r-sign">
-                <div className="hk-r-sign-name">{state.signoff.preparedBy || 'Compliance Department'}</div>
+                <div className="hk-r-sign-name">
+                  {state.signoff.preparedBy || 'Compliance Department'}
+                </div>
                 <div className="hk-r-sign-role">{sign1Role}</div>
               </div>
               <div className="hk-r-sign">
-                <div className="hk-r-sign-name">{state.signoff.approvedBy || 'Management Department'}</div>
+                <div className="hk-r-sign-name">
+                  {state.signoff.approvedBy || 'Management Department'}
+                </div>
                 <div className="hk-r-sign-role">{sign2Role}</div>
               </div>
             </div>
@@ -265,11 +338,19 @@ export function Report() {
                 <span>SUMMARY</span>
               </div>
               {m.versions.map((v) => (
-                <div key={v.ver} className="hk-r-row" style={{ gridTemplateColumns: VER_COLS, padding: '8px 12px' }}>
+                <div
+                  key={v.ver}
+                  className="hk-r-row"
+                  style={{ gridTemplateColumns: VER_COLS, padding: '8px 12px' }}
+                >
                   <span style={{ fontFamily: 'var(--font-mono)', color: '#15171f' }}>{v.ver}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#15171f' }}>{v.date}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#15171f' }}>
+                    {v.date}
+                  </span>
                   <span style={{ color: '#15171f' }}>{v.by}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c026d3' }}>{v.type}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c026d3' }}>
+                    {v.type}
+                  </span>
                   <span style={{ color: '#15171f' }}>{v.summary}</span>
                 </div>
               ))}

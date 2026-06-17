@@ -9,9 +9,10 @@
 import type { AssessmentState } from '@/store/useAssessment';
 import { SANCTIONS_LISTS, ADVERSE_CATEGORIES, PF_FACTORS } from '@/data/labels';
 import {
-  appPalette,
+  paletteForBand,
   reportPalette,
   riskLabelForBand,
+  effectiveBand,
   type RiskBand,
 } from '@/lib/risk';
 
@@ -60,14 +61,32 @@ export interface ReportModel {
 const SAMPLE_DATE = '17/06/2026';
 
 const SAMPLE_VERSIONS = [
-  { ver: '01', date: '29/09/2022', by: 'Compliance Department', type: 'Initial', summary: 'Account opening' },
-  { ver: '02', date: '10/01/2025', by: 'Compliance Department', type: 'Periodic', summary: 'KYC refresh' },
-  { ver: '03', date: '17/06/2026', by: 'Compliance Department', type: 'Periodic', summary: 'Periodic KYC review' },
+  {
+    ver: '01',
+    date: '29/09/2022',
+    by: 'Compliance Department',
+    type: 'Initial',
+    summary: 'Account opening',
+  },
+  {
+    ver: '02',
+    date: '10/01/2025',
+    by: 'Compliance Department',
+    type: 'Periodic',
+    summary: 'KYC refresh',
+  },
+  {
+    ver: '03',
+    date: '17/06/2026',
+    by: 'Compliance Department',
+    type: 'Periodic',
+    summary: 'Periodic KYC review',
+  },
 ];
 
 export function buildReportModel(s: AssessmentState): ReportModel {
-  const pal = appPalette(s.entity.jurisdiction);
-  const band = pal.band;
+  const band = effectiveBand(s.entity.jurisdiction, s.overrideBand);
+  const pal = paletteForBand(band);
   const rPal = reportPalette(band);
   const p0 = s.persons[0];
 
@@ -95,7 +114,10 @@ export function buildReportModel(s: AssessmentState): ReportModel {
       { k: 'JURISDICTION', v: or(s.entity.jurisdiction, 'United Arab Emirates') },
       { k: 'TRADING NAME', v: or(s.entity.tradingName, 'Meridian Bullion') },
       { k: 'REGISTRATION / LICENCE NO.', v: or(s.entity.registrationNo, 'DMCC-184220') },
-      { k: 'REGISTERED ADDRESS', v: or(s.entity.registeredAddress, 'Unit 3204, JBC 2, JLT, Dubai, UAE') },
+      {
+        k: 'REGISTERED ADDRESS',
+        v: or(s.entity.registeredAddress, 'Unit 3204, JBC 2, JLT, Dubai, UAE'),
+      },
       { k: 'WEBSITE / EMAIL', v: or(s.entity.websiteEmail, 'compliance@meridianbullion.ae') },
     ],
     sanctions: SANCTIONS_LISTS.map((list, i) => {

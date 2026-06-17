@@ -1,0 +1,6 @@
+dist
+node_modules
+coverage
+public/assets
+docs/design-handoff
+package-lock.json
