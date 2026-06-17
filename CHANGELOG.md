@@ -14,6 +14,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CodeQL code-scanning workflow.
 - Netlify deployment config (`netlify.toml`) with SPA redirects.
 
+### Changed
+
+- Upgraded runtime dependencies to current majors: React 18 → 19, react-router
+  6 → 7 (the v7 future flags are now defaults), Zustand 4 → 5, lucide-react
+  0.x → 1.x (with matching `@types/react` 19).
+- Bumped GitHub Actions: `actions/checkout` 4 → 6, `actions/setup-node` 4 → 6,
+  `github/codeql-action` 3 → 4.
+- Dev-tooling majors (ESLint 10, Vite 8, Vitest 4, `@vitejs/plugin-react` 6)
+  are deferred — a separate coordinated migration tracked via Dependabot.
+
 ## [1.0.0] - 2026-06-17
 
 ### Added
