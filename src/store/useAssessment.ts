@@ -188,7 +188,6 @@ export interface AssessmentState {
   // session (not persisted)
   locked: boolean;
   remaining: number;
-  now: Date;
 
   // assessment (persisted)
   admin: AdminInfo;
@@ -247,7 +246,6 @@ export const useAssessment = create<AssessmentState>()(
       // session
       locked: true,
       remaining: SESSION_DURATION_SECONDS,
-      now: new Date(),
 
       // assessment
       admin: freshAdmin(),
@@ -266,10 +264,12 @@ export const useAssessment = create<AssessmentState>()(
       lastSavedAt: null,
 
       // session actions
+      // The session clock only runs while unlocked; it auto-locks when it hits 0.
       tick: () =>
         set((s) => {
+          if (s.locked) return {};
           const r = s.remaining > 0 ? s.remaining - 1 : 0;
-          return { now: new Date(), remaining: r, locked: r === 0 ? true : s.locked };
+          return { remaining: r, locked: r === 0 };
         }),
       unlock: () => set({ locked: false, remaining: SESSION_DURATION_SECONDS }),
       lock: () => set({ locked: true, remaining: 0 }),
@@ -313,7 +313,8 @@ export const useAssessment = create<AssessmentState>()(
       setRba: (patch) => set((s) => ({ rba: { ...s.rba, ...patch }, ...saved() })),
       setSignoff: (patch) => set((s) => ({ signoff: { ...s.signoff, ...patch }, ...saved() })),
 
-      // RESET — clean screening/risk defaults; keeps entity identity + sign-off.
+      // RESET — clears entity, screening, persons, PF, RBA and override to clean
+      // defaults (jurisdiction returns to United Kingdom); keeps admin + sign-off.
       reset: () =>
         set((s) => ({
           entity: freshEntity(),

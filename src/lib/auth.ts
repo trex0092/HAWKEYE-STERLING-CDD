@@ -22,7 +22,11 @@ export interface AuthResult {
  */
 const EXPECTED_PASSPHRASE: string = import.meta.env.VITE_SESSION_PASSPHRASE ?? 'sterling';
 
-/** Length-independent string comparison to avoid trivial timing leaks. */
+/**
+ * Simple passphrase comparison. Note: this is the local/dev fallback only — it is
+ * not constant-time (and can't be meaningfully so client-side). Real protection
+ * comes from VITE_AUTH_ENDPOINT (server-side) or the hosting gate.
+ */
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;

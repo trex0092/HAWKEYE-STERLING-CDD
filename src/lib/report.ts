@@ -26,6 +26,10 @@ function lightLevel(v: string): string {
 function lightRisk(v: string): string {
   return v === 'High Risk' ? '#c0392b' : v === 'Medium Risk' ? '#b8860b' : '#1f9d57';
 }
+/* Decision colour follows the decision itself (not the risk band). */
+function lightDecision(v: string): string {
+  return v === 'Rejected' ? '#c0392b' : v === 'Pending' ? '#b8860b' : '#1f9d57';
+}
 
 const or = (value: string, fallback: string) => (value.trim() ? value.trim() : fallback);
 
@@ -44,6 +48,7 @@ export interface ReportModel {
   bannerRiskLabel: string;
   cddLabel: string;
   bannerDecision: string;
+  bannerDecisionColor: string;
   admin: KeyValue[];
   entity: KeyValue[];
   sanctions: { list: string; result: string; resultColor: string; date: string }[];
@@ -84,7 +89,21 @@ const SAMPLE_VERSIONS = [
   },
 ];
 
-export function buildReportModel(s: AssessmentState): ReportModel {
+/** Just the assessment data the report reads — lets callers subscribe narrowly. */
+export type ReportInput = Pick<
+  AssessmentState,
+  | 'admin'
+  | 'entity'
+  | 'sanctions'
+  | 'adverse'
+  | 'pf'
+  | 'persons'
+  | 'rba'
+  | 'versions'
+  | 'overrideBand'
+>;
+
+export function buildReportModel(s: ReportInput): ReportModel {
   const band = effectiveBand(s.entity.jurisdiction, s.overrideBand);
   const pal = paletteForBand(band);
   const rPal = reportPalette(band);
@@ -100,6 +119,7 @@ export function buildReportModel(s: AssessmentState): ReportModel {
     bannerRiskLabel: riskLabelForBand(band),
     cddLabel: pal.label,
     bannerDecision: or(s.rba.decision, 'Approved'),
+    bannerDecisionColor: lightDecision(or(s.rba.decision, 'Approved')),
 
     admin: [
       { k: 'REFERENCE NUMBER', v: or(s.admin.referenceNumber, 'RA-20260617-017') },
@@ -151,7 +171,7 @@ export function buildReportModel(s: AssessmentState): ReportModel {
     rbaOverallColor: lightRisk(s.rba.classification),
     cddLevelName: s.rba.cddLevel,
     decision: or(s.rba.decision, 'Approved'),
-    decisionColor: lightRisk(s.rba.classification),
+    decisionColor: lightDecision(or(s.rba.decision, 'Approved')),
     versions: s.versions.length > 0 ? s.versions : SAMPLE_VERSIONS,
   };
 }
