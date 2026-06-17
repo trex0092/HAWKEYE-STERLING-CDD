@@ -1,0 +1,23 @@
+name: Dependency Review
+
+# Flags vulnerable or disallowed-licence dependencies introduced by a PR.
+# Note: on a private repo this requires the Dependency Graph to be enabled
+# (Settings → Code security → Dependency graph — free).
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
