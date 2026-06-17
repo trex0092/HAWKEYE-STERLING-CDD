@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Dependency Review
+        # Advisory: won't block PRs. Becomes a real gate once the repo's
+        # Dependency Graph is enabled (Settings → Code security).
+        continue-on-error: true
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
