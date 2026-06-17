@@ -1,0 +1,229 @@
+/* ============================================================================
+   Reusable component classes (the in-house "component library" primitives).
+   Sizing that varies per usage is passed inline; base look + interaction states
+   (focus ring, hover tint) live here so they survive inline overrides.
+   ========================================================================== */
+
+/* ---- Panel ---------------------------------------------------------------- */
+.hk-panel {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-panel);
+  border-radius: 11px;
+  padding: 12px 15px;
+}
+
+/* ---- Section header ------------------------------------------------------- */
+.hk-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.hk-section-index {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--magenta-bright);
+}
+.hk-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.hk-hairline {
+  flex: 1;
+  height: 1px;
+  background: var(--grad-hairline);
+}
+.hk-hairline--short {
+  background: var(--grad-hairline-short);
+}
+
+/* ---- Labels --------------------------------------------------------------- */
+.hk-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+}
+.hk-label--sm {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+/* ---- Inputs --------------------------------------------------------------- */
+.hk-input {
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface-input);
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.hk-input:focus {
+  border-color: var(--magenta);
+  box-shadow: var(--focus-ring);
+}
+.hk-input--mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ---- Selects -------------------------------------------------------------- */
+.hk-select {
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface-input);
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: dark;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%239aa3b8' stroke-width='1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.hk-select:focus {
+  border-color: var(--magenta);
+  box-shadow: var(--focus-ring);
+}
+/* status-coloured select: text colour follows the chosen value */
+.hk-select--status {
+  font-weight: 600;
+  color: var(--status-color, var(--text-primary));
+}
+
+/* ---- Row (table-like rows in sections 03/04/06) -------------------------- */
+.hk-row {
+  display: grid;
+  gap: 10px;
+  align-items: center;
+  background: var(--surface-row);
+  border: 1px solid var(--border-row);
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+}
+.hk-row-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+/* ---- Checkbox ------------------------------------------------------------- */
+.hk-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.hk-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--magenta);
+}
+
+/* ---- Buttons -------------------------------------------------------------- */
+.hk-btn {
+  cursor: pointer;
+  border-radius: 9px;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.hk-btn:focus-visible {
+  outline: 2px solid var(--magenta);
+  outline-offset: 2px;
+}
+
+/* small magenta "+ Add person" pill */
+.hk-btn-add {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  color: #f7c9ff;
+  background: rgba(232, 90, 255, 0.12);
+  border: 1px solid rgba(232, 90, 255, 0.5);
+  border-radius: 9px;
+  padding: 8px 14px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hk-btn-add:hover {
+  background: rgba(232, 90, 255, 0.2);
+}
+
+/* red REMOVE pill */
+.hk-btn-remove {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #ff8a99;
+  background: rgba(255, 93, 115, 0.1);
+  border: 1px solid rgba(255, 93, 115, 0.35);
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.hk-btn-remove:hover {
+  background: rgba(255, 93, 115, 0.2);
+}
+
+/* ---- Action cells (right rail) ------------------------------------------- */
+.hk-action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 8px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--cell-color);
+  background: var(--cell-bg);
+  border: 1px solid var(--cell-border);
+  transition: background 0.15s ease;
+}
+.hk-action-cell:hover {
+  background: var(--cell-bg-hover);
+}
+.hk-action-cell svg {
+  flex: none;
+}
+
+/* ---- Required-diligence pill (band coloured) ----------------------------- */
+.hk-diligence-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--band-border);
+  background: var(--band-bg);
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--band-color);
+}

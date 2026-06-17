@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page{size:A4;margin:0;}
+  html,body{margin:0;padding:0;background:#4c4f57;}
+  *{box-sizing:border-box;}
+  @media print{
+    html,body{background:#fff;}
+    .page{box-shadow:none!important;margin:0!important;}
+  }
+</style>
+</helmet>
+<div data-screen-label="CDD Report" style="font-family:'Manrope',sans-serif;color:#15171f;padding:24px 0;">
+
+  <!-- PAGE 1 -->
+  <div class="page" style="width:794px;min-height:1123px;background:#fff;margin:0 auto 26px;box-shadow:0 14px 50px rgba(0,0,0,.34);break-after:page;display:flex;flex-direction:column;">
+
+    <!-- header band -->
+    <div style="background:#0e1018;padding:26px 44px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#e85aff,#7aa6ff,#36e0d0);"></div>
+      <div style="width:72px;height:72px;border-radius:50%;overflow:hidden;border:1px solid rgba(176,123,255,.5);flex:none;">
+        <img src="assets/robot-logo.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 28%;">
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:.14em;color:#f0d9ff;">HAWKEYE STERLING</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;color:#8a8fa3;text-transform:uppercase;margin-top:2px;">Customer &amp; Counterparty Due Diligence</div>
+      </div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8a8fa3;line-height:1.7;">
+      </div>
+    </div>
+
+    <!-- risk banner -->
+    <div style="margin:26px 44px 0;border:1px solid {{ bandBorder }};background:{{ bandBg }};border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:#b14fd8;">OVERALL RISK CLASSIFICATION</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:{{ bandColor }};margin-top:3px;">{{ riskLabel }}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:#b14fd8;">REQUIRED DILIGENCE · DECISION</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:#15171f;margin-top:3px;">{{ cddLabel }} · <span style="color:{{ bandColor }};">{{ decision }}</span></div>
+      </div>
+    </div>
+
+    <div style="padding:26px 44px 0;flex:1;">
+
+      <!-- 01 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">01</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">ASSESSMENT ADMINISTRATION</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px 22px;margin-bottom:24px;">
+        <sc-for list="{{ admin }}" as="r" hint-placeholder-count="6">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#b14fd8;margin-bottom:3px;">{{ r.k }}</div>
+            <div style="font-size:13px;color:#15171f;font-weight:500;">{{ r.v }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- 02 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">02</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">ENTITY IDENTIFICATION</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px 22px;margin-bottom:24px;">
+        <sc-for list="{{ entity }}" as="r" hint-placeholder-count="6">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#b14fd8;margin-bottom:3px;">{{ r.k }}</div>
+            <div style="font-size:13px;color:#15171f;font-weight:500;">{{ r.v }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- 03 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">03</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">SANCTIONS SCREENING</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="margin-bottom:24px;">
+        <div style="display:grid;grid-template-columns:minmax(0,3fr) 100px 110px;gap:10px;padding:0 12px 7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:#b14fd8;border-bottom:1px solid #e3e6ec;">
+          <span>LIST</span><span>RESULT</span><span>SCREENED</span>
+        </div>
+        <sc-for list="{{ sanctions }}" as="r" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:minmax(0,3fr) 100px 110px;gap:10px;padding:8px 12px;border-bottom:1px solid #f0f2f6;font-size:12px;align-items:center;">
+            <span style="color:#15171f;">{{ r.list }}</span>
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;color:#1f9d57;">{{ r.result }}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#15171f;">{{ r.date }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- 04 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">04</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">ADVERSE MEDIA SCREENING</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div>
+        <sc-for list="{{ adverse }}" as="r" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:10px;padding:7px 12px;border-bottom:1px solid #f0f2f6;font-size:12px;align-items:center;">
+            <span style="color:#15171f;">{{ r.cat }}</span>
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;color:#1f9d57;">{{ r.find }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+
+    <div style="padding:16px 44px;border-top:1px solid #e3e6ec;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:#b14fd8;">
+      <span>CONFIDENTIAL</span><span>PAGE 1 OF 2</span>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page" style="width:794px;min-height:1123px;background:#fff;margin:0 auto 26px;box-shadow:0 14px 50px rgba(0,0,0,.34);display:flex;flex-direction:column;">
+    <div style="padding:26px 44px 0;flex:1;">
+
+      <!-- 05 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">05</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">IDENTIFICATIONS</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="border:1px solid #e3e6ec;border-radius:10px;padding:16px;margin-bottom:24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:#c026d3;margin-bottom:12px;">INDIVIDUAL #1</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px 22px;">
+          <sc-for list="{{ person }}" as="r" hint-placeholder-count="8">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#b14fd8;margin-bottom:3px;">{{ r.k }}</div>
+              <div style="font-size:12px;color:#15171f;font-weight:500;">{{ r.v }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- 06 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">06</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">PROLIFERATION FINANCING (PF) ASSESSMENT</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="margin-bottom:24px;">
+        <sc-for list="{{ pf }}" as="r" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:10px;padding:7px 12px;border-bottom:1px solid #f0f2f6;font-size:12px;align-items:center;">
+            <span style="color:#15171f;">{{ r.factor }}</span>
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;color:#1f9d57;">{{ r.level }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- 07 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">07</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">RISK-BASED ASSESSMENT (RBA)</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:24px;">
+        <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#b14fd8;margin-bottom:3px;">OVERALL RISK</div><div style="font-size:14px;font-weight:600;color:{{ bandColor }};">{{ riskLabel }}</div></div>
+        <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#b14fd8;margin-bottom:3px;">CDD LEVEL</div><div style="font-size:14px;font-weight:600;">{{ cddLevelName }}</div></div>
+        <div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#b14fd8;margin-bottom:3px;">DECISION</div><div style="font-size:14px;font-weight:600;color:{{ bandColor }};">{{ decision }}</div></div>
+      </div>
+
+      <!-- 08 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">08</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">SIGN-OFF &amp; AUTHORIZATION</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-bottom:14px;">
+        <div style="margin-top:58px;border-top:2px solid;border-image:linear-gradient(90deg,#e85aff,#7aa6ff) 1;padding-top:8px;">
+          <div style="font-size:13px;font-weight:600;">Compliance Department</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#b14fd8;margin-top:2px;">PREPARED BY · COMPLIANCE OFFICER</div>
+        </div>
+        <div style="margin-top:58px;border-top:2px solid;border-image:linear-gradient(90deg,#e85aff,#7aa6ff) 1;padding-top:8px;">
+          <div style="font-size:13px;font-weight:600;">Management Department</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#b14fd8;margin-top:2px;">APPROVED BY · MANAGING DIRECTOR</div>
+        </div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#b14fd8;line-height:1.6;margin-bottom:24px;">Record retention: retain this assessment and supporting documents for a minimum of <span style="color:#15171f;">10 years</span>.</div>
+
+      <!-- 09 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c026d3;">09</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap;">REVIEW &amp; VERSION CONTROL</span>
+        <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#e85aff,#9b6bff 55%,#7aa6ff);"></div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:50px 110px minmax(0,1.3fr) 90px minmax(0,1.6fr);gap:10px;padding:0 12px 7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:#b14fd8;border-bottom:1px solid #e3e6ec;">
+          <span>VER</span><span>DATE</span><span>BY</span><span>TYPE</span><span>SUMMARY</span>
+        </div>
+        <sc-for list="{{ versions }}" as="v" hint-placeholder-count="3">
+          <div style="display:grid;grid-template-columns:50px 110px minmax(0,1.3fr) 90px minmax(0,1.6fr);gap:10px;padding:8px 12px;border-bottom:1px solid #f0f2f6;font-size:12px;align-items:center;">
+            <span style="font-family:'JetBrains Mono',monospace;color:#15171f;">{{ v.ver }}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#15171f;">{{ v.date }}</span>
+            <span style="color:#15171f;">{{ v.by }}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#c026d3;">{{ v.type }}</span>
+            <span style="color:#15171f;">{{ v.summary }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+
+    <div style="padding:16px 44px;border-top:1px solid #e3e6ec;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:#b14fd8;">
+      <span>CONFIDENTIAL</span><span>PAGE 2 OF 2</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:842,&quot;height&quot;:1180}}">
+class Component extends DCLogic {
+  renderVals() {
+    // Sample SDD (medium) assessment to illustrate the export format
+    const band = 'med';
+    const pal = {
+      low:  { color: '#1f9d57', border: '#bfe6cf', bg: '#eefaf2' },
+      med:  { color: '#b8860b', border: '#f0e2b8', bg: '#fbf6e6' },
+      high: { color: '#c0392b', border: '#f0c6c0', bg: '#fbece9' },
+    }[band];
+
+    return {
+      doPrint: () => window.print(),
+      bandColor: pal.color, bandBorder: pal.border, bandBg: pal.bg,
+      riskLabel: 'Medium Risk',
+      cddLabel: 'SDD - Simplified Due Diligence',
+      cddLevelName: 'Simplified CDD',
+      decision: 'Approved',
+      admin: [
+        { k: 'REFERENCE NUMBER', v: 'RA-20260617-017' },
+        { k: 'ASSESSMENT DATE', v: '17/06/2026' },
+        { k: 'NEXT REVIEW DATE', v: '17/06/2027' },
+        { k: 'ASSESSED BY', v: 'Compliance Department' },
+        { k: 'ROLE / DEPARTMENT', v: 'Compliance Officer' },
+        { k: 'REVIEW TYPE', v: 'Periodic' },
+      ],
+      entity: [
+        { k: 'LEGAL ENTITY NAME', v: 'Meridian Bullion Trading DMCC' },
+        { k: 'JURISDICTION', v: 'United Arab Emirates' },
+        { k: 'TRADING NAME', v: 'Meridian Bullion' },
+        { k: 'REGISTRATION / LICENCE NO.', v: 'DMCC-184220' },
+        { k: 'REGISTERED ADDRESS', v: 'Unit 3204, JBC 2, JLT, Dubai, UAE' },
+        { k: 'WEBSITE / EMAIL', v: 'compliance@meridianbullion.ae' },
+      ],
+      sanctions: [
+        { list: 'UAE Local Terrorist List (EOCN)', result: 'Negative', date: '17/06/2026' },
+        { list: 'UN Consolidated Sanctions List (UNSC)', result: 'Negative', date: '17/06/2026' },
+        { list: 'OFAC Specially Designated Nationals (SDN)', result: 'Negative', date: '17/06/2026' },
+        { list: 'UK OFSI Consolidated Financial Sanctions', result: 'Negative', date: '17/06/2026' },
+        { list: 'EU Consolidated Financial Sanctions List', result: 'Negative', date: '17/06/2026' },
+        { list: 'INTERPOL Red Notices (where applicable)', result: 'Negative', date: '17/06/2026' },
+      ],
+      adverse: [
+        { cat: 'Criminal / Fraud Allegations', find: 'Negative' },
+        { cat: 'Money Laundering', find: 'Negative' },
+        { cat: 'Terrorist / Proliferation Financing Links', find: 'Negative' },
+        { cat: 'Regulatory Actions, Fines, or Investigations', find: 'Negative' },
+        { cat: 'Political Controversy or PEP Connections', find: 'Negative' },
+      ],
+      person: [
+        { k: 'DESIGNATION', v: 'Shareholder & Director' },
+        { k: 'NAME', v: 'Layla Haddad' },
+        { k: 'SHARES %', v: '100' },
+        { k: 'TYPE', v: 'Individual' },
+        { k: 'NATIONALITY', v: 'Lebanon' },
+        { k: 'DATE OF BIRTH', v: '14/03/1981' },
+        { k: 'PASSPORT EXPIRY', v: '22/08/2031' },
+        { k: 'PROOF OF ADDRESS', v: 'Provided' },
+      ],
+      pf: [
+        { factor: 'DPMS Sector Inherent PF Exposure (NRA 2024)', level: 'Medium' },
+        { factor: 'Jurisdictional Exposure - Counterparty Origin', level: 'Low' },
+        { factor: 'Dual-Use Goods or Materials (CR 156/2025)', level: 'Low' },
+        { factor: 'UN PF Sanctions List Match (1718/2231/1540)', level: 'Low' },
+        { factor: 'Unusual Trade Patterns or Volumes', level: 'Low' },
+        { factor: 'Links to Proliferation Networks', level: 'Low' },
+      ],
+      versions: [
+        { ver: '01', date: '29/09/2022', by: 'Compliance Department', type: 'Initial', summary: 'Account opening' },
+        { ver: '02', date: '10/01/2025', by: 'Compliance Department', type: 'Periodic', summary: 'KYC refresh' },
+        { ver: '03', date: '17/06/2026', by: 'Compliance Department', type: 'Periodic', summary: 'Periodic KYC review' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#07080f;}
+  *{box-sizing:border-box;}
+  ::placeholder{color:#4d5670;}
+  input,select,textarea{font-family:inherit;}
+  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%239aa3b8' stroke-width='1.5'/></svg>");background-repeat:no-repeat;background-position:right 12px center;}
+  @keyframes hk-spin{to{transform:rotate(360deg);}}
+  @keyframes hk-spin-rev{to{transform:rotate(-360deg);}}
+  @keyframes hk-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+  @keyframes hk-breathe{0%,100%{transform:scale(1);filter:brightness(1);}50%{transform:scale(1.015);filter:brightness(1.08);}}
+</style>
+</helmet>
+<div data-screen-label="Hawkeye Sterling - Assessment" style="min-height:100vh;background:radial-gradient(1100px 620px at 78% -8%,rgba(120,60,210,.20),transparent 60%),radial-gradient(900px 560px at 8% 4%,rgba(40,90,200,.16),transparent 58%),radial-gradient(700px 500px at 50% 120%,rgba(40,210,150,.10),transparent 60%),#07080f;font-family:'Manrope',sans-serif;color:#e8eaf2;padding-bottom:60px;">
+
+  <!-- LOCK / SESSION EXPIRED GATE -->
+  <sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
+  <div style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(900px 600px at 70% -10%,rgba(120,60,210,.28),transparent 60%),radial-gradient(700px 500px at 10% 110%,rgba(40,90,200,.2),transparent 60%),rgba(5,6,12,.86);backdrop-filter:blur(8px);">
+    <div style="width:520px;max-width:100%;position:relative;overflow:hidden;background:rgba(13,15,25,.94);border:1px solid rgba(130,95,210,.3);border-radius:20px;padding:34px 40px 32px;box-shadow:0 30px 90px rgba(0,0,0,.6);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#e85aff 35%,#7aa6ff 65%,transparent);"></div>
+
+      <div onClick="{{ unlock }}" title="Tap me to unlock" style="position:relative;width:108px;height:108px;margin:2px auto 8px;cursor:pointer;animation:hk-breathe 5s ease-in-out infinite;">
+        <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:#e85aff;border-right-color:#b07bff;animation:hk-spin 7s linear infinite;"></div>
+        <div style="position:absolute;inset:10px;border-radius:50%;border:1px solid transparent;border-bottom-color:#7aa6ff;border-left-color:#36e0d0;animation:hk-spin-rev 10s linear infinite;"></div>
+        <div style="position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(176,123,255,.3);animation:hk-spin 24s linear infinite;"></div>
+        <div style="position:absolute;inset:18px;border-radius:50%;overflow:hidden;box-shadow:0 0 40px rgba(176,123,255,.55),inset 0 0 22px rgba(0,0,0,.6);">
+          <img src="assets/robot-logo.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 28%;">
+        </div>
+        <div style="position:absolute;right:2px;bottom:2px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#13101f;border:1px solid rgba(232,90,255,.5);box-shadow:0 0 14px rgba(232,90,255,.4);font-size:14px;">🔒</div>
+      </div>
+      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#8a7bbf;margin-bottom:20px;">TAP THE BOT TO UNLOCK</div>
+
+      <h2 style="margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;letter-spacing:-.01em;color:#eef0f7;">Session expired</h2>
+      <div style="font-size:15px;line-height:1.55;color:#e3b341;margin-bottom:22px;">Your 1-hour session has ended - please re-enter your passphrase to continue.</div>
+
+      <input type="password" placeholder="Passphrase" onKeyDown="{{ unlockKey }}" style="width:100%;font-size:15px;color:#e8eaf2;background:rgba(10,12,22,.8);border:1px solid rgba(130,95,210,.25);border-radius:12px;padding:15px 18px;outline:none;margin-bottom:14px;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.14);">
+      <button onClick="{{ unlock }}" style="width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.14em;color:#dcb3ff;background:rgba(232,90,255,.08);border:1px solid rgba(232,90,255,.55);border-radius:12px;padding:15px;cursor:pointer;box-shadow:0 0 22px rgba(232,90,255,.14);" style-hover="background:rgba(232,90,255,.16);box-shadow:0 0 32px rgba(232,90,255,.3);">UNLOCK</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- TOP BAR -->
+  <div style="position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:24px;padding:14px 30px;background:rgba(9,10,18,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(130,95,210,.22);">
+    <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1;">
+      <div style="position:relative;width:46px;height:46px;flex:none;">
+        <div style="position:absolute;inset:-3px;border-radius:50%;border:1.5px solid transparent;border-top-color:#e85aff;border-right-color:#7b5bff;animation:hk-spin 5.5s linear infinite;"></div>
+        <div style="position:absolute;inset:1px;border-radius:50%;border:1px solid transparent;border-bottom-color:#36e0d0;animation:hk-spin-rev 7s linear infinite;"></div>
+        <img src="assets/robot-logo.png" alt="" style="position:absolute;inset:4px;width:38px;height:38px;border-radius:50%;object-fit:cover;object-position:50% 30%;">
+      </div>
+      <div style="min-width:0;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:.14em;background:linear-gradient(92deg,#f48bff,#b07bff 60%,#7aa6ff);-webkit-background-clip:text;background-clip:text;color:transparent;">HAWKEYE STERLING</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;flex:1;justify-content:flex-end;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 10px #3ddc84;animation:hk-pulse 2s ease-in-out infinite;"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:#3ddc84;">ALL SYSTEMS LIVE</span>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;color:#e3b341;border:1px solid rgba(227,179,65,.4);background:rgba(227,179,65,.08);border-radius:8px;padding:5px 10px;">⏱ {{ countdown }}</span>
+      <button style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:#aab2c8;background:rgba(18,20,32,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 12px;cursor:pointer;" onClick="{{ lock }}">⊟ LOCK</button>
+    </div>
+  </div>
+
+  <!-- PAGE TITLE -->
+  <div style="max-width:1480px;margin:0 auto;padding:16px 30px 0;">
+    <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.01em;color:#e8eaf2;">Customer &amp; Counterparty <span style="background:linear-gradient(92deg,#f48bff,#b07bff 60%,#7aa6ff);-webkit-background-clip:text;background-clip:text;color:transparent;">Due Diligence</span></h1>
+  </div>
+
+  <!-- ASSESSMENT -->
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) 366px;gap:14px;align-items:start;max-width:1480px;margin:0 auto;padding:10px 30px 0;">
+
+    <!-- main column -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">01</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">ASSESSMENT ADMINISTRATION</span>
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(123,91,255,.45) 35%,rgba(54,224,208,.25) 70%,transparent);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">REFERENCE NUMBER</label>
+            <input value="RA-20260617-017" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">ASSESSMENT DATE</label>
+            <input value="17/06/2026" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">NEXT REVIEW DATE</label>
+            <input value="17/06/2027" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px;">
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">ASSESSED BY</label>
+            <input placeholder="Full name" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">ROLE / DEPARTMENT</label>
+            <input placeholder="e.g. Compliance Officer" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">02</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">ENTITY IDENTIFICATION</span>
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(123,91,255,.45) 35%,rgba(54,224,208,.25) 70%,transparent);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">LEGAL ENTITY NAME</label>
+            <input placeholder="Registered legal name" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">JURISDICTION &amp; INCORPORATION</label>
+            <select value="{{ jurisdiction }}" onChange="{{ onJurisdiction }}" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;cursor:pointer;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+              <sc-for list="{{ countries }}" as="c" hint-placeholder-count="10"><option value="{{ c }}">{{ c }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">TRADING NAME (IF DIFFERENT)</label>
+            <input placeholder="Optional" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">REGISTRATION / LICENCE NO.</label>
+            <input placeholder="Company or trade licence number" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">REGISTERED ADDRESS</label>
+            <input placeholder="Street, city, country" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+          <div>
+            <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">WEBSITE / EMAIL</label>
+            <input placeholder="Optional" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;" style-focus="border-color:#e85aff;box-shadow:0 0 0 3px rgba(232,90,255,.12);">
+          </div>
+        </div>
+      </div>
+
+
+<!-- 03 Sanctions -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">03</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">SANCTIONS SCREENING</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+      </div>
+      <sc-for list="{{ sanctions }}" as="r" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:minmax(0,2.2fr) 140px 150px minmax(0,2fr);gap:10px;align-items:center;background:rgba(10,12,22,.5);border:1px solid rgba(130,95,210,.12);border-radius:10px;padding:9px 12px;margin-bottom:8px;">
+          <span style="font-size:12px;color:#c5ccd9;">{{ r.list }}</span>
+          <select value="{{ r.value }}" onChange="{{ r.onChange }}" style="{{ r.selStyle }}"><option value="Negative" style="color:#3ddc84;">Negative</option><option value="Positive" style="color:#ff5d73;">Positive</option><option value="Pending" style="color:#e3b341;">Pending</option></select>
+          <input placeholder="dd/mm/yyyy" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:8px 10px;outline:none;">
+          <input placeholder="Remarks" style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:8px 10px;outline:none;">
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- 04 Adverse media -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">04</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">ADVERSE MEDIA SCREENING</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+      </div>
+      <sc-for list="{{ adverse }}" as="r" hint-placeholder-count="7">
+        <div style="display:grid;grid-template-columns:minmax(0,2.2fr) 140px minmax(0,3fr);gap:10px;align-items:center;background:rgba(10,12,22,.5);border:1px solid rgba(130,95,210,.12);border-radius:10px;padding:9px 12px;margin-bottom:8px;">
+          <span style="font-size:12px;color:#c5ccd9;">{{ r.category }}</span>
+          <select value="{{ r.value }}" onChange="{{ r.onChange }}" style="{{ r.selStyle }}"><option value="Negative" style="color:#3ddc84;">Negative</option><option value="Positive" style="color:#ff5d73;">Positive</option><option value="Pending" style="color:#e3b341;">Pending</option></select>
+          <input placeholder="Details / source" style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:8px 10px;outline:none;">
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- 05 Identifications -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">05</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">IDENTIFICATIONS</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+        <button onClick="{{ addPerson }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12px;color:#f7c9ff;background:rgba(232,90,255,.12);border:1px solid rgba(232,90,255,.5);border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap;">+ Add person</button>
+      </div>
+      <sc-for list="{{ persons }}" as="p" hint-placeholder-count="1">
+        <div style="background:rgba(10,12,22,.5);border:1px solid rgba(130,95,210,.12);border-radius:10px;padding:11px;margin-bottom:7px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;color:#36e0d0;">INDIVIDUAL #{{ p.n }}</span>
+            <sc-if value="{{ p.canRemove }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ p.remove }}" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#ff8a99;background:rgba(255,93,115,.1);border:1px solid rgba(255,93,115,.35);border-radius:8px;padding:6px 12px;cursor:pointer;">REMOVE</button>
+            </sc-if>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">DESIGNATION</label><input placeholder="Shareholder &amp; Director" style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">NAME</label><input placeholder="Full legal name" style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">SHARES %</label><input placeholder="100" style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">TYPE</label><select style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;cursor:pointer;"><option>Individual</option><option>Corporate</option></select></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">NATIONALITY</label><input style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">GENDER</label><input style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">DATE OF BIRTH</label><input placeholder="dd/mm/yyyy" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">PASSPORT NO.</label><input style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">PASSPORT EXPIRY</label><input placeholder="dd/mm/yyyy" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">EMIRATES ID</label><input style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">EMIRATES ID EXPIRY</label><input placeholder="dd/mm/yyyy" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;"></div>
+            <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#7e889e;margin-bottom:6px;">PROOF OF ADDRESS</label><select style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:7px 10px;outline:none;cursor:pointer;"><option>Provided</option><option>Pending</option></select></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- 06 PF -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">06</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">PROLIFERATION FINANCING (PF) ASSESSMENT</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+      </div>
+      <sc-for list="{{ pf }}" as="r" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:minmax(0,2.2fr) 140px minmax(0,3fr);gap:10px;align-items:center;background:rgba(10,12,22,.5);border:1px solid rgba(130,95,210,.12);border-radius:10px;padding:9px 12px;margin-bottom:8px;">
+          <span style="font-size:12px;color:#c5ccd9;">{{ r.factor }}</span>
+          <select value="{{ r.value }}" onChange="{{ r.onChange }}" style="{{ r.selStyle }}"><option value="Low" style="color:#3ddc84;">Low</option><option value="Medium" style="color:#e3b341;">Medium</option><option value="High" style="color:#ff5d73;">High</option></select>
+          <input placeholder="Assessment notes" style="width:100%;font-size:13px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:9px;padding:8px 10px;outline:none;">
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- 07 RBA -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">07</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">RISK-BASED ASSESSMENT (RBA)</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr) auto;gap:10px;align-items:end;">
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">OVERALL RISK CLASSIFICATION</label><select value="{{ rbaValue }}" onChange="{{ onRba }}" style="{{ rbaStyle }}"><option value="Low Risk" style="color:#3ddc84;">Low Risk</option><option value="Medium Risk" style="color:#e3b341;">Medium Risk</option><option value="High Risk" style="color:#ff5d73;">High Risk</option></select></div>
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">CDD LEVEL REQUIRED</label><select style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;cursor:pointer;"><option>Standard CDD</option><option>Simplified CDD</option><option>Enhanced CDD</option></select></div>
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">RELATIONSHIP DECISION</label><select style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;cursor:pointer;"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+        <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;color:#c5ccd9;padding-bottom:12px;white-space:nowrap;"><input type="checkbox" style="width:17px;height:17px;accent-color:#e85aff;"> Trigger events present</label>
+      </div>
+    </div>
+
+    <!-- 08 Sign-off -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">08</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">SIGN-OFF &amp; AUTHORIZATION</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">PREPARED BY</label><input placeholder="Name" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;"></div>
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">PREPARED - ROLE</label><input value="Compliance Officer" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;"></div>
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">APPROVED BY</label><input placeholder="Name" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;"></div>
+        <div><label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;color:#7e889e;margin-bottom:7px;">APPROVED - ROLE</label><input value="Managing Director" style="width:100%;font-size:14px;color:#e8eaf2;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);border-radius:10px;padding:7px 10px;outline:none;"></div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#5a6478;margin-top:14px;line-height:1.6;">Record retention: retain this assessment and supporting documents for a minimum of <span style="color:#9aa3b8;">10 years</span>.</div>
+    </div>
+
+    <!-- 09 Version control -->
+    <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:12px 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f48bff;">09</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;color:#e8eaf2;white-space:nowrap;">REVIEW &amp; VERSION CONTROL</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25) 70%,transparent);"></div>
+      </div>
+      <sc-if value="{{ hasVersions }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:60px 130px minmax(0,1.4fr) 130px minmax(0,2fr);gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#7e889e;padding:0 4px 10px;border-bottom:1px solid rgba(130,95,210,.18);">
+        <span>VER.</span><span>DATE</span><span>BY</span><span>TYPE</span><span>SUMMARY</span>
+      </div>
+      <sc-for list="{{ versions }}" as="v" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:60px 130px minmax(0,1.4fr) 130px minmax(0,2fr);gap:10px;align-items:center;font-size:13px;color:#c5ccd9;padding:11px 4px;border-bottom:1px solid rgba(130,95,210,.08);">
+          <span style="font-family:'JetBrains Mono',monospace;color:#aab2c8;">{{ v.ver }}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{ v.date }}</span>
+          <span>{{ v.by }}</span>
+          <span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:#f48bff;background:rgba(232,90,255,.12);border:1px solid rgba(232,90,255,.3);border-radius:6px;padding:3px 8px;">{{ v.type }}</span></span>
+          <span>{{ v.summary }}</span>
+        </div>
+      </sc-for>
+      </sc-if>
+      <sc-if value="{{ noVersions }}" hint-placeholder-val="{{ true }}">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a6478;line-height:1.6;padding:4px;">No reviews logged yet - a timestamped, auto-numbered entry will appear here once the first review is logged.</div>
+      </sc-if>
+    </div>
+
+    </div>
+
+    <!-- sidebar -->
+    <div style="display:flex;flex-direction:column;gap:10px;position:sticky;top:78px;align-self:start;">
+      <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:14px;display:flex;flex-direction:column;align-items:center;">
+        <div style="position:relative;width:224px;height:224px;animation:hk-breathe 6s ease-in-out infinite;">
+          <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:{{ scoreColor }};border-right-color:{{ scoreColor }};animation:hk-spin 9s linear infinite;"></div>
+          <div style="position:absolute;inset:12px;border-radius:50%;border:1px solid transparent;border-bottom-color:#e85aff;border-left-color:#7b5bff;animation:hk-spin-rev 12s linear infinite;"></div>
+          <div style="position:absolute;inset:-7px;border-radius:50%;border:1px dashed {{ scoreBorder }};animation:hk-spin 26s linear infinite;"></div>
+          <div style="position:absolute;inset:20px;border-radius:50%;overflow:hidden;box-shadow:0 0 42px {{ scoreGlow }},inset 0 0 24px rgba(0,0,0,.6);">
+            <sc-if value="{{ isLow }}" hint-placeholder-val="{{ true }}"><img src="assets/robot-cdd.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 22%;"></sc-if>
+            <sc-if value="{{ isMed }}" hint-placeholder-val="{{ false }}"><img src="assets/robot-sdd.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 22%;"></sc-if>
+            <sc-if value="{{ isHigh }}" hint-placeholder-val="{{ false }}"><img src="assets/robot-edd.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 22%;"></sc-if>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:20px 22px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:#7e889e;">REQUIRED DILIGENCE</span>
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,#e85aff,rgba(54,224,208,.25),transparent);"></div>
+        </div>
+        <div style="border:1px solid {{ scoreBorder }};background:{{ scoreBg }};border-radius:10px;padding:10px 13px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:{{ scoreColor }};">✓ {{ cddLabel }}</div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(130,95,210,.14);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:#7e889e;cursor:pointer;">▶ ANALYST OVERRIDE</div>
+      </div>
+
+      <div style="background:rgba(16,18,30,.62);border:1px solid rgba(130,95,210,.18);border-radius:11px;padding:11px;display:flex;flex-direction:column;gap:6px;">
+        <button onClick="{{ doPrint }}" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#c4a3ff;background:rgba(176,123,255,.1);border:1px solid rgba(176,123,255,.4);" style-hover="background:rgba(176,123,255,.2);">⎙ PRINT / EXPORT PDF</button>
+        <button style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#3ddc84;background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.4);" style-hover="background:rgba(61,220,132,.2);">✓ COMPLETE ASSESSMENT</button>
+        <button style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#f48bff;background:rgba(244,139,255,.08);border:1px solid rgba(244,139,255,.4);" style-hover="background:rgba(244,139,255,.18);">☰ REGISTER</button>
+        <button style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#e3b341;background:rgba(227,179,65,.1);border:1px solid rgba(227,179,65,.4);" style-hover="background:rgba(227,179,65,.2);">▤ ACTIVITY LOG</button>
+        <button style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#7aa6ff;background:rgba(122,166,255,.1);border:1px solid rgba(122,166,255,.4);" style-hover="background:rgba(122,166,255,.2);">↗ SEND TO ASANA</button>
+        <button onClick="{{ doReset }}" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#ff5d73;background:rgba(255,93,115,.08);border:1px solid rgba(255,93,115,.4);" style-hover="background:rgba(255,93,115,.18);">↺ RESET</button>
+        <button style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#36e0d0;background:rgba(54,224,208,.1);border:1px solid rgba(54,224,208,.4);" style-hover="background:rgba(54,224,208,.2);">⟳ RE-ASSESS</button>
+        <button style="display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;padding:8px 14px;border-radius:9px;cursor:pointer;color:#c9c24a;background:rgba(201,194,74,.1);border:1px solid rgba(201,194,74,.4);" style-hover="background:rgba(201,194,74,.2);">⚙ RISK DATA</button>
+        <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:#5a6478;margin-top:4px;">Autosaved {{ autosaved }}</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1480,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    jurisdiction: 'United Kingdom',
+    locked: true,
+    now: new Date(),
+    remaining: 60 * 60,
+    persons: [1],
+    _nextId: 2,
+    sancResults: ['Negative','Negative','Negative','Negative','Negative','Negative'],
+    advFindings: ['Negative','Negative','Negative','Negative','Negative','Negative','Negative'],
+    pfLevels: ['Low','Low','Low','Low','Low','Low'],
+    rbaClass: 'Low Risk',
+  };
+
+  SANCTIONS = [
+    'UAE Local Terrorist List (EOCN / Executive Office)',
+    'UN Consolidated Sanctions List (UNSC)',
+    'OFAC Specially Designated Nationals List (SDN)',
+    'UK OFSI Consolidated Financial Sanctions List',
+    'EU Consolidated Financial Sanctions List',
+    'INTERPOL Red Notices (where applicable)',
+  ];
+  ADVERSE = [
+    'Criminal / Fraud Allegations',
+    'Money Laundering',
+    'Terrorist Financing or Proliferation Financing Links',
+    'Regulatory Actions, Fines, or Investigations',
+    'Negative Reputation or Commercial Disputes',
+    'Political Controversy or PEP Connections',
+    'Human Rights, Environmental, or Ethical Violations',
+  ];
+  PFACTORS = [
+    'DPMS Sector Inherent PF Exposure (NRA 2024)',
+    'Jurisdictional Exposure - Counterparty or Transaction Origin',
+    'Dual-Use Goods or Materials (Cabinet Resolution No. 156 of 2025)',
+    'UN PF Sanctions List Match (UNSCR 1718/2231/1540)',
+    'Unusual Trade Patterns or Transaction Volumes',
+    'Links to Proliferation Networks or Controlled Technology',
+  ];
+  VERSIONS = [];
+
+  COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','British Virgin Islands','Brunei','Bulgaria','Burkina Faso','Burundi','Cambodia','Cameroon','Canada','Cape Verde','Cayman Islands','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo (Brazzaville)','Congo (DRC)','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Gibraltar','Greece','Grenada','Guatemala','Guernsey','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Isle of Man','Israel','Italy','Ivory Coast','Jamaica','Japan','Jersey','Jordan','Kazakhstan','Kenya','Kiribati','Kosovo','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Macau','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
+
+  RISK = {
+    'Afghanistan':'high','North Korea':'high','Iran':'high','Myanmar':'high','Syria':'high','Yemen':'high','Somalia':'high','South Sudan':'high','Libya':'high','Cuba':'high','Venezuela':'high','Russia':'high','Belarus':'high','Eritrea':'high','Cayman Islands':'high','British Virgin Islands':'high','Panama':'high','Iraq':'high','Sudan':'high',
+    'United Arab Emirates':'med','Nigeria':'med','South Africa':'med','Turkey':'med','Philippines':'med','Vietnam':'med','Cambodia':'med','Pakistan':'med','Senegal':'med','Mali':'med','Mozambique':'med','Tanzania':'med','Croatia':'med','Bulgaria':'med','Kenya':'med','Namibia':'med','Jamaica':'med','Barbados':'med','Monaco':'med','Gibraltar':'med','Jersey':'med','Guernsey':'med','Isle of Man':'med','Hong Kong':'med','Lebanon':'med','Haiti':'med','Bahamas':'med','Seychelles':'med','Malta':'med','Cyprus':'med','Marshall Islands':'med','Vanuatu':'med','Nicaragua':'med','Zimbabwe':'med',
+  };
+
+  componentDidMount() {
+    this._t = setInterval(() => {
+      this.setState((s) => {
+        const r = s.remaining > 0 ? s.remaining - 1 : 0;
+        return { now: new Date(), remaining: r, locked: r === 0 ? true : s.locked };
+      });
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  pad(n) { return String(n).padStart(2, '0'); }
+
+  statusColor(v) { return v === 'Positive' ? '#ff5d73' : v === 'Pending' ? '#e3b341' : '#3ddc84'; }
+  levelColor(v)  { return v === 'High' ? '#ff5d73' : v === 'Medium' ? '#e3b341' : '#3ddc84'; }
+  riskColor(v)   { return v === 'High Risk' ? '#ff5d73' : v === 'Medium Risk' ? '#e3b341' : '#3ddc84'; }
+
+  selStyle(color, big) {
+    const pad = big ? 'padding:11px 13px;font-size:14px;border-radius:10px;' : 'padding:8px 10px;font-size:13px;border-radius:9px;';
+    return 'width:100%;background:rgba(10,12,22,.7);border:1px solid rgba(130,95,210,.22);outline:none;cursor:pointer;color-scheme:dark;font-weight:600;' + pad + 'color:' + color + ';';
+  }
+
+  setArr(key, i, val) {
+    this.setState((st) => { const a = st[key].slice(); a[i] = val; return { [key]: a }; });
+  }
+
+  pill(active, color, bg, border) {
+    const base = "font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;padding:4px 9px;border-radius:7px;border:1px solid ";
+    return active
+      ? base + border + ";background:" + bg + ";color:" + color + ";"
+      : base + "rgba(130,95,210,.18);background:transparent;color:#5a6478;";
+  }
+
+  renderVals() {
+    const s = this.state;
+    const n = s.now;
+    const clock = this.pad(n.getUTCHours()) + ':' + this.pad(n.getUTCMinutes()) + ':' + this.pad(n.getUTCSeconds());
+    const countdown = this.pad(Math.floor(s.remaining / 60)) + ':' + this.pad(s.remaining % 60);
+
+    const band = this.RISK[s.jurisdiction] || 'low';
+    const riskScore = band === 'high' ? 25 : band === 'med' ? 21 : 4;
+    const palette = {
+      low:  { color: '#3ddc84', glow: 'rgba(61,220,132,.5)', border: 'rgba(61,220,132,.4)', bg: 'rgba(61,220,132,.1)', label: 'CDD - Customer Due Diligence', img: 'assets/robot-cdd.png', short: 'CDD', sub: 'CUSTOMER' },
+      med:  { color: '#e3b341', glow: 'rgba(227,179,65,.5)', border: 'rgba(227,179,65,.4)', bg: 'rgba(227,179,65,.1)', label: 'SDD - Simplified Due Diligence', img: 'assets/robot-sdd.png', short: 'SDD', sub: 'SIMPLIFIED' },
+      high: { color: '#ff5d73', glow: 'rgba(255,93,115,.5)', border: 'rgba(255,93,115,.4)', bg: 'rgba(255,93,115,.1)', label: 'EDD - Enhanced Due Diligence', img: 'assets/robot-edd.png', short: 'EDD', sub: 'ENHANCED' },
+    }[band];
+
+    const persons = s.persons.map((id, i) => ({
+      id,
+      n: i + 1,
+      canRemove: s.persons.length > 1,
+      remove: () => this.setState((st) => ({ persons: st.persons.filter((x) => x !== id) })),
+    }));
+
+    return {
+      clock, countdown,
+      autosaved: s.now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      doPrint: () => window.print(),
+      doReset: () => this.setState({
+        jurisdiction: 'United Kingdom',
+        persons: [1], _nextId: 2,
+        sancResults: this.SANCTIONS.map(() => 'Negative'),
+        advFindings: this.ADVERSE.map(() => 'Negative'),
+        pfLevels: this.PFACTORS.map(() => 'Low'),
+        rbaClass: 'Low Risk',
+      }),
+      locked: s.locked,
+      unlock: () => this.setState({ locked: false, remaining: 3600 }),
+      lock: () => this.setState({ locked: true, remaining: 0 }),
+      unlockKey: (e) => { if (e.key === 'Enter') this.setState({ locked: false, remaining: 3600 }); },
+      sanctions: this.SANCTIONS.map((list, i) => { const v = s.sancResults[i]; const c = this.statusColor(v); return { list, value: v, color: c, selStyle: this.selStyle(c), onChange: (e) => this.setArr('sancResults', i, e.target.value) }; }),
+      adverse: this.ADVERSE.map((category, i) => { const v = s.advFindings[i]; const c = this.statusColor(v); return { category, value: v, color: c, selStyle: this.selStyle(c), onChange: (e) => this.setArr('advFindings', i, e.target.value) }; }),
+      pf: this.PFACTORS.map((factor, i) => { const v = s.pfLevels[i]; const c = this.levelColor(v); return { factor, value: v, color: c, selStyle: this.selStyle(c), onChange: (e) => this.setArr('pfLevels', i, e.target.value) }; }),
+      rbaValue: s.rbaClass,
+      rbaStyle: this.selStyle(this.riskColor(s.rbaClass), true),
+      onRba: (e) => this.setState({ rbaClass: e.target.value }),
+      versions: this.VERSIONS,
+      hasVersions: this.VERSIONS.length > 0,
+      noVersions: this.VERSIONS.length === 0,
+      persons,
+      addPerson: () => this.setState((st) => ({ persons: [...st.persons, st._nextId], _nextId: st._nextId + 1 })),
+      countries: this.COUNTRIES,
+      jurisdiction: s.jurisdiction,
+      onJurisdiction: (e) => this.setState({ jurisdiction: e.target.value }),
+      riskScore,
+      scoreColor: palette.color,
+      scoreGlow: palette.glow,
+      scoreBorder: palette.border,
+      scoreBg: palette.bg,
+      cddLabel: palette.label,
+      isLow: band === 'low',
+      isMed: band === 'med',
+      isHigh: band === 'high',
+      bandShort: palette.short,
+      bandSub: palette.sub,
+      pillCdd: this.pill(band === 'low', '#3ddc84', 'rgba(61,220,132,.12)', 'rgba(61,220,132,.45)'),
+      pillSdd: this.pill(band === 'med', '#e3b341', 'rgba(227,179,65,.12)', 'rgba(227,179,65,.45)'),
+      pillEdd: this.pill(band === 'high', '#ff5d73', 'rgba(255,93,115,.12)', 'rgba(255,93,115,.45)'),
+    };
+  }
+}
+</script>
+</body>
+</html>
