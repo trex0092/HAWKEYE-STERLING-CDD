@@ -4,6 +4,9 @@
 [![CodeQL](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/codeql.yml/badge.svg)](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/codeql.yml)
 ![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-3ddc84)
+[![Live on Netlify](https://img.shields.io/badge/live-Netlify-36e0d0)](https://hawkeye-sterling-cdd.netlify.app)
+
+> 🌐 **Live:** https://hawkeye-sterling-cdd.netlify.app — hosted on Netlify (site is password-protected; the in-app session lock also applies).
 
 A compliance workstation for AML/CFT customer due diligence in the DPMS (dealers
 in precious metals & stones) sector. An analyst opens an entity assessment, fills
