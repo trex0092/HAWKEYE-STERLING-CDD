@@ -1,5 +1,10 @@
 # Hawkeye Sterling — Customer & Counterparty Due Diligence (CDD)
 
+[![CI](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/ci.yml/badge.svg)](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/codeql.yml/badge.svg)](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/codeql.yml)
+![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)
+![Node](https://img.shields.io/badge/node-%3E%3D20-3ddc84)
+
 A compliance workstation for AML/CFT customer due diligence in the DPMS (dealers
 in precious metals & stones) sector. An analyst opens an entity assessment, fills
 nine sections, and the app derives a **risk band** (CDD / SDD / EDD) from the
@@ -109,6 +114,20 @@ src/
   test/          Vitest setup + tests
 ```
 
+## Deployment (Netlify)
+
+The repo ships a `netlify.toml` (build `npm run build`, publish `dist`, SPA
+redirects, Node 20). To deploy: connect the repository in Netlify, or run
+`netlify deploy --build`. Set any `VITE_*` variables (see `.env.example`) in the
+Netlify site's environment.
+
+## Contributing & policies
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, scripts, conventions
+- [`SECURITY.md`](SECURITY.md) — vulnerability reporting
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
+- [`CHANGELOG.md`](CHANGELOG.md)
+
 ## Notes & next steps
 
 - **Persistence is client-side** (`localStorage`). The integration seams
@@ -120,3 +139,9 @@ src/
 - **Visual fidelity** was matched by transcribing the design's exact tokens and
   verified via the test suite; this environment can't run a browser to screenshot,
   so a quick manual pass in `npm run dev` is recommended.
+
+## License
+
+Proprietary — © 2026 Hawkeye Sterling. All rights reserved. See [`LICENSE`](LICENSE).
+The robot portrait assets are client-supplied and may not be reused outside this
+project.
