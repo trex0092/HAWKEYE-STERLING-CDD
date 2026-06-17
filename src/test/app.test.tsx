@@ -70,6 +70,16 @@ describe('report model', () => {
     expect(med.band).toBe('med');
     expect(med.bandColor).toBe('#b8860b');
   });
+
+  it('colours the decision by the decision value, not the risk band', () => {
+    // Low band (green) but a Rejected decision must render red, not green.
+    useAssessment.getState().setJurisdiction('United Kingdom');
+    useAssessment.getState().setRba({ classification: 'Low Risk', decision: 'Rejected' });
+    const m = buildReportModel(useAssessment.getState());
+    expect(m.decision).toBe('Rejected');
+    expect(m.decisionColor).toBe('#c0392b');
+    expect(m.bannerDecisionColor).toBe('#c0392b');
+  });
 });
 
 describe('lock gate (real auth)', () => {

@@ -3,8 +3,9 @@
  * assessment state. Reached via the PRINT / EXPORT PDF action (which auto-opens
  * the print dialog) or directly at /report.
  */
-import { useEffect, type CSSProperties } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useAssessment } from '@/store/useAssessment';
 import { buildReportModel, type KeyValue } from '@/lib/report';
 import { PrintExport, Back } from '@/components/icons';
@@ -46,13 +47,30 @@ const GRID2: CSSProperties = {
 export function Report() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = useAssessment();
-  const m = buildReportModel(state);
+  // Subscribe only to the assessment data the report renders — not the 1s clock —
+  // so it doesn't re-render every second while mounted.
+  const data = useAssessment(
+    useShallow((s) => ({
+      admin: s.admin,
+      entity: s.entity,
+      sanctions: s.sanctions,
+      adverse: s.adverse,
+      pf: s.pf,
+      persons: s.persons,
+      rba: s.rba,
+      signoff: s.signoff,
+      versions: s.versions,
+      overrideBand: s.overrideBand,
+    })),
+  );
+  const m = buildReportModel(data);
 
   const autoprint = Boolean((location.state as { autoprint?: boolean } | null)?.autoprint);
+  const printedRef = useRef(false);
 
   useEffect(() => {
-    if (!autoprint) return;
+    if (!autoprint || printedRef.current) return;
+    printedRef.current = true;
     let cancelled = false;
     const run = async () => {
       try {
@@ -64,20 +82,21 @@ export function Report() {
       if (!cancelled) window.print();
     };
     void run();
-    // Clear navigation state so a re-render doesn't reprint.
-    window.history.replaceState({}, '');
+    // Clear the autoprint flag through the router (avoids reprint on refresh
+    // without clobbering react-router's history bookkeeping).
+    navigate(location.pathname, { replace: true, state: null });
     return () => {
       cancelled = true;
     };
-  }, [autoprint]);
+  }, [autoprint, navigate, location.pathname]);
 
   const SANC_COLS = 'minmax(0,3fr) 100px 110px';
   const ADV_COLS = 'minmax(0,1fr) 100px';
   const PF_COLS = 'minmax(0,1fr) 90px';
   const VER_COLS = '50px 110px minmax(0,1.3fr) 90px minmax(0,1.6fr)';
 
-  const sign1Role = `PREPARED BY · ${(state.signoff.preparedRole || 'Compliance Officer').toUpperCase()}`;
-  const sign2Role = `APPROVED BY · ${(state.signoff.approvedRole || 'Managing Director').toUpperCase()}`;
+  const sign1Role = `PREPARED BY · ${(data.signoff.preparedRole || 'Compliance Officer').toUpperCase()}`;
+  const sign2Role = `APPROVED BY · ${(data.signoff.approvedRole || 'Managing Director').toUpperCase()}`;
 
   return (
     <div className="hk-report-surface">
@@ -152,7 +171,8 @@ export function Report() {
                   marginTop: 3,
                 }}
               >
-                {m.cddLabel} · <span style={{ color: m.bandColor }}>{m.bannerDecision}</span>
+                {m.cddLabel} ·{' '}
+                <span style={{ color: m.bannerDecisionColor }}>{m.bannerDecision}</span>
               </div>
             </div>
           </div>
@@ -304,13 +324,13 @@ export function Report() {
             >
               <div className="hk-r-sign">
                 <div className="hk-r-sign-name">
-                  {state.signoff.preparedBy || 'Compliance Department'}
+                  {data.signoff.preparedBy || 'Compliance Department'}
                 </div>
                 <div className="hk-r-sign-role">{sign1Role}</div>
               </div>
               <div className="hk-r-sign">
                 <div className="hk-r-sign-name">
-                  {state.signoff.approvedBy || 'Management Department'}
+                  {data.signoff.approvedBy || 'Management Department'}
                 </div>
                 <div className="hk-r-sign-role">{sign2Role}</div>
               </div>
