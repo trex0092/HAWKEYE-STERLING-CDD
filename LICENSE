@@ -1,0 +1,28 @@
+Copyright (c) 2026 Hawkeye Sterling. All rights reserved.
+
+PROPRIETARY AND CONFIDENTIAL
+
+This software and its associated documentation and assets (the "Software") are
+the proprietary and confidential property of Hawkeye Sterling and its licensors.
+
+Unless you have entered into a separate written agreement with the copyright
+holder that expressly grants you such rights, you may NOT, in whole or in part:
+
+  - use, run, or deploy the Software;
+  - copy, reproduce, or store the Software;
+  - modify, adapt, translate, or create derivative works of the Software;
+  - publish, distribute, sublicense, rent, lease, or sell the Software; or
+  - remove or alter any proprietary notices.
+
+The robot portrait assets in `public/assets/` and `docs/design-handoff/` are
+supplied by the client and are likewise proprietary; they may not be reused
+outside this project.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+To request a usage license, contact the repository owner.

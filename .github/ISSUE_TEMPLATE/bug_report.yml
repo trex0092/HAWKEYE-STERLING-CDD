@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a problem with the workstation or report export
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for the report. Please do not include real customer/PII data.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to …
+        2. Select jurisdiction …
+        3. Click …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Lock gate / session
+        - Assessment workstation
+        - Risk band / status colours
+        - Report / Print-Export
+        - Persistence / register
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: e.g. Chrome 124 on macOS 14, app v1.0.0
+    validations:
+      required: false

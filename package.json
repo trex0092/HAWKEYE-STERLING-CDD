@@ -4,6 +4,31 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Hawkeye Sterling — Customer & Counterparty Due Diligence (CDD) compliance workstation",
+  "license": "UNLICENSED",
+  "author": "Hawkeye Sterling",
+  "keywords": [
+    "aml",
+    "cft",
+    "kyc",
+    "compliance",
+    "due-diligence",
+    "cdd",
+    "dpms",
+    "react",
+    "typescript",
+    "vite"
+  ],
+  "homepage": "https://github.com/trex0092/hawkeye-sterling-cdd#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trex0092/hawkeye-sterling-cdd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/trex0092/hawkeye-sterling-cdd/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
