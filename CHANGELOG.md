@@ -21,8 +21,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   0.x → 1.x (with matching `@types/react` 19).
 - Bumped GitHub Actions: `actions/checkout` 4 → 6, `actions/setup-node` 4 → 6,
   `github/codeql-action` 3 → 4.
-- Dev-tooling majors (ESLint 10, Vite 8, Vitest 4, `@vitejs/plugin-react` 6)
-  are deferred — a separate coordinated migration tracked via Dependabot.
+- Upgraded the dev toolchain to current majors: ESLint 9 → 10, Vite 5 → 8,
+  Vitest 2 → 4, `@vitejs/plugin-react` 4 → 6, plus `@eslint/js` 10,
+  `eslint-config-prettier` 10, `eslint-plugin-react-hooks` 7, `globals` 17,
+  `@types/node` 25, `jsdom` 29.
+
+### Security
+
+- `npm audit` now reports **0 vulnerabilities** (the esbuild dev-server advisory
+  chain is resolved by Vite 8 / Vitest 4).
 
 ## [1.0.0] - 2026-06-17
 
