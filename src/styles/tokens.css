@@ -1,0 +1,160 @@
+/* ============================================================================
+   Hawkeye Sterling — Design Tokens
+   Exact values transcribed from the design handoff (README + .dc.html source).
+   ========================================================================== */
+
+:root {
+  /* Fonts */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* App (dark) surfaces */
+  --bg-page: #07080f;
+  --surface-panel: rgba(16, 18, 30, 0.62);
+  --surface-input: rgba(10, 12, 22, 0.7);
+  --surface-row: rgba(10, 12, 22, 0.5);
+  --border-panel: rgba(130, 95, 210, 0.18);
+  --border-input: rgba(130, 95, 210, 0.22);
+  --border-row: rgba(130, 95, 210, 0.12);
+
+  /* App text */
+  --text-primary: #e8eaf2;
+  --text-secondary: #c5ccd9;
+  --text-muted: #7e889e;
+  --text-faint: #5a6478;
+  --placeholder: #4d5670;
+
+  /* Accents */
+  --magenta: #e85aff;
+  --magenta-bright: #f48bff;
+  --violet: #b07bff;
+  --violet-deep: #7b5bff;
+  --blue: #7aa6ff;
+  --cyan: #36e0d0;
+  --green: #3ddc84;
+  --amber: #e3b341;
+  --red: #ff5d73;
+  --olive: #c9c24a;
+
+  /* Status semantics (sanctions / adverse / pf / rba) */
+  --status-negative: #3ddc84; /* Negative / Low / Low Risk */
+  --status-pending: #e3b341; /* Pending / Medium / Medium Risk */
+  --status-positive: #ff5d73; /* Positive / High / High Risk */
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(232, 90, 255, 0.12);
+  --focus-ring-strong: 0 0 0 3px rgba(232, 90, 255, 0.14);
+
+  /* Gradients */
+  --grad-wordmark: linear-gradient(92deg, #f48bff, #b07bff 60%, #7aa6ff);
+  --grad-hairline: linear-gradient(
+    90deg,
+    #e85aff,
+    rgba(123, 91, 255, 0.45) 35%,
+    rgba(54, 224, 208, 0.25) 70%,
+    transparent
+  );
+  --grad-hairline-short: linear-gradient(
+    90deg,
+    #e85aff,
+    rgba(54, 224, 208, 0.25) 70%,
+    transparent
+  );
+
+  /* Report (light) */
+  --r-paper: #ffffff;
+  --r-ink: #15171f;
+  --r-body: #374151;
+  --r-muted: #6b7280;
+  --r-muted-2: #9aa0ac;
+  --r-hairline: #e3e6ec;
+  --r-row: #f0f2f6;
+  --r-band-dark: #0e1018;
+  --r-accent: #c026d3;
+  --r-accent-soft: #b14fd8;
+  --r-result-green: #1f9d57;
+}
+
+/* ----------------------------------------------------------------------------
+   Keyframes (orbital rings, live dots, breathing medallions)
+   -------------------------------------------------------------------------- */
+@keyframes hk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes hk-spin-rev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes hk-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes hk-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.015);
+    filter: brightness(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   Base reset
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-page);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::placeholder {
+  color: var(--placeholder);
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}

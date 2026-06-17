@@ -1,0 +1,221 @@
+/* ============================================================================
+   Assessment workstation layout
+   ========================================================================== */
+
+.hk-app-bg {
+  min-height: 100vh;
+  padding-bottom: 60px;
+  background:
+    radial-gradient(1100px 620px at 78% -8%, rgba(120, 60, 210, 0.2), transparent 60%),
+    radial-gradient(900px 560px at 8% 4%, rgba(40, 90, 200, 0.16), transparent 58%),
+    radial-gradient(700px 500px at 50% 120%, rgba(40, 210, 150, 0.1), transparent 60%),
+    var(--bg-page);
+}
+
+/* ---- Top bar -------------------------------------------------------------- */
+.hk-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 30px;
+  background: rgba(9, 10, 18, 0.82);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(130, 95, 210, 0.22);
+}
+.hk-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+.hk-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.hk-wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  background: var(--grad-wordmark);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hk-systems {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hk-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  animation: hk-pulse 2s ease-in-out infinite;
+}
+.hk-systems-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--green);
+}
+
+.hk-countdown-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  border: 1px solid rgba(227, 179, 65, 0.4);
+  background: rgba(227, 179, 65, 0.08);
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+
+.hk-lock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #aab2c8;
+  background: rgba(18, 20, 32, 0.7);
+  border: 1px solid rgba(130, 95, 210, 0.22);
+  border-radius: 9px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.hk-lock-btn:hover {
+  border-color: rgba(130, 95, 210, 0.45);
+}
+
+/* ---- Page + grid ---------------------------------------------------------- */
+.hk-page {
+  max-width: 1480px;
+  margin: 0 auto;
+}
+.hk-page-title-wrap {
+  padding: 16px 30px 0;
+}
+.hk-page-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.hk-grad-text {
+  background: var(--grad-wordmark);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hk-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 366px;
+  gap: 14px;
+  align-items: start;
+  padding: 10px 30px 0;
+}
+.hk-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ---- Right rail ----------------------------------------------------------- */
+.hk-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: sticky;
+  top: 78px;
+  align-self: start;
+}
+.hk-avatar-panel {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-panel);
+  border-radius: 11px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hk-rail-panel {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-panel);
+  border-radius: 11px;
+}
+.hk-diligence-panel {
+  padding: 20px 22px;
+}
+.hk-actions-panel {
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hk-override {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(130, 95, 210, 0.14);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hk-autosaved {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+/* ---- Misc grids reused by sections --------------------------------------- */
+.hk-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.hk-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.hk-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1080px) {
+  .hk-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hk-sidebar {
+    position: static;
+  }
+}

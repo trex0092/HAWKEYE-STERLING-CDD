@@ -1,0 +1,274 @@
+/* ============================================================================
+   CDD Assessment Report — light A4 export (2 pages)
+   ========================================================================== */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+.hk-report-surface {
+  min-height: 100vh;
+  background: #4c4f57;
+  color: var(--r-ink);
+  font-family: var(--font-body);
+}
+
+/* Toolbar (screen only) */
+.hk-report-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: rgba(9, 10, 18, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(130, 95, 210, 0.22);
+}
+.hk-report-toolbar .title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #aab2c8;
+  text-transform: uppercase;
+}
+.hk-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  border-radius: 9px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.hk-toolbar-btn--ghost {
+  color: #aab2c8;
+  background: rgba(18, 20, 32, 0.7);
+  border: 1px solid rgba(130, 95, 210, 0.22);
+}
+.hk-toolbar-btn--ghost:hover {
+  background: rgba(28, 30, 46, 0.8);
+}
+.hk-toolbar-btn--primary {
+  color: #c4a3ff;
+  background: rgba(176, 123, 255, 0.12);
+  border: 1px solid rgba(176, 123, 255, 0.5);
+}
+.hk-toolbar-btn--primary:hover {
+  background: rgba(176, 123, 255, 0.22);
+}
+
+.hk-report-pages {
+  padding: 24px 0;
+}
+
+/* A4 page */
+.hk-report-page {
+  width: 794px;
+  min-height: 1123px;
+  background: #fff;
+  margin: 0 auto 26px;
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.34);
+  display: flex;
+  flex-direction: column;
+}
+.hk-report-page--break {
+  break-after: page;
+}
+
+/* Header band */
+.hk-r-header {
+  background: var(--r-band-dark);
+  padding: 26px 44px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.hk-r-header-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #e85aff, #7aa6ff, #36e0d0);
+}
+.hk-r-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(176, 123, 255, 0.5);
+  flex: none;
+}
+.hk-r-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 28%;
+}
+.hk-r-wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  color: #f0d9ff;
+}
+.hk-r-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #8a8fa3;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.hk-r-refblock {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #8a8fa3;
+  line-height: 1.7;
+}
+.hk-r-refblock b {
+  color: #cfd3df;
+  font-weight: 500;
+}
+
+/* Risk banner */
+.hk-r-banner {
+  margin: 26px 44px 0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.hk-r-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--r-accent-soft);
+}
+
+/* Body */
+.hk-r-body {
+  padding: 26px 44px 0;
+  flex: 1;
+}
+.hk-r-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.hk-r-index {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--r-accent);
+}
+.hk-r-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.hk-r-rule {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #e85aff, #9b6bff 55%, #7aa6ff);
+}
+
+.hk-r-kv-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--r-accent-soft);
+  margin-bottom: 3px;
+}
+.hk-r-kv-value {
+  font-size: 13px;
+  color: var(--r-ink);
+  font-weight: 500;
+}
+
+.hk-r-row {
+  display: grid;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--r-row);
+  font-size: 12px;
+}
+.hk-r-row-head {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 7px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--r-accent-soft);
+  border-bottom: 1px solid var(--r-hairline);
+}
+.hk-r-result {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.hk-r-footer {
+  padding: 16px 44px;
+  border-top: 1px solid var(--r-hairline);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--r-accent-soft);
+}
+
+.hk-r-sign {
+  margin-top: 58px;
+  border-top: 2px solid;
+  border-image: linear-gradient(90deg, #e85aff, #7aa6ff) 1;
+  padding-top: 8px;
+}
+.hk-r-sign-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.hk-r-sign-role {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--r-accent-soft);
+  margin-top: 2px;
+}
+
+/* ---- Print ---------------------------------------------------------------- */
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+  .hk-report-surface {
+    background: #fff;
+  }
+  .hk-report-toolbar {
+    display: none !important;
+  }
+  .hk-report-pages {
+    padding: 0;
+  }
+  .hk-report-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+}
