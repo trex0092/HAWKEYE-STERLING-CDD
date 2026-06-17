@@ -67,7 +67,9 @@
   border-radius: 10px;
   padding: 7px 10px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .hk-input:focus {
   border-color: var(--magenta);
@@ -143,7 +145,10 @@
 .hk-btn {
   cursor: pointer;
   border-radius: 9px;
-  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 .hk-btn:focus-visible {
   outline: 2px solid var(--magenta);
@@ -211,6 +216,112 @@
 }
 .hk-action-cell svg {
   flex: none;
+}
+
+/* ---- Modal ---------------------------------------------------------------- */
+.hk-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 6, 12, 0.72);
+  backdrop-filter: blur(8px);
+}
+.hk-modal {
+  width: 620px;
+  max-width: 100%;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: rgba(13, 15, 25, 0.97);
+  border: 1px solid rgba(130, 95, 210, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+}
+.hk-modal-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e85aff 35%, #7aa6ff 65%, transparent);
+}
+.hk-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid rgba(130, 95, 210, 0.18);
+}
+.hk-modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+.hk-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: rgba(18, 20, 32, 0.7);
+  border: 1px solid rgba(130, 95, 210, 0.22);
+}
+.hk-modal-close:hover {
+  background: rgba(28, 30, 46, 0.85);
+}
+.hk-modal-body {
+  padding: 18px 22px 22px;
+  overflow: auto;
+}
+.hk-modal-empty {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.6;
+}
+
+/* ---- Analyst-override popover --------------------------------------------- */
+.hk-override-pop {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hk-override-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: rgba(10, 12, 22, 0.6);
+  border: 1px solid rgba(130, 95, 210, 0.22);
+}
+.hk-override-opt:hover {
+  border-color: rgba(130, 95, 210, 0.45);
+}
+.hk-override-opt[data-active='true'] {
+  color: var(--band-color, var(--magenta-bright));
+  border-color: var(--band-color, var(--magenta));
+  background: var(--band-bg, rgba(232, 90, 255, 0.1));
 }
 
 /* ---- Required-diligence pill (band coloured) ----------------------------- */

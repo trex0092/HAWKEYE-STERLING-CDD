@@ -110,9 +110,7 @@ export function OrbitalMedallion({
           inset: imageInset,
           borderRadius: '50%',
           overflow: 'hidden',
-          boxShadow: glow
-            ? `${glow}, inset 0 0 24px rgba(0,0,0,.6)`
-            : undefined,
+          boxShadow: glow ? `${glow}, inset 0 0 24px rgba(0,0,0,.6)` : undefined,
         }}
       >
         <img

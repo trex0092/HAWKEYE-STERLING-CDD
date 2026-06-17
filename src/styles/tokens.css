@@ -55,12 +55,7 @@
     rgba(54, 224, 208, 0.25) 70%,
     transparent
   );
-  --grad-hairline-short: linear-gradient(
-    90deg,
-    #e85aff,
-    rgba(54, 224, 208, 0.25) 70%,
-    transparent
-  );
+  --grad-hairline-short: linear-gradient(90deg, #e85aff, rgba(54, 224, 208, 0.25) 70%, transparent);
 
   /* Report (light) */
   --r-paper: #ffffff;

@@ -1,10 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useAssessment, type Person } from '@/store/useAssessment';
-import {
-  PERSON_TYPE_OPTIONS,
-  PROOF_OF_ADDRESS_OPTIONS,
-  PEP_STATUS_OPTIONS,
-} from '@/data/labels';
+import { PERSON_TYPE_OPTIONS, PROOF_OF_ADDRESS_OPTIONS, PEP_STATUS_OPTIONS } from '@/data/labels';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { LabeledText, LabeledSelect } from '@/components/ui/fields';
 import { AddPerson, RemovePerson } from '@/components/icons';
@@ -13,7 +9,15 @@ const textStyle: CSSProperties = { fontSize: 13, borderRadius: 9, padding: '7px 
 const dateStyle: CSSProperties = { fontSize: 12, borderRadius: 9, padding: '7px 10px' };
 const selectStyle: CSSProperties = { fontSize: 13, borderRadius: 9, padding: '7px 10px' };
 
-function PersonCard({ person, index, canRemove }: { person: Person; index: number; canRemove: boolean }) {
+function PersonCard({
+  person,
+  index,
+  canRemove,
+}: {
+  person: Person;
+  index: number;
+  canRemove: boolean;
+}) {
   const setPerson = useAssessment((s) => s.setPerson);
   const removePerson = useAssessment((s) => s.removePerson);
   const set = (patch: Partial<Person>) => setPerson(person.id, patch);
@@ -54,19 +58,109 @@ function PersonCard({ person, index, canRemove }: { person: Person; index: numbe
         )}
       </div>
       <div className="hk-grid-4">
-        <LabeledText labelSm label="DESIGNATION" placeholder="Shareholder & Director" value={person.designation} onChange={(v) => set({ designation: v })} inputStyle={textStyle} />
-        <LabeledText labelSm label="NAME" placeholder="Full legal name" value={person.name} onChange={(v) => set({ name: v })} inputStyle={textStyle} />
-        <LabeledText labelSm label="SHARES %" placeholder="100" value={person.shares} onChange={(v) => set({ shares: v })} inputStyle={textStyle} />
-        <LabeledSelect labelSm label="TYPE" value={person.type} onChange={(v) => set({ type: v })} options={PERSON_TYPE_OPTIONS} inputStyle={selectStyle} />
-        <LabeledText labelSm label="NATIONALITY" value={person.nationality} onChange={(v) => set({ nationality: v })} inputStyle={textStyle} />
-        <LabeledText labelSm label="GENDER" value={person.gender} onChange={(v) => set({ gender: v })} inputStyle={textStyle} />
-        <LabeledText labelSm mono label="DATE OF BIRTH" placeholder="dd/mm/yyyy" value={person.dob} onChange={(v) => set({ dob: v })} inputStyle={dateStyle} />
-        <LabeledText labelSm label="PASSPORT NO." value={person.passportNo} onChange={(v) => set({ passportNo: v })} inputStyle={textStyle} />
-        <LabeledText labelSm mono label="PASSPORT EXPIRY" placeholder="dd/mm/yyyy" value={person.passportExpiry} onChange={(v) => set({ passportExpiry: v })} inputStyle={dateStyle} />
-        <LabeledText labelSm label="EMIRATES ID" value={person.emiratesId} onChange={(v) => set({ emiratesId: v })} inputStyle={textStyle} />
-        <LabeledText labelSm mono label="EMIRATES ID EXPIRY" placeholder="dd/mm/yyyy" value={person.emiratesIdExpiry} onChange={(v) => set({ emiratesIdExpiry: v })} inputStyle={dateStyle} />
-        <LabeledSelect labelSm label="PROOF OF ADDRESS" value={person.proofOfAddress} onChange={(v) => set({ proofOfAddress: v })} options={PROOF_OF_ADDRESS_OPTIONS} inputStyle={selectStyle} />
-        <LabeledSelect labelSm label="PEP STATUS" value={person.pepStatus} onChange={(v) => set({ pepStatus: v })} options={PEP_STATUS_OPTIONS} inputStyle={selectStyle} />
+        <LabeledText
+          labelSm
+          label="DESIGNATION"
+          placeholder="Shareholder & Director"
+          value={person.designation}
+          onChange={(v) => set({ designation: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledText
+          labelSm
+          label="NAME"
+          placeholder="Full legal name"
+          value={person.name}
+          onChange={(v) => set({ name: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledText
+          labelSm
+          label="SHARES %"
+          placeholder="100"
+          value={person.shares}
+          onChange={(v) => set({ shares: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledSelect
+          labelSm
+          label="TYPE"
+          value={person.type}
+          onChange={(v) => set({ type: v })}
+          options={PERSON_TYPE_OPTIONS}
+          inputStyle={selectStyle}
+        />
+        <LabeledText
+          labelSm
+          label="NATIONALITY"
+          value={person.nationality}
+          onChange={(v) => set({ nationality: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledText
+          labelSm
+          label="GENDER"
+          value={person.gender}
+          onChange={(v) => set({ gender: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledText
+          labelSm
+          mono
+          label="DATE OF BIRTH"
+          placeholder="dd/mm/yyyy"
+          value={person.dob}
+          onChange={(v) => set({ dob: v })}
+          inputStyle={dateStyle}
+        />
+        <LabeledText
+          labelSm
+          label="PASSPORT NO."
+          value={person.passportNo}
+          onChange={(v) => set({ passportNo: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledText
+          labelSm
+          mono
+          label="PASSPORT EXPIRY"
+          placeholder="dd/mm/yyyy"
+          value={person.passportExpiry}
+          onChange={(v) => set({ passportExpiry: v })}
+          inputStyle={dateStyle}
+        />
+        <LabeledText
+          labelSm
+          label="EMIRATES ID"
+          value={person.emiratesId}
+          onChange={(v) => set({ emiratesId: v })}
+          inputStyle={textStyle}
+        />
+        <LabeledText
+          labelSm
+          mono
+          label="EMIRATES ID EXPIRY"
+          placeholder="dd/mm/yyyy"
+          value={person.emiratesIdExpiry}
+          onChange={(v) => set({ emiratesIdExpiry: v })}
+          inputStyle={dateStyle}
+        />
+        <LabeledSelect
+          labelSm
+          label="PROOF OF ADDRESS"
+          value={person.proofOfAddress}
+          onChange={(v) => set({ proofOfAddress: v })}
+          options={PROOF_OF_ADDRESS_OPTIONS}
+          inputStyle={selectStyle}
+        />
+        <LabeledSelect
+          labelSm
+          label="PEP STATUS"
+          value={person.pepStatus}
+          onChange={(v) => set({ pepStatus: v })}
+          options={PEP_STATUS_OPTIONS}
+          inputStyle={selectStyle}
+        />
       </div>
     </div>
   );

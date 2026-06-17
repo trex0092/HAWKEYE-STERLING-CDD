@@ -1,16 +1,19 @@
 /**
- * Right rail: band-driven avatar medallion, Required-Diligence pill, and the 8
- * action cells + autosaved stamp. Avatar robot/rings/glow + pill colour all
- * follow the jurisdiction-derived band.
+ * Right rail: band-driven avatar medallion, Required-Diligence pill (+ analyst
+ * override popover), and the 8 wired action cells + autosave stamp. The effective
+ * band = analyst override ?? jurisdiction-derived band.
  */
 import { useNavigate } from 'react-router-dom';
 import type { CSSProperties, ReactNode } from 'react';
 import { useAssessment } from '@/store/useAssessment';
-import { appPalette } from '@/lib/risk';
+import { useUI } from '@/store/useUI';
+import { useToast } from '@/store/useToast';
+import { effectiveBand, paletteForBand, type RiskBand } from '@/lib/risk';
 import { formatClock } from '@/lib/format';
+import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
+import { downloadJson } from '@/lib/download';
 import { OrbitalMedallion } from '@/components/ui/OrbitalMedallion';
 import { ActionCell } from '@/components/ui/ActionCell';
-import { useToast } from '@/components/ui/Toast';
 import {
   PrintExport,
   Complete,
@@ -35,14 +38,38 @@ interface CellConfig {
   onClick: () => void;
 }
 
+const OVERRIDE_OPTIONS: { label: string; band: RiskBand | null }[] = [
+  { label: 'Auto (jurisdiction)', band: null },
+  { label: 'CDD — Customer', band: 'low' },
+  { label: 'SDD — Simplified', band: 'med' },
+  { label: 'EDD — Enhanced', band: 'high' },
+];
+
 export function Sidebar() {
   const navigate = useNavigate();
   const jurisdiction = useAssessment((s) => s.entity.jurisdiction);
-  const now = useAssessment((s) => s.now);
+  const overrideBand = useAssessment((s) => s.overrideBand);
+  const reference = useAssessment((s) => s.admin.referenceNumber);
+  const entityName = useAssessment((s) => s.entity.legalName);
+  const assessedBy = useAssessment((s) => s.admin.assessedBy);
+  const decision = useAssessment((s) => s.rba.decision);
+  const lastSavedAt = useAssessment((s) => s.lastSavedAt);
+
   const reset = useAssessment((s) => s.reset);
+  const completeAssessment = useAssessment((s) => s.completeAssessment);
+  const reassess = useAssessment((s) => s.reassess);
+  const setOverrideBand = useAssessment((s) => s.setOverrideBand);
+  const logActivity = useAssessment((s) => s.logActivity);
+
+  const openModal = useUI((s) => s.openModal);
+  const overrideOpen = useUI((s) => s.overrideOpen);
+  const toggleOverride = useUI((s) => s.toggleOverride);
+  const closeOverride = useUI((s) => s.closeOverride);
+
   const showToast = useToast((s) => s.show);
 
-  const pal = appPalette(jurisdiction);
+  const band = effectiveBand(jurisdiction, overrideBand);
+  const pal = paletteForBand(band);
   const ICON = 15;
 
   const bandVars = {
@@ -50,6 +77,28 @@ export function Sidebar() {
     ['--band-bg']: pal.bg,
     ['--band-border']: pal.border,
   } as CSSProperties;
+
+  const handleAsana = async () => {
+    const task = buildAsanaTask({
+      reference,
+      entity: entityName,
+      bandShort: pal.short,
+      bandLabel: pal.label,
+      decision,
+      assessedBy,
+    });
+    const result = await sendToAsana(task);
+    if (result.ok) {
+      logActivity(`Sent "${task.name}" to Asana.`);
+      showToast('Sent to Asana.');
+    } else if (result.reason === 'not-configured') {
+      downloadJson(`asana-task-${reference || 'assessment'}.json`, task);
+      logActivity('Exported Asana task payload (no webhook configured).');
+      showToast('Asana not configured — exported task as JSON.');
+    } else {
+      showToast(`Asana send failed: ${result.detail ?? 'request failed'}.`);
+    }
+  };
 
   const cells: CellConfig[] = [
     {
@@ -70,7 +119,10 @@ export function Sidebar() {
       bg: 'rgba(61,220,132,.1)',
       bgHover: 'rgba(61,220,132,.2)',
       border: 'rgba(61,220,132,.4)',
-      onClick: () => showToast('Assessment marked complete.'),
+      onClick: () => {
+        completeAssessment();
+        showToast('Assessment completed — version logged.');
+      },
     },
     {
       key: 'register',
@@ -80,7 +132,7 @@ export function Sidebar() {
       bg: 'rgba(244,139,255,.08)',
       bgHover: 'rgba(244,139,255,.18)',
       border: 'rgba(244,139,255,.4)',
-      onClick: () => showToast('Opening assessment register…'),
+      onClick: () => openModal('register'),
     },
     {
       key: 'activity',
@@ -90,7 +142,7 @@ export function Sidebar() {
       bg: 'rgba(227,179,65,.1)',
       bgHover: 'rgba(227,179,65,.2)',
       border: 'rgba(227,179,65,.4)',
-      onClick: () => showToast('Activity log is not yet wired to a backend.'),
+      onClick: () => openModal('activity'),
     },
     {
       key: 'asana',
@@ -100,7 +152,7 @@ export function Sidebar() {
       bg: 'rgba(122,166,255,.1)',
       bgHover: 'rgba(122,166,255,.2)',
       border: 'rgba(122,166,255,.4)',
-      onClick: () => showToast('Queued for Asana sync.'),
+      onClick: () => void handleAsana(),
     },
     {
       key: 'reset',
@@ -123,7 +175,10 @@ export function Sidebar() {
       bg: 'rgba(54,224,208,.1)',
       bgHover: 'rgba(54,224,208,.2)',
       border: 'rgba(54,224,208,.4)',
-      onClick: () => showToast('Risk band re-derived from current inputs.'),
+      onClick: () => {
+        reassess();
+        showToast('Re-assessed — sanctions re-screened.');
+      },
     },
     {
       key: 'riskdata',
@@ -133,7 +188,7 @@ export function Sidebar() {
       bg: 'rgba(201,194,74,.1)',
       bgHover: 'rgba(201,194,74,.2)',
       border: 'rgba(201,194,74,.4)',
-      onClick: () => showToast('Risk data sources…'),
+      onClick: () => openModal('riskdata'),
     },
   ];
 
@@ -151,7 +206,13 @@ export function Sidebar() {
           ariaLabel={`Risk band ${pal.short}`}
           rings={[
             { inset: 0, width: 1.5, topColor: pal.color, rightColor: pal.color, durationS: 9 },
-            { inset: 12, bottomColor: '#e85aff', leftColor: '#7b5bff', durationS: 12, reverse: true },
+            {
+              inset: 12,
+              bottomColor: '#e85aff',
+              leftColor: '#7b5bff',
+              durationS: 12,
+              reverse: true,
+            },
             { inset: -7, dashed: true, color: pal.border, durationS: 26 },
           ]}
         />
@@ -182,10 +243,58 @@ export function Sidebar() {
           <Diligence size={15} strokeWidth={2.2} />
           {pal.label}
         </div>
-        <div className="hk-override">
-          <Override size={13} strokeWidth={2.2} />
+
+        <button
+          type="button"
+          className="hk-override"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            borderTop: '1px solid rgba(130,95,210,.14)',
+            textAlign: 'left',
+          }}
+          aria-expanded={overrideOpen}
+          onClick={toggleOverride}
+        >
+          <Override
+            size={13}
+            strokeWidth={2.2}
+            style={{
+              transform: overrideOpen ? 'rotate(90deg)' : 'none',
+              transition: 'transform .15s ease',
+            }}
+          />
           ANALYST OVERRIDE
-        </div>
+        </button>
+
+        {overrideOpen && (
+          <div className="hk-override-pop">
+            {OVERRIDE_OPTIONS.map((opt) => {
+              const active = overrideBand === opt.band;
+              const optPal = opt.band ? paletteForBand(opt.band) : null;
+              const style = optPal
+                ? ({ ['--band-color']: optPal.color, ['--band-bg']: optPal.bg } as CSSProperties)
+                : undefined;
+              return (
+                <button
+                  key={opt.label}
+                  type="button"
+                  className="hk-override-opt"
+                  data-active={active}
+                  style={style}
+                  onClick={() => {
+                    setOverrideBand(opt.band);
+                    closeOverride();
+                  }}
+                >
+                  {opt.label}
+                  {active && <span aria-hidden>✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Actions */}
@@ -202,7 +311,9 @@ export function Sidebar() {
             onClick={c.onClick}
           />
         ))}
-        <div className="hk-autosaved">Autosaved {formatClock(now)}</div>
+        <div className="hk-autosaved">
+          {lastSavedAt ? `Autosaved ${formatClock(new Date(lastSavedAt))}` : 'Not yet saved'}
+        </div>
       </div>
     </div>
   );
