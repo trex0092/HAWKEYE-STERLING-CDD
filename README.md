@@ -27,7 +27,8 @@ runtime.
 - **lucide-react** — icon set (replaces the design's placeholder Unicode glyphs)
 - **CSS design tokens** — `src/styles/*` (variables, keyframes, component classes)
 - **Vitest + Testing Library** — runtime tests
-- **ESLint + Prettier** — linting/formatting; **GitHub Actions** CI
+- **ESLint + Prettier** — linting/formatting
+- **GitHub Actions** — CI (lint·typecheck·test·build), CodeQL, Dependency Review, Lighthouse, Dependabot (+ auto-merge), and release-please
 
 ## Getting started
 

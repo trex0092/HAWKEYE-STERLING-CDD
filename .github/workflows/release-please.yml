@@ -1,0 +1,22 @@
+name: Release
+
+# Maintains a "release PR" that bumps the version + updates CHANGELOG from
+# Conventional Commits; merging it tags the release and publishes a GitHub Release.
+# Requires repo setting: Settings → Actions → General → Workflow permissions →
+# "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: node
