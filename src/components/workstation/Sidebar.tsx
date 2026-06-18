@@ -96,6 +96,7 @@ export function Sidebar() {
       logActivity('Exported Asana task payload (no webhook configured).');
       showToast('Asana not configured — exported task as JSON.');
     } else {
+      logActivity(`Asana send failed: ${result.detail ?? 'request failed'}.`);
       showToast(`Asana send failed: ${result.detail ?? 'request failed'}.`);
     }
   };

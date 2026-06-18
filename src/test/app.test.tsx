@@ -7,6 +7,7 @@ import { deriveBand, appPalette, statusColor, levelColor, riskColor } from '@/li
 import { formatCountdown } from '@/lib/format';
 import { buildReportModel } from '@/lib/report';
 import { getRegister, saveToRegister } from '@/lib/register';
+import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
 
 beforeEach(() => {
   // Clean, locked session + empty storage/UI before each test.
@@ -233,5 +234,97 @@ describe('report view', () => {
     expect(screen.getByText('PAGE 2 OF 2')).toBeInTheDocument();
     // UK → low band: appears in the banner and the RBA summary.
     expect(screen.getAllByText('Low Risk').length).toBeGreaterThan(0);
+  });
+});
+
+describe('asana integration (env-gated)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('builds a task payload carrying the band and decision', () => {
+    const task = buildAsanaTask({
+      reference: 'RA-001',
+      entity: 'Acme DMCC',
+      bandShort: 'EDD',
+      bandLabel: 'EDD — Enhanced Due Diligence',
+      decision: 'Approved',
+      assessedBy: 'Compliance',
+    });
+    expect(task.name).toContain('RA-001');
+    expect(task.name).toContain('Acme DMCC');
+    expect(task.band).toBe('EDD');
+    expect(task.decision).toBe('Approved');
+  });
+
+  it('returns not-configured when no webhook URL is set (drives the JSON fallback)', async () => {
+    vi.stubEnv('VITE_ASANA_WEBHOOK_URL', '');
+    const task = buildAsanaTask({
+      reference: 'RA-001',
+      entity: 'Acme DMCC',
+      bandShort: 'CDD',
+      bandLabel: 'CDD — Customer Due Diligence',
+      decision: 'Pending',
+      assessedBy: '',
+    });
+    const result = await sendToAsana(task);
+    expect(result).toEqual({ ok: false, reason: 'not-configured' });
+  });
+});
+
+describe('session auto-lock', () => {
+  it('ticks down while unlocked and auto-locks at zero', () => {
+    useAssessment.setState({ locked: false, remaining: 1 });
+    useAssessment.getState().tick();
+    expect(useAssessment.getState().remaining).toBe(0);
+    expect(useAssessment.getState().locked).toBe(true);
+
+    // Once locked, the clock holds at zero.
+    useAssessment.getState().tick();
+    expect(useAssessment.getState().remaining).toBe(0);
+
+    // Unlocking restores a fresh 60-minute session.
+    useAssessment.getState().unlock();
+    expect(useAssessment.getState().locked).toBe(false);
+    expect(useAssessment.getState().remaining).toBe(3600);
+  });
+});
+
+describe('report model hardening', () => {
+  it('does not crash when screening arrays are short/empty (safe defaults)', () => {
+    const base = useAssessment.getState();
+    const model = buildReportModel({ ...base, sanctions: [], adverse: [], pf: [] });
+    expect(model.sanctions).toHaveLength(6);
+    expect(model.adverse).toHaveLength(7);
+    expect(model.pf).toHaveLength(6);
+    // Missing rows fall back to fresh defaults instead of throwing.
+    expect(model.sanctions[0].result).toBe('Negative');
+    expect(model.adverse[0].find).toBe('Negative');
+    expect(model.pf[0].level).toBe('Low');
+  });
+});
+
+describe('reset integrity', () => {
+  it('restores clean defaults but preserves admin + sign-off, and logs it', () => {
+    useAssessment.getState().setAdmin({ referenceNumber: 'RA-KEEP-9' });
+    useAssessment.getState().setSignoff({ preparedBy: 'Alice Approver' });
+    useAssessment.getState().setEntity({ legalName: 'Temp Co', jurisdiction: 'Iran' });
+    useAssessment.getState().addPerson();
+    useAssessment.getState().setOverrideBand('high');
+
+    useAssessment.getState().reset();
+    const s = useAssessment.getState();
+
+    // Entity/persons/override return to clean defaults.
+    expect(s.entity.legalName).toBe('');
+    expect(s.entity.jurisdiction).toBe('United Kingdom');
+    expect(s.persons).toHaveLength(1);
+    expect(s.overrideBand).toBeNull();
+    expect(s.completed).toBe(false);
+    // Admin + sign-off survive a reset.
+    expect(s.admin.referenceNumber).toBe('RA-KEEP-9');
+    expect(s.signoff.preparedBy).toBe('Alice Approver');
+    // The reset is recorded in the activity log.
+    expect(s.activity[0].message).toMatch(/reset/i);
   });
 });
