@@ -4,7 +4,7 @@
  *
  *   ⎙ → PrintExport     ✓ → Complete / Diligence   ☰ → Register
  *   ▤ → ActivityLog     ↗ → SendToAsana            ↺ → Reset
- *   ⟳ → ReAssess        ⚙ → RiskData               ⏱ → Countdown
+ *   ⟳ → ReAssess        ⏱ → Countdown
  *   ⊟ → LockToggle      🔒 → LockBadge             ▶ → Override
  *   + → AddPerson       (remove) → RemovePerson
  */
@@ -16,7 +16,6 @@ export {
   ArrowUpRight as SendToAsana,
   RotateCcw as Reset,
   RefreshCw as ReAssess,
-  Database as RiskData,
   Timer as Countdown,
   Lock as LockToggle,
   Lock as LockBadge,
