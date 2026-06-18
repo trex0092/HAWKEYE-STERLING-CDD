@@ -21,7 +21,7 @@ runtime.
 
 ## Stack
 
-- **React 18 + TypeScript + Vite**
+- **React 19 + TypeScript + Vite**
 - **React Router** — `/` workstation, `/report` export view
 - **Zustand** — assessment store (state + derived band) with **localStorage persistence**
 - **lucide-react** — icon set (replaces the design's placeholder Unicode glyphs)

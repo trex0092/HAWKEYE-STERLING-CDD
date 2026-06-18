@@ -142,16 +142,17 @@ export function buildReportModel(s: ReportInput): ReportModel {
     ],
     sanctions: SANCTIONS_LISTS.map((list, i) => {
       const row = s.sanctions[i];
+      const result = row?.result ?? 'Negative';
       return {
         list,
-        result: row.result,
-        resultColor: lightResult(row.result),
-        date: or(row.date, SAMPLE_DATE),
+        result,
+        resultColor: lightResult(result),
+        date: or(row?.date ?? '', SAMPLE_DATE),
       };
     }),
     adverse: ADVERSE_CATEGORIES.map((cat, i) => {
-      const row = s.adverse[i];
-      return { cat, find: row.finding, findColor: lightResult(row.finding) };
+      const finding = s.adverse[i]?.finding ?? 'Negative';
+      return { cat, find: finding, findColor: lightResult(finding) };
     }),
     person: [
       { k: 'DESIGNATION', v: or(p0?.designation ?? '', 'Shareholder & Director') },
@@ -164,8 +165,8 @@ export function buildReportModel(s: ReportInput): ReportModel {
       { k: 'PROOF OF ADDRESS', v: or(p0?.proofOfAddress ?? '', 'Provided') },
     ],
     pf: PF_FACTORS.map((factor, i) => {
-      const row = s.pf[i];
-      return { factor, level: row.level, levelColor: lightLevel(row.level) };
+      const level = s.pf[i]?.level ?? 'Low';
+      return { factor, level, levelColor: lightLevel(level) };
     }),
     rbaOverall: s.rba.classification,
     rbaOverallColor: lightRisk(s.rba.classification),
