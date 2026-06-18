@@ -1,6 +1,6 @@
 /**
  * Right rail: band-driven avatar medallion, Required-Diligence pill (+ analyst
- * override popover), and the 8 wired action cells + autosave stamp. The effective
+ * override popover), and the 7 wired action cells + autosave stamp. The effective
  * band = analyst override ?? jurisdiction-derived band.
  */
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,6 @@ import {
   SendToAsana,
   Reset,
   ReAssess,
-  RiskData,
   Diligence,
   Override,
 } from '@/components/icons';
@@ -180,16 +179,6 @@ export function Sidebar() {
         reassess();
         showToast('Re-assessed — sanctions re-screened.');
       },
-    },
-    {
-      key: 'riskdata',
-      icon: <RiskData size={ICON} />,
-      label: 'RISK DATA',
-      color: '#c9c24a',
-      bg: 'rgba(201,194,74,.1)',
-      bgHover: 'rgba(201,194,74,.2)',
-      border: 'rgba(201,194,74,.4)',
-      onClick: () => openModal('riskdata'),
     },
   ];
 
