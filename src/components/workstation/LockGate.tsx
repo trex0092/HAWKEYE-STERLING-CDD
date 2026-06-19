@@ -71,7 +71,7 @@ export function LockGate() {
         <div style={{ display: 'flex', justifyContent: 'center', margin: '2px 0 8px' }}>
           <OrbitalMedallion
             size={108}
-            image="/assets/robot-logo.png"
+            image="/assets/robot-android.jpg"
             imageInset={18}
             objectPosition="50% 28%"
             glow="0 0 40px rgba(176,123,255,.55)"

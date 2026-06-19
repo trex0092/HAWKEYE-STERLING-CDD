@@ -124,7 +124,7 @@ export function Report() {
           <div className="hk-r-header">
             <div className="hk-r-header-bar" />
             <div className="hk-r-logo">
-              <img src="/assets/robot-logo.png" alt="" />
+              <img src="/assets/robot-android.jpg" alt="" />
             </div>
             <div style={{ flex: 1 }}>
               <div className="hk-r-wordmark">HAWKEYE STERLING</div>
