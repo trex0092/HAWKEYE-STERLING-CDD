@@ -172,6 +172,21 @@
   letter-spacing: 0.04em;
 }
 
+/* Screening-escalation note — confirmed sanctions/adverse/PEP hit raised the band. */
+.hk-r-escalation {
+  margin: 14px 44px 0;
+  border-radius: 10px;
+  padding: 11px 15px;
+  background: #fbece9;
+  border: 1px solid #f0c6c0;
+  color: #c0392b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.hk-r-escalation b {
+  font-weight: 700;
+}
+
 /* Standing disclaimer — small print, always present on the export. */
 .hk-r-disclaimer {
   margin: 10px 44px 0;

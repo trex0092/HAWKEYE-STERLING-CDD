@@ -20,6 +20,7 @@ import {
   reportPalette,
   riskLabelForBand,
   effectiveBand,
+  screeningEscalation,
   type RiskBand,
 } from '@/lib/risk';
 
@@ -83,6 +84,9 @@ export interface ReportModel {
   approvedBy: string;
   /** True when a required field (ref, legal name, assessed-by, first person, sign-off) is blank. */
   incomplete: boolean;
+  /** True when a screening hit (sanctions/adverse/PEP) raised the band to EDD. */
+  escalated: boolean;
+  escalationReasons: string[];
   disclaimer: string;
 }
 
@@ -102,7 +106,12 @@ export type ReportInput = Pick<
 >;
 
 export function buildReportModel(s: ReportInput): ReportModel {
-  const band = effectiveBand(s.entity.jurisdiction, s.overrideBand);
+  const escalation = screeningEscalation({
+    sanctions: s.sanctions,
+    adverse: s.adverse,
+    persons: s.persons,
+  });
+  const band = effectiveBand(s.entity.jurisdiction, s.overrideBand, escalation);
   const pal = paletteForBand(band);
   const rPal = reportPalette(band);
   const p0 = s.persons[0];
@@ -187,6 +196,8 @@ export function buildReportModel(s: ReportInput): ReportModel {
     preparedBy: or(s.signoff.preparedBy),
     approvedBy: or(s.signoff.approvedBy),
     incomplete,
+    escalated: escalation.escalate,
+    escalationReasons: escalation.reasons,
     disclaimer: REPORT_DISCLAIMER,
   };
 }

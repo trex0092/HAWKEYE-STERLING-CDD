@@ -154,7 +154,11 @@ export function Report() {
             style={{ border: `1px solid ${m.bandBorder}`, background: m.bandBg }}
           >
             <div>
-              <div className="hk-r-eyebrow">INHERENT RISK · JURISDICTION-BASED</div>
+              <div className="hk-r-eyebrow">
+                {m.escalated
+                  ? 'ESCALATED RISK · SCREENING HIT'
+                  : 'INHERENT RISK · JURISDICTION-BASED'}
+              </div>
               <div
                 style={{
                   fontFamily: 'var(--font-display)',
@@ -183,6 +187,14 @@ export function Report() {
               </div>
             </div>
           </div>
+
+          {m.escalated && (
+            <div className="hk-r-escalation" role="note">
+              <b>Risk escalated to Enhanced Due Diligence (EDD).</b>{' '}
+              {m.escalationReasons.join(' · ')}. Applied regardless of the jurisdiction&apos;s
+              inherent risk.
+            </div>
+          )}
 
           <div className="hk-r-body">
             <RSectionHead index="01" title="ASSESSMENT ADMINISTRATION" />
@@ -348,7 +360,8 @@ export function Report() {
               }}
             >
               Record retention: retain this assessment and supporting documents in line with the
-              firm&apos;s records-retention policy and applicable regulatory requirements.
+              firm&apos;s records-retention policy (a maximum of 10 years) and applicable regulatory
+              requirements.
             </div>
 
             <RSectionHead index="09" title="REVIEW & VERSION CONTROL" />

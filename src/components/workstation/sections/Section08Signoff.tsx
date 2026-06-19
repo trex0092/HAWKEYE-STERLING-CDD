@@ -43,7 +43,8 @@ export function Section08Signoff() {
         }}
       >
         Record retention: retain this assessment and supporting documents in line with the
-        firm&apos;s records-retention policy and applicable regulatory requirements.
+        firm&apos;s records-retention policy (a maximum of 10 years) and applicable regulatory
+        requirements.
       </div>
     </section>
   );

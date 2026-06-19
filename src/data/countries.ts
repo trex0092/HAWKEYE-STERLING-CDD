@@ -6,10 +6,18 @@
  * the design source, Hawkeye Sterling.dc.html). It is NOT an authoritative or
  * up-to-date sanctions / high-risk-jurisdiction list and is not sourced from any
  * specific regulator or standard-setter. Each firm must review and maintain it
- * against current official sources (e.g. its own risk assessment and the relevant
- * regulators'/standard-setters' published lists) before any real use. Treat the
- * band as the jurisdiction's *inherent* risk input only — it does not, by itself,
- * determine the customer's overall risk rating or the required level of diligence.
+ * against current official sources before any real use. Firm-selected reference
+ * sources to validate/maintain this map against:
+ *   - FATF high-risk & monitored jurisdictions (official primary source):
+ *     https://www.fatf-gafi.org/en/countries.html
+ *   - EU list of high-risk third countries (official — consult the current
+ *     consolidated EU Delegated Regulation list).
+ *   - EU CAHRA — Conflict-Affected and High-Risk Areas (official indicative list).
+ *   - KnowYourCountry country reports (third-party aggregator, not official):
+ *     https://www.knowyourcountry.com/country-reports/
+ * The current band assignments have NOT yet been reconciled against these sources.
+ * Treat the band as the jurisdiction's *inherent* risk input only — it does not, by
+ * itself, determine the customer's overall risk rating or the required diligence.
  *
  * Any jurisdiction not present in RISK falls back to "low".
  */

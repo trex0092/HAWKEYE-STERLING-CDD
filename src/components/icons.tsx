@@ -24,4 +24,5 @@ export {
   Trash2 as RemovePerson,
   ShieldCheck as Diligence,
   ArrowLeft as Back,
+  TriangleAlert as Alert,
 } from 'lucide-react';

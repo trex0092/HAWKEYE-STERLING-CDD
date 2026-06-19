@@ -357,3 +357,50 @@
   font-size: 13px;
   color: var(--band-color);
 }
+
+/* Screening-escalation alert — confirmed sanctions/adverse/PEP hit raised the band. */
+.hk-escalation {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 93, 115, 0.45);
+  background: linear-gradient(180deg, rgba(255, 93, 115, 0.16), rgba(255, 93, 115, 0.06));
+  box-shadow:
+    0 0 22px rgba(255, 93, 115, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  animation: hk-escalation-in 0.28s ease both;
+}
+.hk-escalation-icon {
+  display: inline-flex;
+  flex: none;
+  margin-top: 1px;
+  color: #ff5d73;
+  filter: drop-shadow(0 0 6px rgba(255, 93, 115, 0.55));
+}
+.hk-escalation-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: #ff7587;
+}
+.hk-escalation-reason {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+@keyframes hk-escalation-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
