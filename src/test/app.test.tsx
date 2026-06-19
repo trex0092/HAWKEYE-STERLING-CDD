@@ -328,9 +328,8 @@ describe('asana integration (env-gated)', () => {
     expect(task.decision).toBe('Approved');
   });
 
-  it('returns not-configured when no webhook URL is set (drives the JSON fallback)', async () => {
-    vi.stubEnv('VITE_ASANA_WEBHOOK_URL', '');
-    const task = buildAsanaTask({
+  const sampleTask = () =>
+    buildAsanaTask({
       reference: 'RA-001',
       entity: 'Acme DMCC',
       bandShort: 'CDD',
@@ -338,8 +337,35 @@ describe('asana integration (env-gated)', () => {
       decision: 'Pending',
       assessedBy: '',
     });
-    const result = await sendToAsana(task);
+
+  it('maps a 503 from the backend to not-configured (drives the JSON fallback)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 503 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await sendToAsana(sampleTask());
     expect(result).toEqual({ ok: false, reason: 'not-configured' });
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/.netlify/functions/asana',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it('reports ok when the backend creates the task', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await sendToAsana(sampleTask());
+    expect(result).toEqual({ ok: true });
+    vi.unstubAllGlobals();
+  });
+
+  it('reports request-failed on a backend error', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 502 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await sendToAsana(sampleTask());
+    expect(result).toEqual({ ok: false, reason: 'request-failed', detail: 'HTTP 502' });
+    vi.unstubAllGlobals();
   });
 });
 
