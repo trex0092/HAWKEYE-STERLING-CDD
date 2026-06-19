@@ -16,6 +16,7 @@ import { formatCountdown } from '@/lib/format';
 import { buildReportModel } from '@/lib/report';
 import { getRegister, saveToRegister } from '@/lib/register';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
+import { buildNarrative } from '@/lib/narrative';
 
 beforeEach(() => {
   // Clean, locked session + empty storage/UI before each test.
@@ -292,7 +293,7 @@ describe('analyst override (UI)', () => {
 });
 
 describe('report view', () => {
-  it('renders the 2-page export from live state', () => {
+  it('renders the 3-page export (incl. narrative) from live state', () => {
     useAssessment.setState({ locked: false });
     render(
       <MemoryRouter initialEntries={['/report']}>
@@ -301,8 +302,11 @@ describe('report view', () => {
     );
 
     expect(screen.getAllByText('HAWKEYE STERLING').length).toBeGreaterThan(0);
-    expect(screen.getByText('PAGE 1 OF 2')).toBeInTheDocument();
-    expect(screen.getByText('PAGE 2 OF 2')).toBeInTheDocument();
+    expect(screen.getByText('PAGE 1 OF 3')).toBeInTheDocument();
+    expect(screen.getByText('PAGE 2 OF 3')).toBeInTheDocument();
+    expect(screen.getByText('PAGE 3 OF 3')).toBeInTheDocument();
+    expect(screen.getByText('COMPLIANCE NARRATIVE')).toBeInTheDocument();
+    expect(screen.getByText('1. Purpose & Scope')).toBeInTheDocument();
     // UK → low band: appears in the banner and the RBA summary.
     expect(screen.getAllByText('Low Risk').length).toBeGreaterThan(0);
   });
@@ -366,6 +370,62 @@ describe('asana integration (env-gated)', () => {
     const result = await sendToAsana(sampleTask());
     expect(result).toEqual({ ok: false, reason: 'request-failed', detail: 'HTTP 502' });
     vi.unstubAllGlobals();
+  });
+});
+
+describe('compliance narrative', () => {
+  const input = () => {
+    const s = useAssessment.getState();
+    return {
+      admin: s.admin,
+      entity: s.entity,
+      sanctions: s.sanctions,
+      adverse: s.adverse,
+      pf: s.pf,
+      persons: s.persons,
+      rba: s.rba,
+      signoff: s.signoff,
+      versions: s.versions,
+      overrideBand: s.overrideBand,
+    };
+  };
+
+  it('drafts ten paragraphs and merges entity + assessor', () => {
+    useAssessment.getState().setEntity({ legalName: 'Acme DMCC' });
+    useAssessment.getState().setAdmin({ assessedBy: 'L. Fernanda' });
+    const n = buildNarrative(input());
+    expect(n).toHaveLength(10);
+    expect(n[0].heading).toBe('1. Purpose & Scope');
+    expect(n[0].body).toContain('Acme DMCC');
+    expect(n[0].body).toContain('L. Fernanda');
+  });
+
+  it('reads as "not yet recorded" when screening has no date (no fabricated clear screen)', () => {
+    const n = buildNarrative(input());
+    expect(n[2].body).toMatch(/not yet been recorded/);
+  });
+
+  it('injects escalation wording on a positive sanctions match', () => {
+    useAssessment.getState().setSanction(0, { result: 'Positive', date: '01/01/2026' });
+    const n = buildNarrative(input());
+    expect(n[2].body).toMatch(/matches were identified/);
+    expect(n[6].body).toMatch(/Enhanced Due Diligence/);
+  });
+
+  it('embeds the narrative in the Asana task notes', () => {
+    useAssessment.getState().setEntity({ legalName: 'Acme DMCC' });
+    const task = buildAsanaTask({
+      reference: 'RA-001',
+      entity: 'Acme DMCC',
+      bandShort: 'CDD',
+      bandLabel: 'CDD — Customer Due Diligence',
+      decision: 'Pending',
+      assessedBy: '',
+      narrative: buildNarrative(input()),
+    });
+    expect(task.name).toContain('Acme DMCC');
+    expect(task.notes).toContain('COMPLIANCE NARRATIVE');
+    expect(task.notes).toContain('1. Purpose & Scope');
   });
 });
 

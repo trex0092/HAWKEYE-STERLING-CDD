@@ -94,7 +94,7 @@ the session lock always re-engages on reload. Right-rail actions:
 | `COMPLETE ASSESSMENT` | Appends an auto-numbered, timestamped entry to the version log (§09). |
 | `REGISTER`            | Save/load assessments to a local register (modal).                    |
 | `ACTIVITY LOG`        | Shows the recorded activity timeline (modal).                         |
-| `SEND TO ASANA`       | Creates an Asana task via the bundled function; exports JSON if unconfigured. |
+| `SEND TO ASANA`       | Creates an Asana task (named for the entity, body = auto-drafted narrative) via the bundled function; exports JSON if unconfigured. |
 | `RESET`               | Restores clean screening/risk defaults.                               |
 | `RE-ASSESS`           | Re-screens all sanctions lists (stamps today).                        |
 

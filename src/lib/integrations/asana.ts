@@ -31,18 +31,24 @@ export function buildAsanaTask(input: {
   bandLabel: string;
   decision: string;
   assessedBy: string;
+  /** Auto-drafted compliance narrative paragraphs, appended to the task body. */
+  narrative?: { heading: string; body: string }[];
 }): AsanaTask {
   const name = `CDD ${input.reference} — ${input.entity || 'Unnamed entity'} [${input.bandShort}]`;
-  const notes = [
+  const summary = [
     `Reference: ${input.reference}`,
     `Entity: ${input.entity || '—'}`,
     `Required diligence: ${input.bandLabel}`,
     `Relationship decision: ${input.decision}`,
     `Assessed by: ${input.assessedBy || '—'}`,
   ].join('\n');
+  const narrative = input.narrative?.length
+    ? '\n\n— COMPLIANCE NARRATIVE —\n\n' +
+      input.narrative.map((p) => `${p.heading}\n${p.body}`).join('\n\n')
+    : '';
   return {
     name,
-    notes,
+    notes: summary + narrative,
     reference: input.reference,
     band: input.bandShort,
     decision: input.decision,
