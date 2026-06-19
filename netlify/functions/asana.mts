@@ -47,8 +47,9 @@ export default async (req: Request): Promise<Response> => {
 
   const auth = { Authorization: `Bearer ${token}` };
 
-  // Resolve a target: a project (preferred) or a workspace.
-  const projectGid = process.env.ASANA_PROJECT_GID;
+  // Resolve a target: a project (preferred) or a workspace. Defaults to the
+  // "Compliance Assessments" project so the action works with just ASANA_TOKEN.
+  const projectGid = process.env.ASANA_PROJECT_GID ?? '1213914392047129';
   let workspaceGid = process.env.ASANA_WORKSPACE_GID;
 
   if (!projectGid && !workspaceGid) {
