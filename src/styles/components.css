@@ -4,6 +4,19 @@
    (focus ring, hover tint) live here so they survive inline overrides.
    ========================================================================== */
 
+/* ---- Accessibility: visually-hidden (screen-reader only) ------------------ */
+.hk-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---- Panel ---------------------------------------------------------------- */
 .hk-panel {
   background: var(--surface-panel);
@@ -26,6 +39,7 @@
   color: var(--magenta-bright);
 }
 .hk-section-title {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 14px;
@@ -215,6 +229,11 @@
   background: var(--cell-bg-hover);
 }
 .hk-action-cell svg {
+  flex: none;
+}
+.hk-action-cell-icon {
+  display: inline-flex;
+  align-items: center;
   flex: none;
 }
 

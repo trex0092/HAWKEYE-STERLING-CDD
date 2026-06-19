@@ -135,10 +135,12 @@ function blankPerson(id: number): Person {
 }
 
 function freshAdmin(): AdminInfo {
+  // Start blank — a reference number and review date must be assigned by the firm,
+  // not pre-seeded with sample values that would otherwise flow into the export.
   return {
-    referenceNumber: 'RA-20260617-017',
-    assessmentDate: '17/06/2026',
-    nextReviewDate: '17/06/2027',
+    referenceNumber: '',
+    assessmentDate: todayStr(),
+    nextReviewDate: '',
     assessedBy: '',
     role: '',
   };

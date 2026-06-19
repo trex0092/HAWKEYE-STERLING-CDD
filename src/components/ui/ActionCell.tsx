@@ -21,7 +21,9 @@ export function ActionCell({ icon, label, color, bg, bgHover, border, onClick }:
 
   return (
     <button type="button" className="hk-action-cell" style={style} onClick={onClick}>
-      {icon}
+      <span aria-hidden="true" className="hk-action-cell-icon">
+        {icon}
+      </span>
       {label}
     </button>
   );

@@ -13,8 +13,13 @@ interface SectionHeaderProps {
 export function SectionHeader({ index, title, shortHairline, action }: SectionHeaderProps) {
   return (
     <div className="hk-section-head">
-      <span className="hk-section-index">{index}</span>
-      <span className="hk-section-title">{title}</span>
+      <span className="hk-section-index" aria-hidden="true">
+        {index}
+      </span>
+      <h2 className="hk-section-title">
+        <span className="hk-sr-only">Section {index}: </span>
+        {title}
+      </h2>
       <div className={`hk-hairline${shortHairline ? ' hk-hairline--short' : ''}`} />
       {action}
     </div>

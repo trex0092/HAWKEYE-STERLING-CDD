@@ -16,12 +16,15 @@ export interface RegisterRecord {
 }
 
 export function getRegister(): RegisterRecord[] {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) return [];
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
     const parsed = JSON.parse(raw) as RegisterRecord[];
     return Array.isArray(parsed) ? parsed : [];
-  } catch {
+  } catch (err) {
+    // Surface corruption rather than silently presenting an empty register (which
+    // could look like data loss). The raw value is left intact for recovery.
+    console.warn('[register] stored register could not be parsed; leaving it untouched.', err);
     return [];
   }
 }
