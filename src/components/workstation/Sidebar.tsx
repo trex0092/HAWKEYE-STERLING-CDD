@@ -8,7 +8,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useAssessment } from '@/store/useAssessment';
 import { useUI } from '@/store/useUI';
 import { useToast } from '@/store/useToast';
-import { effectiveBand, paletteForBand, type RiskBand } from '@/lib/risk';
+import { effectiveBand, paletteForBand, screeningEscalation, type RiskBand } from '@/lib/risk';
 import { formatClock } from '@/lib/format';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
 import { downloadJson } from '@/lib/download';
@@ -24,6 +24,7 @@ import {
   ReAssess,
   Diligence,
   Override,
+  Alert,
 } from '@/components/icons';
 
 interface CellConfig {
@@ -48,6 +49,9 @@ export function Sidebar() {
   const navigate = useNavigate();
   const jurisdiction = useAssessment((s) => s.entity.jurisdiction);
   const overrideBand = useAssessment((s) => s.overrideBand);
+  const sanctions = useAssessment((s) => s.sanctions);
+  const adverse = useAssessment((s) => s.adverse);
+  const persons = useAssessment((s) => s.persons);
   const reference = useAssessment((s) => s.admin.referenceNumber);
   const entityName = useAssessment((s) => s.entity.legalName);
   const assessedBy = useAssessment((s) => s.admin.assessedBy);
@@ -67,7 +71,8 @@ export function Sidebar() {
 
   const showToast = useToast((s) => s.show);
 
-  const band = effectiveBand(jurisdiction, overrideBand);
+  const escalation = screeningEscalation({ sanctions, adverse, persons });
+  const band = effectiveBand(jurisdiction, overrideBand, escalation);
   const pal = paletteForBand(band);
   const ICON = 15;
 
@@ -233,6 +238,20 @@ export function Sidebar() {
           <Diligence size={15} strokeWidth={2.2} />
           {pal.label}
         </div>
+
+        {escalation.escalate && (
+          <div className="hk-escalation" role="alert">
+            <span className="hk-escalation-icon" aria-hidden="true">
+              <Alert size={16} strokeWidth={2.2} />
+            </span>
+            <div className="hk-escalation-text">
+              <div className="hk-escalation-title">RISK RAISED TO EDD</div>
+              <div className="hk-escalation-reason">
+                {escalation.reasons.join(' · ')} — Enhanced Due Diligence required.
+              </div>
+            </div>
+          </div>
+        )}
 
         <button
           type="button"

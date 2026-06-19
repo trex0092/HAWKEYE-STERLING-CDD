@@ -3,7 +3,15 @@ import { MemoryRouter } from 'react-router-dom';
 import App from '@/App';
 import { useAssessment } from '@/store/useAssessment';
 import { useUI } from '@/store/useUI';
-import { deriveBand, appPalette, statusColor, levelColor, riskColor } from '@/lib/risk';
+import {
+  deriveBand,
+  appPalette,
+  statusColor,
+  levelColor,
+  riskColor,
+  screeningEscalation,
+  effectiveBand,
+} from '@/lib/risk';
 import { formatCountdown } from '@/lib/format';
 import { buildReportModel } from '@/lib/report';
 import { getRegister, saveToRegister } from '@/lib/register';
@@ -98,6 +106,51 @@ describe('report model', () => {
     expect(m.decision).toBe('Rejected');
     expect(m.decisionColor).toBe('#c0392b');
     expect(m.bannerDecisionColor).toBe('#c0392b');
+  });
+});
+
+describe('screening escalation', () => {
+  it('flags confirmed sanctions / adverse / PEP hits (not "Pending")', () => {
+    expect(
+      screeningEscalation({ sanctions: [{ result: 'Pending' }], adverse: [], persons: [] })
+        .escalate,
+    ).toBe(false);
+    const hit = screeningEscalation({
+      sanctions: [{ result: 'Positive' }],
+      adverse: [{ finding: 'Positive' }],
+      persons: [{ pepStatus: 'PEP' }],
+    });
+    expect(hit.escalate).toBe(true);
+    expect(hit.reasons).toHaveLength(3);
+  });
+
+  it('forces the effective band up to EDD and never lower', () => {
+    const esc = { escalate: true, reasons: ['Positive sanctions match'] };
+    expect(effectiveBand('United Kingdom', null, esc)).toBe('high'); // UK low → high
+    expect(effectiveBand('United Kingdom', 'low', esc)).toBe('high'); // a low override can't hold
+    expect(effectiveBand('United Kingdom', null, { escalate: false, reasons: [] })).toBe('low');
+  });
+
+  it('escalates the report band and exposes the reason', () => {
+    useAssessment.getState().setJurisdiction('United Kingdom'); // inherent low
+    useAssessment.getState().setSanction(0, { result: 'Positive' });
+    const m = buildReportModel(useAssessment.getState());
+    expect(m.band).toBe('high');
+    expect(m.escalated).toBe(true);
+    expect(m.escalationReasons).toContain('Positive sanctions match');
+    expect(m.bannerRiskLabel).toBe('High Risk');
+  });
+
+  it('raises the EDD alert and pill in the workstation on a hit', async () => {
+    useAssessment.setState({ locked: false });
+    useAssessment.getState().setSanction(0, { result: 'Positive' });
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('RISK RAISED TO EDD')).toBeInTheDocument();
+    expect(screen.getByText('EDD — Enhanced Due Diligence')).toBeInTheDocument();
   });
 });
 
