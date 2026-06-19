@@ -9,7 +9,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Serverless functions (e.g. the "Send to Asana" bridge).
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
 # Single-page app: serve index.html for client-side routes.
+# Function routes (/.netlify/functions/*) are matched before this catch-all.
 [[redirects]]
   from = "/*"
   to = "/index.html"
