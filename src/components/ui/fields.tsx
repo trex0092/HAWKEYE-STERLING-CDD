@@ -1,5 +1,5 @@
 /** Labeled text input + labeled plain select (the form's two basic fields). */
-import type { CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 
 interface LabeledTextProps {
   label: string;
@@ -24,10 +24,14 @@ export function LabeledText({
   type = 'text',
   inputStyle,
 }: LabeledTextProps) {
+  const id = useId();
   return (
     <div>
-      <label className={labelSm ? 'hk-label hk-label--sm' : 'hk-label'}>{label}</label>
+      <label htmlFor={id} className={labelSm ? 'hk-label hk-label--sm' : 'hk-label'}>
+        {label}
+      </label>
       <input
+        id={id}
         type={type}
         className={mono ? 'hk-input hk-input--mono' : 'hk-input'}
         value={value}
@@ -86,10 +90,14 @@ export function LabeledSelect({
   labelSm,
   inputStyle,
 }: LabeledSelectProps) {
+  const id = useId();
   return (
     <div>
-      <label className={labelSm ? 'hk-label hk-label--sm' : 'hk-label'}>{label}</label>
+      <label htmlFor={id} className={labelSm ? 'hk-label hk-label--sm' : 'hk-label'}>
+        {label}
+      </label>
       <select
+        id={id}
         className="hk-select"
         value={value}
         onChange={(e) => onChange(e.target.value)}

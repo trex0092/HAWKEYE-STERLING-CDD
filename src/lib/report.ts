@@ -1,10 +1,17 @@
 /**
  * Builds the CDD Assessment Report view-model from live assessment state.
  *
- * The banner + required diligence are band-driven (jurisdiction → band, per the
- * spec). Section 07 mirrors the analyst's RBA selects. Descriptive fields fall
- * back to the design's sample values when blank so the export always reads as a
- * complete document.
+ * The banner shows the jurisdiction-derived *inherent* risk band (jurisdiction →
+ * band; see lib/risk.ts) — it is NOT affected by the screening sections. Section
+ * 07 mirrors the analyst's own risk-based assessment (RBA) selects, which is a
+ * separate, analyst-driven determination.
+ *
+ * Blank fields render as a neutral placeholder ("—") rather than invented sample
+ * data: a compliance export must never present fabricated entity/person details
+ * or a default "Approved" decision. When required fields are missing the model
+ * flags `incomplete` so the report can be marked as a draft, and it always
+ * carries a `disclaimer` clarifying the report records analyst inputs and is not
+ * a legal determination.
  */
 import type { AssessmentState } from '@/store/useAssessment';
 import { SANCTIONS_LISTS, ADVERSE_CATEGORIES, PF_FACTORS } from '@/data/labels';
@@ -31,7 +38,18 @@ function lightDecision(v: string): string {
   return v === 'Rejected' ? '#c0392b' : v === 'Pending' ? '#b8860b' : '#1f9d57';
 }
 
-const or = (value: string, fallback: string) => (value.trim() ? value.trim() : fallback);
+/** Neutral placeholder for any blank field in the export (never invented data). */
+export const BLANK = '—';
+
+/** Standing disclaimer printed on the report — the tool supports, never replaces, judgment. */
+export const REPORT_DISCLAIMER =
+  "This report records the analyst's assessment inputs to support compliance review. " +
+  'It is not a legal determination of compliance and does not replace the judgment of the ' +
+  'named compliance officer(s). Risk bands, jurisdiction risk, retention periods and ' +
+  'regulatory references reflect configurable firm policy and must be verified against ' +
+  'current official sources.';
+
+const or = (value: string, fallback: string = BLANK) => (value.trim() ? value.trim() : fallback);
 
 export interface KeyValue {
   k: string;
@@ -61,33 +79,12 @@ export interface ReportModel {
   decision: string;
   decisionColor: string;
   versions: { ver: string; date: string; by: string; type: string; summary: string }[];
+  preparedBy: string;
+  approvedBy: string;
+  /** True when a required field (ref, legal name, assessed-by, first person, sign-off) is blank. */
+  incomplete: boolean;
+  disclaimer: string;
 }
-
-const SAMPLE_DATE = '17/06/2026';
-
-const SAMPLE_VERSIONS = [
-  {
-    ver: '01',
-    date: '29/09/2022',
-    by: 'Compliance Department',
-    type: 'Initial',
-    summary: 'Account opening',
-  },
-  {
-    ver: '02',
-    date: '10/01/2025',
-    by: 'Compliance Department',
-    type: 'Periodic',
-    summary: 'KYC refresh',
-  },
-  {
-    ver: '03',
-    date: '17/06/2026',
-    by: 'Compliance Department',
-    type: 'Periodic',
-    summary: 'Periodic KYC review',
-  },
-];
 
 /** Just the assessment data the report reads — lets callers subscribe narrowly. */
 export type ReportInput = Pick<
@@ -99,6 +96,7 @@ export type ReportInput = Pick<
   | 'pf'
   | 'persons'
   | 'rba'
+  | 'signoff'
   | 'versions'
   | 'overrideBand'
 >;
@@ -109,60 +107,72 @@ export function buildReportModel(s: ReportInput): ReportModel {
   const rPal = reportPalette(band);
   const p0 = s.persons[0];
 
+  // A blank decision renders as "Pending" (amber) — never a default "Approved".
+  const decision = or(s.rba.decision, 'Pending');
+
+  const required = [
+    s.admin.referenceNumber,
+    s.entity.legalName,
+    s.admin.assessedBy,
+    p0?.name ?? '',
+    s.signoff.preparedBy,
+    s.signoff.approvedBy,
+  ];
+  const incomplete = required.some((v) => !v.trim());
+
   return {
     band,
     bandColor: rPal.color,
     bandBorder: rPal.border,
     bandBg: rPal.bg,
-    ref: or(s.admin.referenceNumber, 'RA-20260617-017'),
-    date: or(s.admin.assessmentDate, SAMPLE_DATE),
+    ref: or(s.admin.referenceNumber),
+    date: or(s.admin.assessmentDate),
     bannerRiskLabel: riskLabelForBand(band),
     cddLabel: pal.label,
-    bannerDecision: or(s.rba.decision, 'Approved'),
-    bannerDecisionColor: lightDecision(or(s.rba.decision, 'Approved')),
+    bannerDecision: decision,
+    bannerDecisionColor: lightDecision(decision),
 
     admin: [
-      { k: 'REFERENCE NUMBER', v: or(s.admin.referenceNumber, 'RA-20260617-017') },
-      { k: 'ASSESSMENT DATE', v: or(s.admin.assessmentDate, SAMPLE_DATE) },
-      { k: 'NEXT REVIEW DATE', v: or(s.admin.nextReviewDate, '17/06/2027') },
-      { k: 'ASSESSED BY', v: or(s.admin.assessedBy, 'Compliance Department') },
-      { k: 'ROLE / DEPARTMENT', v: or(s.admin.role, 'Compliance Officer') },
-      { k: 'REVIEW TYPE', v: 'Periodic' },
+      { k: 'REFERENCE NUMBER', v: or(s.admin.referenceNumber) },
+      { k: 'ASSESSMENT DATE', v: or(s.admin.assessmentDate) },
+      { k: 'NEXT REVIEW DATE', v: or(s.admin.nextReviewDate) },
+      { k: 'ASSESSED BY', v: or(s.admin.assessedBy) },
+      { k: 'ROLE / DEPARTMENT', v: or(s.admin.role) },
+      { k: 'REVIEW TYPE', v: s.versions.length === 0 ? 'Initial' : 'Periodic' },
     ],
     entity: [
-      { k: 'LEGAL ENTITY NAME', v: or(s.entity.legalName, 'Meridian Bullion Trading DMCC') },
-      { k: 'JURISDICTION', v: or(s.entity.jurisdiction, 'United Arab Emirates') },
-      { k: 'TRADING NAME', v: or(s.entity.tradingName, 'Meridian Bullion') },
-      { k: 'REGISTRATION / LICENCE NO.', v: or(s.entity.registrationNo, 'DMCC-184220') },
-      {
-        k: 'REGISTERED ADDRESS',
-        v: or(s.entity.registeredAddress, 'Unit 3204, JBC 2, JLT, Dubai, UAE'),
-      },
-      { k: 'WEBSITE / EMAIL', v: or(s.entity.websiteEmail, 'compliance@meridianbullion.ae') },
+      { k: 'LEGAL ENTITY NAME', v: or(s.entity.legalName) },
+      { k: 'JURISDICTION', v: or(s.entity.jurisdiction) },
+      { k: 'TRADING NAME', v: or(s.entity.tradingName) },
+      { k: 'REGISTRATION / LICENCE NO.', v: or(s.entity.registrationNo) },
+      { k: 'REGISTERED ADDRESS', v: or(s.entity.registeredAddress) },
+      { k: 'WEBSITE / EMAIL', v: or(s.entity.websiteEmail) },
     ],
     sanctions: SANCTIONS_LISTS.map((list, i) => {
       const row = s.sanctions[i];
-      const result = row?.result ?? 'Negative';
+      // A missing row reads as "Pending" (not yet screened) — never "Negative",
+      // which would falsely imply a completed, clear screen.
+      const result = row?.result ?? 'Pending';
       return {
         list,
         result,
         resultColor: lightResult(result),
-        date: or(row?.date ?? '', SAMPLE_DATE),
+        date: or(row?.date ?? ''),
       };
     }),
     adverse: ADVERSE_CATEGORIES.map((cat, i) => {
-      const finding = s.adverse[i]?.finding ?? 'Negative';
+      const finding = s.adverse[i]?.finding ?? 'Pending';
       return { cat, find: finding, findColor: lightResult(finding) };
     }),
     person: [
-      { k: 'DESIGNATION', v: or(p0?.designation ?? '', 'Shareholder & Director') },
-      { k: 'NAME', v: or(p0?.name ?? '', 'Layla Haddad') },
-      { k: 'SHARES %', v: or(p0?.shares ?? '', '100') },
-      { k: 'TYPE', v: or(p0?.type ?? '', 'Individual') },
-      { k: 'NATIONALITY', v: or(p0?.nationality ?? '', 'Lebanon') },
-      { k: 'DATE OF BIRTH', v: or(p0?.dob ?? '', '14/03/1981') },
-      { k: 'PASSPORT EXPIRY', v: or(p0?.passportExpiry ?? '', '22/08/2031') },
-      { k: 'PROOF OF ADDRESS', v: or(p0?.proofOfAddress ?? '', 'Provided') },
+      { k: 'DESIGNATION', v: or(p0?.designation ?? '') },
+      { k: 'NAME', v: or(p0?.name ?? '') },
+      { k: 'SHARES %', v: or(p0?.shares ?? '') },
+      { k: 'TYPE', v: or(p0?.type ?? '') },
+      { k: 'NATIONALITY', v: or(p0?.nationality ?? '') },
+      { k: 'DATE OF BIRTH', v: or(p0?.dob ?? '') },
+      { k: 'PASSPORT EXPIRY', v: or(p0?.passportExpiry ?? '') },
+      { k: 'PROOF OF ADDRESS', v: or(p0?.proofOfAddress ?? '') },
     ],
     pf: PF_FACTORS.map((factor, i) => {
       const level = s.pf[i]?.level ?? 'Low';
@@ -171,8 +181,12 @@ export function buildReportModel(s: ReportInput): ReportModel {
     rbaOverall: s.rba.classification,
     rbaOverallColor: lightRisk(s.rba.classification),
     cddLevelName: s.rba.cddLevel,
-    decision: or(s.rba.decision, 'Approved'),
-    decisionColor: lightDecision(or(s.rba.decision, 'Approved')),
-    versions: s.versions.length > 0 ? s.versions : SAMPLE_VERSIONS,
+    decision,
+    decisionColor: lightDecision(decision),
+    versions: s.versions,
+    preparedBy: or(s.signoff.preparedBy),
+    approvedBy: or(s.signoff.approvedBy),
+    incomplete,
+    disclaimer: REPORT_DISCLAIMER,
   };
 }

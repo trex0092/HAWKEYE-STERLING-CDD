@@ -31,8 +31,12 @@ export function TopBar() {
           <span className="hk-live-dot" aria-hidden />
           <span className="hk-systems-label">ALL SYSTEMS LIVE</span>
         </div>
-        <span className="hk-countdown-pill">
-          <Countdown size={13} strokeWidth={2} />
+        <span
+          className="hk-countdown-pill"
+          role="timer"
+          aria-label={`Session time remaining: ${formatCountdown(remaining)}`}
+        >
+          <Countdown size={13} strokeWidth={2} aria-hidden="true" />
           {formatCountdown(remaining)}
         </span>
         <button type="button" className="hk-lock-btn" onClick={lock}>

@@ -1,7 +1,13 @@
 /**
  * Risk-band derivation and the band-driven palettes.
- * The jurisdiction selected in section 02 derives a band, which recolours the
- * avatar, rings/glow, the Required-Diligence pill, and the report banner.
+ *
+ * The band is derived from the section-02 jurisdiction ONLY (an analyst override
+ * wins when set) — it represents the jurisdiction's *inherent* risk and recolours
+ * the avatar, rings/glow, the Required-Diligence pill and the report banner. The
+ * screening sections (sanctions / adverse media / PF) and the Section-07 RBA do
+ * NOT feed this band; the RBA is a separate, analyst-entered determination. See
+ * docs/COMPLIANCE-NOTES.md. The jurisdiction → band map is configurable firm
+ * policy (src/data/countries.ts), not an authoritative regulatory list.
  */
 import { RISK, type RiskBand } from '@/data/countries';
 

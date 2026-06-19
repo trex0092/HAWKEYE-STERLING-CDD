@@ -42,8 +42,8 @@ export function Section08Signoff() {
           lineHeight: 1.6,
         }}
       >
-        Record retention: retain this assessment and supporting documents for a minimum of{' '}
-        <span style={{ color: '#9aa3b8' }}>10 years</span>.
+        Record retention: retain this assessment and supporting documents in line with the
+        firm&apos;s records-retention policy and applicable regulatory requirements.
       </div>
     </section>
   );

@@ -10,9 +10,17 @@
 
 A compliance workstation for AML/CFT customer due diligence in the DPMS (dealers
 in precious metals & stones) sector. An analyst opens an entity assessment, fills
-nine sections, and the app derives a **risk band** (CDD / SDD / EDD) from the
-selected jurisdiction. A session-lock gate guards entry, and the assessment can
-be exported as a 2-page A4 PDF report.
+nine sections, and the app assigns a **risk band** (CDD / SDD / EDD) from a
+configurable jurisdiction → band lookup — this is the jurisdiction's _inherent_
+risk only, distinct from the analyst's own Section 07 risk-based assessment, and
+an analyst can override it. A session-lock gate guards entry, and the assessment
+can be exported as a 2-page A4 PDF report.
+
+> This tool **supports** a human compliance review; it does not perform live
+> screening and does not replace legal or compliance judgement. The jurisdiction
+> risk map, retention period and regulatory references are **configurable firm
+> policy** that must be verified against current official sources — see
+> [`docs/COMPLIANCE-NOTES.md`](docs/COMPLIANCE-NOTES.md).
 
 Built to the design handoff in [`docs/design-handoff/`](docs/design-handoff/)
 (README + two `.dc.html` references). The design files were references only — the
@@ -50,11 +58,17 @@ npm run format       # prettier --write
 
 ### Unlocking the session
 
-The lock gate uses real authentication (`src/lib/auth.ts`). The default
-passphrase is **`sterling`** — override it by copying `.env.example` to
-`.env.local` and setting `VITE_SESSION_PASSPHRASE`. Tapping the robot medallion
-is the designed "delight" unlock. `authenticate()` is the single seam to swap for
-a backend call.
+The lock gate is a **client-side passphrase gate** (`src/lib/auth.ts`), intended as
+a prototype session lock — it is **not** backend-verified authentication, and the
+passphrase is bundled into the client build. The default development passphrase is
+**`sterling`**; override it by copying `.env.example` to `.env.local` and setting
+`VITE_SESSION_PASSPHRASE`. Tapping the robot medallion is the designed "delight"
+unlock.
+
+> ⚠️ **Before any non-demo deployment:** point the `authenticate()` seam at a real
+> backend (set `VITE_AUTH_ENDPOINT`) so credentials are verified server-side, and do
+> not rely on the default passphrase. As shipped, the lock is not an access-control
+> guarantee.
 
 ## Screens
 
@@ -83,7 +97,6 @@ the session lock always re-engages on reload. Right-rail actions:
 | `SEND TO ASANA`       | POSTs to `VITE_ASANA_WEBHOOK_URL`; exports JSON if unconfigured.      |
 | `RESET`               | Restores clean screening/risk defaults.                               |
 | `RE-ASSESS`           | Re-screens all sanctions lists (stamps today).                        |
-| `RISK DATA`           | Shows the band/score mapping and colour legend (modal).               |
 
 The **▶ Analyst Override** control under the diligence pill lets an analyst pin
 the band (CDD/SDD/EDD) over the jurisdiction-derived value; it drives the avatar,

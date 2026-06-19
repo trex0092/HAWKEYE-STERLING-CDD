@@ -57,19 +57,37 @@ describe('formatting', () => {
 });
 
 describe('report model', () => {
-  it('is band-driven and falls back to sample descriptive values', () => {
+  it('is band-driven and shows placeholders (never invented data) for blanks', () => {
     const low = buildReportModel(useAssessment.getState());
     expect(low.band).toBe('low');
     expect(low.bannerRiskLabel).toBe('Low Risk');
     expect(low.sanctions).toHaveLength(6);
     expect(low.adverse).toHaveLength(7);
-    expect(low.versions).toHaveLength(3); // sample fallback when none logged
-    expect(low.entity[0].v).toBe('Meridian Bullion Trading DMCC'); // legalName blank → fallback
+    // No fabricated history, entity, person, or "Approved" decision for a blank form.
+    expect(low.versions).toHaveLength(0);
+    expect(low.entity[0].v).toBe('—'); // legalName blank → neutral placeholder
+    expect(low.person[1].v).toBe('—'); // person NAME blank → neutral placeholder
+    expect(low.incomplete).toBe(true);
+    expect(low.decision).toBe('Pending');
+    expect(low.decision).not.toBe('Approved');
+    expect(low.disclaimer).toMatch(/not a legal determination/i);
 
     useAssessment.getState().setJurisdiction('United Arab Emirates');
     const med = buildReportModel(useAssessment.getState());
     expect(med.band).toBe('med');
     expect(med.bandColor).toBe('#b8860b');
+  });
+
+  it('clears the incomplete flag once required fields are filled', () => {
+    const s = useAssessment.getState();
+    s.setAdmin({ referenceNumber: 'RA-2026-001', assessedBy: 'A. Analyst' });
+    s.setEntity({ legalName: 'Acme DMCC' });
+    s.setPerson(useAssessment.getState().persons[0].id, { name: 'Real Person' });
+    s.setSignoff({ preparedBy: 'Prep Arer', approvedBy: 'App Rover' });
+    const m = buildReportModel(useAssessment.getState());
+    expect(m.incomplete).toBe(false);
+    expect(m.entity[0].v).toBe('Acme DMCC');
+    expect(m.ref).toBe('RA-2026-001');
   });
 
   it('colours the decision by the decision value, not the risk band', () => {
@@ -83,7 +101,7 @@ describe('report model', () => {
   });
 });
 
-describe('lock gate (real auth)', () => {
+describe('lock gate (session passphrase)', () => {
   it('rejects a wrong passphrase and unlocks with the correct one', async () => {
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -297,9 +315,10 @@ describe('report model hardening', () => {
     expect(model.sanctions).toHaveLength(6);
     expect(model.adverse).toHaveLength(7);
     expect(model.pf).toHaveLength(6);
-    // Missing rows fall back to fresh defaults instead of throwing.
-    expect(model.sanctions[0].result).toBe('Negative');
-    expect(model.adverse[0].find).toBe('Negative');
+    // A missing screening row reads as "Pending" (not yet screened) — never
+    // "Negative", which would falsely imply a completed, clear screen.
+    expect(model.sanctions[0].result).toBe('Pending');
+    expect(model.adverse[0].find).toBe('Pending');
     expect(model.pf[0].level).toBe('Low');
   });
 });
@@ -326,5 +345,46 @@ describe('reset integrity', () => {
     expect(s.signoff.preparedBy).toBe('Alice Approver');
     // The reset is recorded in the activity log.
     expect(s.activity[0].message).toMatch(/reset/i);
+  });
+});
+
+describe('accessibility', () => {
+  function renderWorkstation() {
+    useAssessment.setState({ locked: false });
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    );
+  }
+
+  it('programmatically links form labels to their controls', () => {
+    renderWorkstation();
+    const legalName = screen.getByLabelText('LEGAL ENTITY NAME');
+    expect(legalName.tagName).toBe('INPUT');
+    fireEvent.change(legalName, { target: { value: 'Acme DMCC' } });
+    expect(useAssessment.getState().entity.legalName).toBe('Acme DMCC');
+
+    expect(screen.getByLabelText('JURISDICTION & INCORPORATION').tagName).toBe('SELECT');
+  });
+
+  it('renders section titles as level-2 headings beneath the page h1', () => {
+    renderWorkstation();
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: /ENTITY IDENTIFICATION/ }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 2 }).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('labels the session countdown as a timer', () => {
+    renderWorkstation();
+    expect(screen.getByRole('timer', { name: /session time remaining/i })).toBeInTheDocument();
+  });
+
+  it('gives the modal dialog an accessible name', () => {
+    renderWorkstation();
+    fireEvent.click(screen.getByRole('button', { name: 'ACTIVITY LOG' }));
+    expect(screen.getByRole('dialog', { name: 'Activity log' })).toBeInTheDocument();
   });
 });

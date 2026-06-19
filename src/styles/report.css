@@ -158,6 +158,29 @@
   color: var(--r-accent-soft);
 }
 
+/* Draft / incomplete marker — shown when required fields are missing (prints). */
+.hk-r-draft {
+  margin: 22px 44px 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: #fbece9;
+  border: 1px solid #f0c6c0;
+  color: #c0392b;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* Standing disclaimer — small print, always present on the export. */
+.hk-r-disclaimer {
+  margin: 10px 44px 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
 /* Body */
 .hk-r-body {
   padding: 26px 44px 0;

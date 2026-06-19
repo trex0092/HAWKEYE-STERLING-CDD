@@ -142,12 +142,19 @@ export function Report() {
             </div>
           </div>
 
+          {m.incomplete && (
+            <div className="hk-r-draft" role="status">
+              DRAFT — one or more required fields are incomplete. This is not a finalised
+              assessment.
+            </div>
+          )}
+
           <div
             className="hk-r-banner"
             style={{ border: `1px solid ${m.bandBorder}`, background: m.bandBg }}
           >
             <div>
-              <div className="hk-r-eyebrow">OVERALL RISK CLASSIFICATION</div>
+              <div className="hk-r-eyebrow">INHERENT RISK · JURISDICTION-BASED</div>
               <div
                 style={{
                   fontFamily: 'var(--font-display)',
@@ -297,7 +304,7 @@ export function Report() {
               }}
             >
               <RKeyValue
-                k="OVERALL RISK"
+                k="OVERALL RISK (ANALYST RBA)"
                 v={m.rbaOverall}
                 valueStyle={{ fontSize: 14, fontWeight: 600, color: m.rbaOverallColor }}
               />
@@ -323,15 +330,11 @@ export function Report() {
               }}
             >
               <div className="hk-r-sign">
-                <div className="hk-r-sign-name">
-                  {data.signoff.preparedBy || 'Compliance Department'}
-                </div>
+                <div className="hk-r-sign-name">{m.preparedBy}</div>
                 <div className="hk-r-sign-role">{sign1Role}</div>
               </div>
               <div className="hk-r-sign">
-                <div className="hk-r-sign-name">
-                  {data.signoff.approvedBy || 'Management Department'}
-                </div>
+                <div className="hk-r-sign-name">{m.approvedBy}</div>
                 <div className="hk-r-sign-role">{sign2Role}</div>
               </div>
             </div>
@@ -344,8 +347,8 @@ export function Report() {
                 marginBottom: 24,
               }}
             >
-              Record retention: retain this assessment and supporting documents for a minimum of{' '}
-              <span style={{ color: '#15171f' }}>10 years</span>.
+              Record retention: retain this assessment and supporting documents in line with the
+              firm&apos;s records-retention policy and applicable regulatory requirements.
             </div>
 
             <RSectionHead index="09" title="REVIEW & VERSION CONTROL" />
@@ -357,25 +360,42 @@ export function Report() {
                 <span>TYPE</span>
                 <span>SUMMARY</span>
               </div>
-              {m.versions.map((v) => (
+              {m.versions.length === 0 ? (
                 <div
-                  key={v.ver}
                   className="hk-r-row"
-                  style={{ gridTemplateColumns: VER_COLS, padding: '8px 12px' }}
+                  style={{ gridTemplateColumns: '1fr', padding: '8px 12px', color: '#6b7280' }}
                 >
-                  <span style={{ fontFamily: 'var(--font-mono)', color: '#15171f' }}>{v.ver}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#15171f' }}>
-                    {v.date}
-                  </span>
-                  <span style={{ color: '#15171f' }}>{v.by}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c026d3' }}>
-                    {v.type}
-                  </span>
-                  <span style={{ color: '#15171f' }}>{v.summary}</span>
+                  No review history recorded yet.
                 </div>
-              ))}
+              ) : (
+                m.versions.map((v) => (
+                  <div
+                    key={v.ver}
+                    className="hk-r-row"
+                    style={{ gridTemplateColumns: VER_COLS, padding: '8px 12px' }}
+                  >
+                    <span style={{ fontFamily: 'var(--font-mono)', color: '#15171f' }}>
+                      {v.ver}
+                    </span>
+                    <span
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#15171f' }}
+                    >
+                      {v.date}
+                    </span>
+                    <span style={{ color: '#15171f' }}>{v.by}</span>
+                    <span
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c026d3' }}
+                    >
+                      {v.type}
+                    </span>
+                    <span style={{ color: '#15171f' }}>{v.summary}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
+
+          <div className="hk-r-disclaimer">{m.disclaimer}</div>
 
           <div className="hk-r-footer">
             <span>CONFIDENTIAL · HAWKEYE STERLING COMPLIANCE</span>

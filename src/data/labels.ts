@@ -1,6 +1,12 @@
 /**
  * Static row labels and select option sets for the assessment form.
- * Copy transcribed verbatim from the design source.
+ *
+ * The sanctions-list names and PF-factor labels below (including any references to
+ * specific lists, resolutions or instruments) are configurable firm content,
+ * originally transcribed from the design source. They are presented as the screening
+ * checklist the analyst works through — the app does not itself perform screening or
+ * verify that these references are current. Each firm should confirm the list/factor
+ * set and the currency of every referenced source against official publications.
  */
 
 export const SANCTIONS_LISTS: string[] = [

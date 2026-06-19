@@ -1,7 +1,17 @@
 /**
  * Country list + jurisdiction → risk-band map.
- * Transcribed verbatim from the design source (Hawkeye Sterling.dc.html).
- * Any jurisdiction not present in RISK falls back to "low" (CDD).
+ *
+ * IMPORTANT — configurable firm policy, not regulatory fact:
+ * This `RISK` map is illustrative firm configuration (originally transcribed from
+ * the design source, Hawkeye Sterling.dc.html). It is NOT an authoritative or
+ * up-to-date sanctions / high-risk-jurisdiction list and is not sourced from any
+ * specific regulator or standard-setter. Each firm must review and maintain it
+ * against current official sources (e.g. its own risk assessment and the relevant
+ * regulators'/standard-setters' published lists) before any real use. Treat the
+ * band as the jurisdiction's *inherent* risk input only — it does not, by itself,
+ * determine the customer's overall risk rating or the required level of diligence.
+ *
+ * Any jurisdiction not present in RISK falls back to "low".
  */
 
 export type RiskBand = 'low' | 'med' | 'high';
