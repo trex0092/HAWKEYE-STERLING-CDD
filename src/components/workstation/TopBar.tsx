@@ -13,7 +13,7 @@ export function TopBar() {
       <div className="hk-topbar-left">
         <OrbitalMedallion
           size={46}
-          image="/assets/robot-logo.png"
+          image="/assets/robot-android.jpg"
           imageInset={4}
           objectPosition="50% 30%"
           rings={[
