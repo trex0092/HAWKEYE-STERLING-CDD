@@ -35,6 +35,35 @@ function oxford(items: string[]): string {
   return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 }
 
+/** A flowing sentence describing one identified party from the fields present. */
+function describePerson(p: ReportInput['persons'][number]): string {
+  const lead =
+    p.name.trim() +
+    (p.designation.trim() ? ` (${p.designation.trim()})` : '') +
+    (p.shares.trim() ? `, holding ${p.shares.trim()}%` : '');
+  const facts: string[] = [];
+  if (p.type.trim()) {
+    const ty = p.type.trim().toLowerCase();
+    facts.push(`a${/^[aeiou]/.test(ty) ? 'n' : ''} ${ty}`);
+  }
+  if (p.nationality.trim()) facts.push(`of ${p.nationality.trim()} nationality`);
+  if (p.dob.trim()) facts.push(`born ${p.dob.trim()}`);
+  if (p.passportNo.trim())
+    facts.push(
+      `holding passport ${p.passportNo.trim()}` +
+        (p.passportExpiry.trim() ? ` (valid to ${p.passportExpiry.trim()})` : ''),
+    );
+  if (p.emiratesId.trim())
+    facts.push(
+      `Emirates ID ${p.emiratesId.trim()}` +
+        (p.emiratesIdExpiry.trim() ? ` (valid to ${p.emiratesIdExpiry.trim()})` : ''),
+    );
+  if (p.proofOfAddress.trim())
+    facts.push(`with proof of address by ${p.proofOfAddress.trim().toLowerCase()}`);
+  const pep = p.pepStatus.trim() ? ` Recorded PEP status: ${p.pepStatus.trim()}.` : '';
+  return `${lead}${facts.length ? ', ' + facts.join(', ') : ''}.${pep}`;
+}
+
 export function buildNarrative(s: ReportInput): NarrativeParagraph[] {
   const escalation = screeningEscalation({
     sanctions: s.sanctions,
@@ -48,11 +77,14 @@ export function buildNarrative(s: ReportInput): NarrativeParagraph[] {
   const reviewType = s.versions.length === 0 ? 'initial' : 'periodic';
 
   /* 1. Purpose & Scope */
+  const refClause = s.admin.referenceNumber.trim()
+    ? ` (reference ${s.admin.referenceNumber.trim()})`
+    : '';
   const purpose: NarrativeParagraph = {
     heading: '1. Purpose & Scope',
     body:
-      `This ${reviewType} Customer & Counterparty Due Diligence assessment of ${entity} was ` +
-      `conducted on ${t(s.admin.assessmentDate, 'the assessment date')} by ` +
+      `This ${reviewType} Customer & Counterparty Due Diligence assessment${refClause} of ` +
+      `${entity} was conducted on ${t(s.admin.assessmentDate, 'the assessment date')} by ` +
       `${t(s.admin.assessedBy, 'the assigned analyst')} ` +
       `(${t(s.admin.role, 'Compliance')}). Its purpose is to establish the customer's identity ` +
       `and beneficial ownership, screen the relevant parties against applicable sanctions and ` +
@@ -61,29 +93,33 @@ export function buildNarrative(s: ReportInput): NarrativeParagraph[] {
       `diligence and the business-relationship decision.`,
   };
 
-  /* 2. Customer Profile */
-  const reg = s.entity.registrationNo.trim();
+  /* 2. Customer Profile — weaves in the recorded entity and individual detail. */
+  const entityFacts: string[] = [];
+  if (s.entity.registrationNo.trim())
+    entityFacts.push(`under registration/licence number ${s.entity.registrationNo.trim()}`);
+  if (s.entity.tradingName.trim()) entityFacts.push(`trading as ${s.entity.tradingName.trim()}`);
+  if (s.entity.registeredAddress.trim())
+    entityFacts.push(`with registered address at ${s.entity.registeredAddress.trim()}`);
+  if (s.entity.websiteEmail.trim())
+    entityFacts.push(`contactable at ${s.entity.websiteEmail.trim()}`);
+  const entityClause =
+    `${entity} is registered in ${jurisdiction}` +
+    (entityFacts.length ? ` ${oxford(entityFacts)}` : '') +
+    `.`;
+
   const named = s.persons.filter((p) => p.name.trim());
   const ownerClause = named.length
-    ? `Ownership and control are attributed to ` +
-      oxford(
-        named.map(
-          (p) =>
-            `${p.name.trim()}` +
-            (p.shares.trim() ? ` (${p.shares.trim()}%)` : '') +
-            (p.designation.trim() ? `, ${p.designation.trim()}` : ''),
-        ),
-      ) +
-      `.`
-    : `Beneficial ownership has not yet been recorded for this assessment.`;
+    ? ` Ownership and control are attributed to ${describePerson(named[0])}` +
+      (named.length > 1
+        ? ` The remaining identified parties are: ${named.slice(1).map(describePerson).join(' ')}`
+        : '')
+    : ` Beneficial ownership has not yet been recorded for this assessment.`;
+
   const profile: NarrativeParagraph = {
     heading: '2. Customer Profile',
     body:
-      `${entity} is registered in ${jurisdiction}` +
-      (reg ? ` under registration/licence number ${reg}` : '') +
-      `${s.entity.tradingName.trim() ? `, trading as ${s.entity.tradingName.trim()}` : ''}. ` +
-      `${ownerClause} Identification documents for the identified parties have been obtained and ` +
-      `recorded as set out in the Identifications section.`,
+      `${entityClause}${ownerClause} Identification documents for the identified parties have ` +
+      `been obtained and recorded as set out in the Identifications section.`,
   };
 
   /* 3. Screening Performed */

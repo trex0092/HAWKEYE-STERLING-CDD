@@ -400,6 +400,29 @@ describe('compliance narrative', () => {
     expect(n[0].body).toContain('L. Fernanda');
   });
 
+  it('spells out the recorded customer details in the profile paragraph', () => {
+    useAssessment.getState().setEntity({
+      legalName: 'Acme DMCC',
+      registrationNo: '24839',
+      registeredAddress: 'JLT, Dubai',
+    });
+    const pid = useAssessment.getState().persons[0].id;
+    useAssessment.getState().setPerson(pid, {
+      name: 'Kutluay Furkan Caner',
+      designation: 'Shareholder & Manager',
+      shares: '100',
+      nationality: 'Turkey',
+      passportNo: 'U38311219',
+    });
+    const profile = buildNarrative(input())[1];
+    expect(profile.body).toContain('24839');
+    expect(profile.body).toContain('JLT, Dubai');
+    expect(profile.body).toContain('Kutluay Furkan Caner');
+    expect(profile.body).toContain('100%');
+    expect(profile.body).toContain('Turkey');
+    expect(profile.body).toContain('U38311219');
+  });
+
   it('reads as "not yet recorded" when screening has no date (no fabricated clear screen)', () => {
     const n = buildNarrative(input());
     expect(n[2].body).toMatch(/not yet been recorded/);
