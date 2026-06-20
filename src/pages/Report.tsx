@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useAssessment } from '@/store/useAssessment';
 import { buildReportModel, type KeyValue } from '@/lib/report';
+import { buildNarrative } from '@/lib/narrative';
 import { PrintExport, Back } from '@/components/icons';
 
 function RSectionHead({ index, title }: { index: string; title: string }) {
@@ -64,6 +65,7 @@ export function Report() {
     })),
   );
   const m = buildReportModel(data);
+  const narrative = buildNarrative(data);
 
   const autoprint = Boolean((location.state as { autoprint?: boolean } | null)?.autoprint);
   const printedRef = useRef(false);
@@ -254,12 +256,12 @@ export function Report() {
 
           <div className="hk-r-footer">
             <span>CONFIDENTIAL · HAWKEYE STERLING COMPLIANCE</span>
-            <span>PAGE 1 OF 2</span>
+            <span>PAGE 1 OF 3</span>
           </div>
         </div>
 
         {/* PAGE 2 */}
-        <div className="hk-report-page">
+        <div className="hk-report-page hk-report-page--break">
           <div className="hk-r-body">
             <RSectionHead index="05" title="IDENTIFICATIONS" />
             <div
@@ -412,7 +414,40 @@ export function Report() {
 
           <div className="hk-r-footer">
             <span>CONFIDENTIAL · HAWKEYE STERLING COMPLIANCE</span>
-            <span>PAGE 2 OF 2</span>
+            <span>PAGE 2 OF 3</span>
+          </div>
+        </div>
+
+        {/* PAGE 3 — auto-drafted compliance narrative */}
+        <div className="hk-report-page">
+          <div className="hk-r-body">
+            <RSectionHead index="10" title="COMPLIANCE NARRATIVE" />
+            <div style={{ marginBottom: 16, fontSize: 11, color: '#6b7280', lineHeight: 1.5 }}>
+              Auto-drafted from the assessment inputs to support review. Verify and edit before
+              relying on it; blank fields read as &ldquo;not yet recorded&rdquo; rather than invented
+              detail.
+            </div>
+            {narrative.map((p) => (
+              <div key={p.heading} style={{ marginBottom: 14 }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: 12.5,
+                    color: '#15171f',
+                    marginBottom: 4,
+                  }}
+                >
+                  {p.heading}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#15171f', lineHeight: 1.6 }}>{p.body}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hk-r-footer">
+            <span>CONFIDENTIAL · HAWKEYE STERLING COMPLIANCE</span>
+            <span>PAGE 3 OF 3</span>
           </div>
         </div>
       </div>

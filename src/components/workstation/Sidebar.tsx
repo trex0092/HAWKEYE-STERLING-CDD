@@ -11,6 +11,7 @@ import { useToast } from '@/store/useToast';
 import { effectiveBand, paletteForBand, screeningEscalation, type RiskBand } from '@/lib/risk';
 import { formatClock } from '@/lib/format';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
+import { buildNarrative } from '@/lib/narrative';
 import { downloadJson } from '@/lib/download';
 import { OrbitalMedallion } from '@/components/ui/OrbitalMedallion';
 import { ActionCell } from '@/components/ui/ActionCell';
@@ -83,6 +84,20 @@ export function Sidebar() {
   } as CSSProperties;
 
   const handleAsana = async () => {
+    // Read the full assessment for the narrative (the rail subscribes narrowly).
+    const s = useAssessment.getState();
+    const narrative = buildNarrative({
+      admin: s.admin,
+      entity: s.entity,
+      sanctions: s.sanctions,
+      adverse: s.adverse,
+      pf: s.pf,
+      persons: s.persons,
+      rba: s.rba,
+      signoff: s.signoff,
+      versions: s.versions,
+      overrideBand: s.overrideBand,
+    });
     const task = buildAsanaTask({
       reference,
       entity: entityName,
@@ -90,6 +105,7 @@ export function Sidebar() {
       bandLabel: pal.label,
       decision,
       assessedBy,
+      narrative,
     });
     const result = await sendToAsana(task);
     if (result.ok) {
