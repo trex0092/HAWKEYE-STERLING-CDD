@@ -334,6 +334,28 @@ export function extractExistingKeys(tasks) {
   return keys;
 }
 
+/**
+ * Pick the renewal tasks that should be auto-closed because their underlying
+ * date has been renewed (or cleared) and is no longer due. Returns the gids of
+ * OPEN, notifier-created tasks (those carrying a `dedup-key:`) whose key is no
+ * longer in `dueKeys`. Guarded by `knownCodes` (the customer codes we actually
+ * scanned) so hand-made tasks like the "[SAMPLE]" one are never touched.
+ */
+export function selectStaleTasks(existingTasks, dueKeys, knownCodes) {
+  const gids = [];
+  for (const t of existingTasks) {
+    if (t.completed) continue;
+    const m = /dedup-key:\s*(\S+)/.exec(t.notes ?? '');
+    if (!m) continue;
+    const key = m[1];
+    if (dueKeys.has(key)) continue;
+    const customerCode = key.split('|')[0];
+    if (!knownCodes.has(customerCode)) continue;
+    gids.push(t.gid);
+  }
+  return gids;
+}
+
 // ----- Asana API -----------------------------------------------------------
 
 async function asanaGet(path, token) {
@@ -374,6 +396,19 @@ async function createTask(data, token) {
   return res.json();
 }
 
+async function completeTask(gid, token) {
+  const res = await fetch(`${ASANA_API}/tasks/${gid}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: { completed: true } }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Asana complete task ${gid} failed: HTTP ${res.status} ${detail}`.trim());
+  }
+  return res.json();
+}
+
 // ----- main ----------------------------------------------------------------
 
 export async function main(env = process.env, log = console) {
@@ -402,8 +437,10 @@ export async function main(env = process.env, log = console) {
   );
   log.info(`Read ${tasks.length} customer records.`);
 
-  // Build the full list of due items across all customers.
+  // Build the full list of due items across all customers, plus the set of
+  // customer codes we scanned (used to scope auto-close to real records).
   const due = [];
+  const knownCodes = new Set();
   for (const t of tasks) {
     const parsed = parseAssessment(t.notes, t.name);
     // The license expiry lives in the "Expiry Date" column on most records;
@@ -411,6 +448,7 @@ export async function main(env = process.env, log = console) {
     const columnExpiry = (t.custom_fields ?? []).find((f) => f.gid === cfg.expiryFieldGid)
       ?.display_value;
     parsed.license = parseDate(columnExpiry) ?? parsed.license;
+    knownCodes.add(parsed.customerCode);
     for (const item of collectDueItems(parsed, today, cfg.reviewIntervalMonths, cfg.leadDays)) {
       due.push({
         item,
@@ -421,11 +459,14 @@ export async function main(env = process.env, log = console) {
     }
   }
   log.info(`Found ${due.length} expired/overdue item(s).`);
+  const dueKeys = new Set(due.map((d) => d.item.dedupKey));
 
-  // Skip anything we have already filed (idempotent across daily runs).
+  // Existing renewal tasks: used both to skip re-filing (idempotency) and to
+  // auto-close ones whose date has since been renewed.
+  let existing = [];
   let existingKeys = new Set();
   if (cfg.renewalsProjectGid) {
-    const existing = await fetchAllTasks(cfg.renewalsProjectGid, 'notes', cfg.token);
+    existing = await fetchAllTasks(cfg.renewalsProjectGid, 'gid,name,notes,completed', cfg.token);
     existingKeys = extractExistingKeys(existing);
   }
 
@@ -458,7 +499,25 @@ export async function main(env = process.env, log = console) {
     log.info(`Created: ${task.name}`);
   }
 
-  log.info(`Done. ${created} created${cfg.dryRun ? ' (dry-run)' : ''}, ${skipped} already filed.`);
+  // Auto-close renewal tasks whose underlying date is no longer due (renewed).
+  const staleGids = selectStaleTasks(existing, dueKeys, knownCodes);
+  let closed = 0;
+  for (const gid of staleGids) {
+    const name = existing.find((t) => t.gid === gid)?.name ?? gid;
+    if (cfg.dryRun) {
+      log.info(`[dry-run] would close: ${name}`);
+      closed += 1;
+      continue;
+    }
+    await completeTask(gid, cfg.token);
+    closed += 1;
+    log.info(`Closed (renewed): ${name}`);
+  }
+
+  log.info(
+    `Done. ${created} created${cfg.dryRun ? ' (dry-run)' : ''}, ${skipped} already filed, ` +
+      `${closed} closed${cfg.dryRun ? ' (dry-run)' : ''}.`,
+  );
 }
 
 const isEntryPoint =

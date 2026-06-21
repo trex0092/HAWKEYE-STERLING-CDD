@@ -6,6 +6,7 @@ import {
   makeDedupKey,
   buildRenewalTask,
   extractExistingKeys,
+  selectStaleTasks,
   addMonths,
   todayInTimeZone,
 } from './expiry-notifier.mjs';
@@ -186,6 +187,39 @@ describe('dedup keys + idempotency', () => {
   it('makeDedupKey is deterministic', () => {
     const item = { type: 'review', date: new Date(Date.UTC(2019, 1, 1)) };
     expect(makeDedupKey('CAS-VER-0042', item)).toBe('CAS-VER-0042|review|2019-02-01');
+  });
+});
+
+describe('selectStaleTasks (auto-close when renewed)', () => {
+  const knownCodes = new Set(['CAS-VER-0042', 'CAS-HON-0001']);
+  const dueKeys = new Set(['CAS-VER-0042|license|2020-03-13']);
+  const note = (key) => `dedup-key: ${key}`;
+
+  it('closes an open task whose key is no longer due, for a known customer', () => {
+    const tasks = [
+      { gid: '1', completed: false, notes: note('CAS-HON-0001|license|2026-04-24') }, // renewed
+    ];
+    expect(selectStaleTasks(tasks, dueKeys, knownCodes)).toEqual(['1']);
+  });
+
+  it('keeps a task whose key is still due', () => {
+    const tasks = [{ gid: '2', completed: false, notes: note('CAS-VER-0042|license|2020-03-13') }];
+    expect(selectStaleTasks(tasks, dueKeys, knownCodes)).toEqual([]);
+  });
+
+  it('ignores already-completed tasks', () => {
+    const tasks = [{ gid: '3', completed: true, notes: note('CAS-HON-0001|license|2026-04-24') }];
+    expect(selectStaleTasks(tasks, dueKeys, knownCodes)).toEqual([]);
+  });
+
+  it('ignores tasks without a dedup-key line', () => {
+    const tasks = [{ gid: '4', completed: false, notes: 'a manual note with no key' }];
+    expect(selectStaleTasks(tasks, dueKeys, knownCodes)).toEqual([]);
+  });
+
+  it('protects hand-made tasks whose code is not a real customer (e.g. SAMPLE)', () => {
+    const tasks = [{ gid: '5', completed: false, notes: note('SAMPLE|CAS-VER-0042|license|2026-05-30') }];
+    expect(selectStaleTasks(tasks, dueKeys, knownCodes)).toEqual([]);
   });
 });
 
