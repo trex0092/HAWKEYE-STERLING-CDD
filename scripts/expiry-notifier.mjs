@@ -44,6 +44,11 @@ export function readConfig(env = process.env) {
     assigneeGid: env.ASSIGNEE_GID ?? '1213645083721304',
     workspaceGid: env.ASANA_WORKSPACE_GID ?? '1213645083721316',
     reviewIntervalMonths: Number(env.REVIEW_INTERVAL_MONTHS ?? '12'),
+    // The "Expiry Date" text column on the customer records (already populated),
+    // used as the license-expiry source when the description line is blank.
+    expiryFieldGid: env.ASANA_EXPIRY_FIELD_GID ?? '1215871723101263',
+    // How many days ahead counts as "expiring soon" (0 = only on/after expiry).
+    leadDays: Number(env.REMINDER_LEAD_DAYS ?? '2'),
     timeZone: env.TIMEZONE ?? 'Asia/Dubai',
     dryRun: isTruthy(env.DRY_RUN),
   };
@@ -228,34 +233,45 @@ export function parseAssessment(notes, fallbackName = '') {
  * Given a parsed assessment, return the list of items that are expired/overdue
  * as of `today`. Each item carries a stable dedup key for idempotency.
  */
-export function collectDueItems(parsed, today, reviewIntervalMonths) {
+export function collectDueItems(parsed, today, reviewIntervalMonths, leadDays = 0) {
   const items = [];
-  const push = (item) => {
+  const dayMs = 86400000;
+  const horizon = today.getTime() + Math.max(0, leadDays) * dayMs;
+
+  // null if still beyond the horizon; otherwise "expired" (on/before today) or
+  // "upcoming" (within the lead window).
+  const statusOf = (date) => {
+    if (!date) return null;
+    const t = date.getTime();
+    if (t > horizon) return null;
+    return t <= today.getTime() ? 'expired' : 'upcoming';
+  };
+  const daysUntil = (date) => Math.round((date.getTime() - today.getTime()) / dayMs);
+
+  const consider = (date, base) => {
+    const status = statusOf(date);
+    if (!status) return;
+    const item = { ...base, date, status, daysUntil: daysUntil(date) };
     item.dedupKey = makeDedupKey(parsed.customerCode, item);
     items.push(item);
   };
 
-  if (parsed.license && parsed.license <= today) {
-    push({ type: 'license', kind: 'License', person: null, date: parsed.license });
-  }
+  consider(parsed.license, { type: 'license', kind: 'License', person: null });
 
   for (const ind of parsed.individuals) {
     const who = ind.name || `Individual ${ind.number}`;
     const slug = `individual-${ind.number}`;
-    if (ind.passport && ind.passport <= today) {
-      push({ type: 'passport', kind: 'Passport', person: who, slug, date: ind.passport });
-    }
-    if (ind.emiratesId && ind.emiratesId <= today) {
-      push({ type: 'emirates-id', kind: 'Emirates ID', person: who, slug, date: ind.emiratesId });
-    }
+    consider(ind.passport, { type: 'passport', kind: 'Passport', person: who, slug });
+    consider(ind.emiratesId, { type: 'emirates-id', kind: 'Emirates ID', person: who, slug });
   }
 
   const reviewBase = parsed.lastReviewDate || parsed.registrationDate;
   if (reviewBase && Number.isFinite(reviewIntervalMonths)) {
-    const due = addMonths(reviewBase, reviewIntervalMonths);
-    if (due <= today) {
-      push({ type: 'review', kind: 'Periodic review', person: null, date: due });
-    }
+    consider(addMonths(reviewBase, reviewIntervalMonths), {
+      type: 'review',
+      kind: 'Periodic review',
+      person: null,
+    });
   }
 
   return items;
@@ -273,14 +289,25 @@ export function makeDedupKey(customerCode, item) {
 export function buildRenewalTask(companyName, customerCode, item, permalink) {
   const when = formatDate(item.date);
   const person = item.person ? ` / ${item.person}` : '';
+  const subject = item.person ? `The ${item.kind} for ${item.person}` : `The ${item.kind}`;
+  const upcoming = item.status === 'upcoming';
+  const inDays =
+    item.daysUntil <= 0 ? 'today' : item.daysUntil === 1 ? 'in 1 day' : `in ${item.daysUntil} days`;
   let name;
   let lead;
   if (item.type === 'review') {
-    name = `🔄 Periodic review due — ${companyName} (due ${when})`;
-    lead = `The periodic CDD review/refresh for ${companyName} is due as of ${when}. Please re-screen the customer, refresh the assessment, and record the outcome.`;
+    if (upcoming) {
+      name = `🔄 Periodic review due soon — ${companyName} (due ${when})`;
+      lead = `The periodic CDD review/refresh for ${companyName} is due ${inDays} (${when}). Please plan the re-screening and refresh.`;
+    } else {
+      name = `🔄 Periodic review due — ${companyName} (due ${when})`;
+      lead = `The periodic CDD review/refresh for ${companyName} is due as of ${when}. Please re-screen the customer, refresh the assessment, and record the outcome.`;
+    }
+  } else if (upcoming) {
+    name = `⏳ ${item.kind} expiring soon — ${companyName}${person} (expires ${when})`;
+    lead = `${subject} at ${companyName} expires ${inDays} (${when}). Please arrange renewal before it lapses.`;
   } else {
     name = `⚠️ Renew ${item.kind} — ${companyName}${person} (expired ${when})`;
-    const subject = item.person ? `The ${item.kind} for ${item.person}` : `The ${item.kind}`;
     lead = `${subject} at ${companyName} expired on ${when}. Please obtain the renewed document and update the customer record.`;
   }
   const notes = [
@@ -363,11 +390,14 @@ export async function main(env = process.env, log = console) {
   }
 
   const today = todayInTimeZone(cfg.timeZone);
-  log.info(`Scanning project ${cfg.sourceProjectGid} as of ${isoDate(today)} (${cfg.timeZone})...`);
+  log.info(
+    `Scanning project ${cfg.sourceProjectGid} as of ${isoDate(today)} (${cfg.timeZone}); ` +
+      `flagging expired + within ${cfg.leadDays} day(s)...`,
+  );
 
   const tasks = await fetchAllTasks(
     cfg.sourceProjectGid,
-    'name,notes,permalink_url',
+    'name,notes,permalink_url,custom_fields.gid,custom_fields.display_value',
     cfg.token,
   );
   log.info(`Read ${tasks.length} customer records.`);
@@ -376,7 +406,12 @@ export async function main(env = process.env, log = console) {
   const due = [];
   for (const t of tasks) {
     const parsed = parseAssessment(t.notes, t.name);
-    for (const item of collectDueItems(parsed, today, cfg.reviewIntervalMonths)) {
+    // The license expiry lives in the "Expiry Date" column on most records;
+    // prefer it, falling back to the description line when the column is blank.
+    const columnExpiry = (t.custom_fields ?? []).find((f) => f.gid === cfg.expiryFieldGid)
+      ?.display_value;
+    parsed.license = parseDate(columnExpiry) ?? parsed.license;
+    for (const item of collectDueItems(parsed, today, cfg.reviewIntervalMonths, cfg.leadDays)) {
       due.push({
         item,
         name: parsed.companyName,

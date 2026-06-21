@@ -119,6 +119,25 @@ describe('collectDueItems', () => {
     const future = parseAssessment(SAMPLE.replace(/20\d\d/g, '2099'), 'Veritas');
     expect(collectDueItems(future, today, 12)).toEqual([]);
   });
+
+  it('marks expired vs upcoming and respects the lead window', () => {
+    const base = parseAssessment(SAMPLE, 'Veritas');
+    // License expires in 1 day (within a 2-day lead) → upcoming, not expired.
+    base.license = new Date(Date.UTC(2026, 5, 22)); // today + 1
+    const license = collectDueItems(base, today, 12, 2).find((i) => i.type === 'license');
+    expect(license.status).toBe('upcoming');
+    expect(license.daysUntil).toBe(1);
+
+    // 3 days out is beyond the 2-day lead → not flagged.
+    base.license = new Date(Date.UTC(2026, 5, 24));
+    expect(collectDueItems(base, today, 12, 2).some((i) => i.type === 'license')).toBe(false);
+
+    // Already past → expired regardless of lead.
+    base.license = new Date(Date.UTC(2026, 3, 24)); // 24 Apr 2026
+    expect(collectDueItems(base, today, 12, 2).find((i) => i.type === 'license').status).toBe(
+      'expired',
+    );
+  });
 });
 
 describe('dedup keys + idempotency', () => {
@@ -147,6 +166,21 @@ describe('dedup keys + idempotency', () => {
     expect(task.dueOn).toBe('2020-03-13');
     const keys = extractExistingKeys([{ notes: task.notes }]);
     expect(keys.has(license.dedupKey)).toBe(true);
+  });
+
+  it('renders an "expiring soon" narrative for upcoming items', () => {
+    const item = {
+      type: 'license',
+      kind: 'License',
+      person: null,
+      status: 'upcoming',
+      daysUntil: 2,
+      date: new Date(Date.UTC(2026, 5, 23)),
+      dedupKey: 'CAS-VER-0042|license|2026-06-23',
+    };
+    const task = buildRenewalTask('Veritas Metals Trading LLC', 'CAS-VER-0042', item, null);
+    expect(task.name).toContain('expiring soon');
+    expect(task.notes).toContain('in 2 days');
   });
 
   it('makeDedupKey is deterministic', () => {
