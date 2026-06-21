@@ -4,10 +4,11 @@ name: Expiry notifier
 # project and files follow-up tasks for anything expired or overdue, so the
 # reminders land in Asana (Inbox + My Tasks). No email; no Asana date columns.
 #
-# Required secret:  ASANA_TOKEN            Asana Personal Access Token.
-# Required var:     RENEWALS_PROJECT_GID   "Compliance Renewals" project gid.
-# Optional vars:    ASSIGNEE_GID, ASANA_PROJECT_GID, ASANA_WORKSPACE_GID,
-#                   REVIEW_INTERVAL_MONTHS, TIMEZONE
+# Required secret:  ASANA_TOKEN   Asana Personal Access Token. That is the ONLY
+#                   thing you must add — every project/assignee id is baked into
+#                   scripts/expiry-notifier.mjs as a default.
+# Optional vars:    only if you ever want to override a default (RENEWALS_PROJECT_GID,
+#                   ASSIGNEE_GID, ASANA_PROJECT_GID, REVIEW_INTERVAL_MONTHS, TIMEZONE).
 
 on:
   schedule:
@@ -41,11 +42,7 @@ jobs:
       - name: Run expiry notifier
         run: node scripts/expiry-notifier.mjs
         env:
+          # The only required secret. Project, assignee and workspace ids are
+          # baked into the script as defaults, so nothing else is needed.
           ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
-          RENEWALS_PROJECT_GID: ${{ vars.RENEWALS_PROJECT_GID }}
-          ASANA_PROJECT_GID: ${{ vars.ASANA_PROJECT_GID }}
-          ASANA_WORKSPACE_GID: ${{ vars.ASANA_WORKSPACE_GID }}
-          ASSIGNEE_GID: ${{ vars.ASSIGNEE_GID }}
-          REVIEW_INTERVAL_MONTHS: ${{ vars.REVIEW_INTERVAL_MONTHS }}
-          TIMEZONE: ${{ vars.TIMEZONE }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '' }}

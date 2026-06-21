@@ -38,8 +38,8 @@ export function readConfig(env = process.env) {
     token: env.ASANA_TOKEN ?? env.ASANA_PAT ?? '',
     // Source project holding the customer assessments.
     sourceProjectGid: env.ASANA_PROJECT_GID ?? '1214107620220121',
-    // Project the renewal follow-up tasks are filed under.
-    renewalsProjectGid: env.RENEWALS_PROJECT_GID ?? '',
+    // Project the renewal follow-up tasks are filed under ("Compliance Renewals").
+    renewalsProjectGid: env.RENEWALS_PROJECT_GID ?? '1215884707932023',
     // Who the follow-up tasks are assigned to (account owner by default).
     assigneeGid: env.ASSIGNEE_GID ?? '1213645083721304',
     workspaceGid: env.ASANA_WORKSPACE_GID ?? '1213645083721316',
