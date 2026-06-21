@@ -6,6 +6,7 @@ import {
   makeDedupKey,
   buildRenewalTask,
   dailyScreeningTask,
+  reviewIntervalForRisk,
   extractExistingKeys,
   selectStaleTasks,
   addMonths,
@@ -310,6 +311,30 @@ describe('screening reminders', () => {
     expect(t.dedupKey).toBe('SYSTEM|daily-screening|2026-06-21');
     expect(t.dueOn).toBe('2026-06-21');
     expect(extractExistingKeys([{ notes: t.notes }]).has(t.dedupKey)).toBe(true);
+  });
+});
+
+describe('risk-based CDD review cadence', () => {
+  const intervals = { high: 1, medium: 3, low: 6, default: 12 };
+
+  it('maps the risk rating to the review interval', () => {
+    expect(reviewIntervalForRisk('High Risk', intervals)).toBe(1);
+    expect(reviewIntervalForRisk('MEDIUM', intervals)).toBe(3);
+    expect(reviewIntervalForRisk('Low', intervals)).toBe(6);
+  });
+
+  it('falls back to the default when missing or unrecognised', () => {
+    expect(reviewIntervalForRisk('', intervals)).toBe(12);
+    expect(reviewIntervalForRisk(null, intervals)).toBe(12);
+    expect(reviewIntervalForRisk('Prohibited', intervals)).toBe(12);
+  });
+
+  it('parseAssessment reads the Overall Risk Classification', () => {
+    const parsed = parseAssessment(
+      'SECTION 6\nOverall Risk Classification     : High\nCDD Level Required : EDD',
+      'x',
+    );
+    expect(parsed.riskClassification).toBe('High');
   });
 });
 

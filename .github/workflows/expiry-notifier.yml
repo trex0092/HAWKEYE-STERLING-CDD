@@ -12,8 +12,8 @@ name: Expiry notifier
 
 on:
   schedule:
-    # Daily at 02:00 UTC ≈ 06:00 Asia/Dubai.
-    - cron: '0 2 * * *'
+    # Daily at 04:40 UTC = 08:40 Asia/Dubai (UTC+4).
+    - cron: '40 4 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

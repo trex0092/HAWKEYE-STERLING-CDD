@@ -43,7 +43,14 @@ export function readConfig(env = process.env) {
     // Who the follow-up tasks are assigned to (account owner by default).
     assigneeGid: env.ASSIGNEE_GID ?? '1213645083721304',
     workspaceGid: env.ASANA_WORKSPACE_GID ?? '1213645083721316',
-    reviewIntervalMonths: Number(env.REVIEW_INTERVAL_MONTHS ?? '12'),
+    // CDD review cadence by risk rating (months); "default" used when the risk
+    // classification is missing/unrecognised.
+    reviewIntervals: {
+      high: Number(env.REVIEW_INTERVAL_HIGH_MONTHS ?? '1'),
+      medium: Number(env.REVIEW_INTERVAL_MEDIUM_MONTHS ?? '3'),
+      low: Number(env.REVIEW_INTERVAL_LOW_MONTHS ?? '6'),
+      default: Number(env.REVIEW_INTERVAL_MONTHS ?? '12'),
+    },
     // The "Expiry Date" text column on the customer records (already populated),
     // used as the license-expiry source when the description line is blank.
     expiryFieldGid: env.ASANA_EXPIRY_FIELD_GID ?? '1215871723101263',
@@ -196,6 +203,8 @@ export function parseAssessment(notes, fallbackName = '') {
   const registrationDate = parseDate(
     fieldValue(lines, /(date of registration|registration date)\s*:/i),
   );
+  // Section 6 RBA outcome, drives the risk-based review cadence.
+  const riskClassification = fieldValue(lines, /overall risk classification\s*:/i);
 
   // Latest dated "Ver. NN | Date: ... | ..." line drives review derivation.
   let lastReviewDate = null;
@@ -244,6 +253,7 @@ export function parseAssessment(notes, fallbackName = '') {
     companyName,
     license,
     registrationDate,
+    riskClassification,
     lastReviewDate,
     lastScreeningDate,
     individuals,
@@ -316,6 +326,18 @@ export function collectDueItems(
   }
 
   return items;
+}
+
+/**
+ * Pick the CDD review cadence (months) from the risk classification:
+ * High → 1, Medium → 3, Low → 6, otherwise the default.
+ */
+export function reviewIntervalForRisk(risk, intervals) {
+  const r = (risk ?? '').toLowerCase();
+  if (r.includes('high')) return intervals.high;
+  if (r.includes('medium') || r.includes('moderate')) return intervals.medium;
+  if (r.includes('low')) return intervals.low;
+  return intervals.default;
 }
 
 /** Stable key: customer | type [| person] | date. Date keeps renewals distinct. */
@@ -520,10 +542,11 @@ export async function main(env = process.env, log = console) {
       ?.display_value;
     parsed.license = parseDate(columnExpiry) ?? parsed.license;
     knownCodes.add(parsed.customerCode);
+    const reviewMonths = reviewIntervalForRisk(parsed.riskClassification, cfg.reviewIntervals);
     const items = collectDueItems(
       parsed,
       today,
-      cfg.reviewIntervalMonths,
+      reviewMonths,
       cfg.leadDays,
       cfg.screeningIntervalMonths,
     );
