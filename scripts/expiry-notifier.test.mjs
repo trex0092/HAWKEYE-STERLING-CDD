@@ -169,6 +169,22 @@ describe('dedup keys + idempotency', () => {
     expect(keys.has(license.dedupKey)).toBe(true);
   });
 
+  it('matches keys that contain spaces (company-name fallback) without truncating', () => {
+    // When a description has no Customer Code, the key is the company name.
+    const item = { type: 'license', date: new Date(Date.UTC(2024, 10, 7)) };
+    const key = makeDedupKey('NAWAL JEWELLERY TRADING L.L.C', item);
+    const task = buildRenewalTask('NAWAL JEWELLERY TRADING L.L.C', 'NAWAL JEWELLERY TRADING L.L.C', {
+      ...item,
+      kind: 'License',
+      person: null,
+      status: 'expired',
+      daysUntil: -100,
+      dedupKey: key,
+    });
+    const keys = extractExistingKeys([{ notes: task.notes }]);
+    expect(keys.has(key)).toBe(true); // full key, not just "NAWAL"
+  });
+
   it('renders an "expiring soon" narrative for upcoming items', () => {
     const item = {
       type: 'license',

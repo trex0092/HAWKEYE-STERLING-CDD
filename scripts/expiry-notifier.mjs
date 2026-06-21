@@ -324,12 +324,21 @@ export function buildRenewalTask(companyName, customerCode, item, permalink) {
   return { name, notes, dueOn: isoDate(item.date) };
 }
 
+/**
+ * Read the dedup key out of a task's notes. Captures the whole line (keys can
+ * contain spaces when the customer code falls back to the company name).
+ */
+export function dedupKeyOf(notes) {
+  const m = /dedup-key:\s*([^\n]+)/.exec(notes ?? '');
+  return m ? m[1].trim() : null;
+}
+
 /** Find every `dedup-key: ...` already present in existing renewal task notes. */
 export function extractExistingKeys(tasks) {
   const keys = new Set();
   for (const t of tasks) {
-    const m = /dedup-key:\s*(\S+)/.exec(t.notes ?? '');
-    if (m) keys.add(m[1]);
+    const key = dedupKeyOf(t.notes);
+    if (key) keys.add(key);
   }
   return keys;
 }
@@ -345,9 +354,8 @@ export function selectStaleTasks(existingTasks, dueKeys, knownCodes) {
   const gids = [];
   for (const t of existingTasks) {
     if (t.completed) continue;
-    const m = /dedup-key:\s*(\S+)/.exec(t.notes ?? '');
-    if (!m) continue;
-    const key = m[1];
+    const key = dedupKeyOf(t.notes);
+    if (!key) continue;
     if (dueKeys.has(key)) continue;
     const customerCode = key.split('|')[0];
     if (!knownCodes.has(customerCode)) continue;
