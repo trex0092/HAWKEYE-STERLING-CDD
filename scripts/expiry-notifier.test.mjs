@@ -77,7 +77,8 @@ Ver. 02 | Date: February 01, 2018 | Reviewed By: B | Type: Periodic | Summary:
 describe('parseAssessment', () => {
   const parsed = parseAssessment(SAMPLE, 'Veritas');
 
-  it('reads the customer code and license date', () => {
+  it('reads the company name, customer code and license date', () => {
+    expect(parsed.companyName).toBe('Veritas Metals Trading LLC');
     expect(parsed.customerCode).toBe('CAS-VER-0042');
     expect(iso(parsed.license)).toBe('2020-03-13');
   });
@@ -134,8 +135,15 @@ describe('dedup keys + idempotency', () => {
 
   it('round-trips through task notes so existing tasks are detected', () => {
     const license = items.find((i) => i.type === 'license');
-    const task = buildRenewalTask('CAS-VER-0042', license, 'https://app.asana.com/x');
+    const task = buildRenewalTask(
+      'Veritas Metals Trading LLC',
+      'CAS-VER-0042',
+      license,
+      'https://app.asana.com/x',
+    );
     expect(task.name).toContain('Renew License');
+    expect(task.name).toContain('Veritas Metals Trading LLC'); // company name, not code
+    expect(task.notes).toContain('Customer code: CAS-VER-0042');
     expect(task.dueOn).toBe('2020-03-13');
     const keys = extractExistingKeys([{ notes: task.notes }]);
     expect(keys.has(license.dedupKey)).toBe(true);
