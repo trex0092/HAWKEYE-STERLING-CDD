@@ -1,7 +1,9 @@
 name: Lighthouse
 
 # Audits performance / accessibility / best-practices / SEO on every PR.
-# Thresholds are "error" (see lighthouserc.json), so a regression fails the check.
+# Accessibility, best-practices and SEO are blocking ("error"); performance stays
+# "warn" because single-run CI performance scores are noisy (see lighthouserc.json).
+# Scores are taken as the median of 3 runs to reduce flake.
 
 on:
   pull_request:
