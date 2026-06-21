@@ -1,0 +1,48 @@
+name: Expiry notifier
+
+# Reads customer assessment descriptions from the Asana "Customer Database"
+# project and files follow-up tasks for anything expired or overdue, so the
+# reminders land in Asana (Inbox + My Tasks). No email; no Asana date columns.
+#
+# Required secret:  ASANA_TOKEN   Asana Personal Access Token. That is the ONLY
+#                   thing you must add — every project/assignee id is baked into
+#                   scripts/expiry-notifier.mjs as a default.
+# Optional vars:    only if you ever want to override a default (RENEWALS_PROJECT_GID,
+#                   ASSIGNEE_GID, ASANA_PROJECT_GID, REVIEW_INTERVAL_MONTHS, TIMEZONE).
+
+on:
+  schedule:
+    # Daily at 02:00 UTC ≈ 06:00 Asia/Dubai.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Print what would be created without writing to Asana'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: expiry-notifier
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Run expiry notifier
+        run: node scripts/expiry-notifier.mjs
+        env:
+          # The only required secret. Project, assignee and workspace ids are
+          # baked into the script as defaults, so nothing else is needed.
+          ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
