@@ -44,5 +44,6 @@ jobs:
         env:
           # The only required secret. Project, assignee and workspace ids are
           # baked into the script as defaults, so nothing else is needed.
-          ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
+          # Accepts either secret name (this repo uses ASANA_ACCESS_TOKEN).
+          ASANA_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN || secrets.ASANA_TOKEN }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
