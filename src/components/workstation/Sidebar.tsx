@@ -1,6 +1,6 @@
 /**
  * Right rail: band-driven avatar medallion, Required-Diligence pill (+ analyst
- * override popover), and the 7 wired action cells + autosave stamp. The effective
+ * override popover), and the 8 wired action cells + autosave stamp. The effective
  * band = analyst override ?? jurisdiction-derived band.
  */
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,8 @@ import { useToast } from '@/store/useToast';
 import { effectiveBand, paletteForBand, screeningEscalation, type RiskBand } from '@/lib/risk';
 import { formatClock } from '@/lib/format';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
+import { requestCopilot, narrativeToSource } from '@/lib/integrations/aiCopilot';
+import { useAiCopilot } from '@/store/useAiCopilot';
 import { buildNarrative } from '@/lib/narrative';
 import { downloadJson } from '@/lib/download';
 import { OrbitalMedallion } from '@/components/ui/OrbitalMedallion';
@@ -26,6 +28,7 @@ import {
   Diligence,
   Override,
   Alert,
+  AiCopilot,
 } from '@/components/icons';
 
 interface CellConfig {
@@ -66,6 +69,9 @@ export function Sidebar() {
   const logActivity = useAssessment((s) => s.logActivity);
 
   const openModal = useUI((s) => s.openModal);
+  const copilotBegin = useAiCopilot((s) => s.begin);
+  const copilotSucceed = useAiCopilot((s) => s.succeed);
+  const copilotFail = useAiCopilot((s) => s.fail);
   const overrideOpen = useUI((s) => s.overrideOpen);
   const toggleOverride = useUI((s) => s.toggleOverride);
   const closeOverride = useUI((s) => s.closeOverride);
@@ -118,6 +124,41 @@ export function Sidebar() {
     } else {
       logActivity(`Asana send failed: ${result.detail ?? 'request failed'}.`);
       showToast(`Asana send failed: ${result.detail ?? 'request failed'}.`);
+    }
+  };
+
+  // AI Co-pilot: rephrase the deterministic narrative into a DRAFT, then open the
+  // review modal where the analyst Accepts/edits/Discards it (Layer 5 oversight).
+  // It never sets the band or decision; the deterministic narrative stays the
+  // authoritative fallback when AI is unconfigured or fails.
+  const handleCopilot = async () => {
+    const s = useAssessment.getState();
+    const narrative = buildNarrative({
+      admin: s.admin,
+      entity: s.entity,
+      sanctions: s.sanctions,
+      adverse: s.adverse,
+      pf: s.pf,
+      persons: s.persons,
+      rba: s.rba,
+      signoff: s.signoff,
+      versions: s.versions,
+      overrideBand: s.overrideBand,
+    });
+    copilotBegin();
+    openModal('ai-copilot');
+    const result = await requestCopilot('narrative-polish', narrativeToSource(narrative));
+    if (result.ok) {
+      copilotSucceed(result.value);
+      logActivity(
+        `AI Co-pilot drafted narrative (${result.value.model}) — ${result.value.grounded ? 'grounded' : `flagged: ${result.value.ungrounded.join(', ') || 'review'}`}; awaiting analyst review.`,
+      );
+    } else if (result.reason === 'not-configured') {
+      copilotFail('not configured');
+      logActivity('AI Co-pilot not configured — kept deterministic narrative.');
+    } else {
+      copilotFail(result.detail ?? 'request failed');
+      logActivity(`AI Co-pilot failed: ${result.detail ?? 'request failed'}.`);
     }
   };
 
@@ -174,6 +215,16 @@ export function Sidebar() {
       bgHover: 'rgba(122,166,255,.2)',
       border: 'rgba(122,166,255,.4)',
       onClick: () => void handleAsana(),
+    },
+    {
+      key: 'copilot',
+      icon: <AiCopilot size={ICON} />,
+      label: 'AI NARRATIVE (DRAFT)',
+      color: '#b07bff',
+      bg: 'rgba(176,123,255,.1)',
+      bgHover: 'rgba(176,123,255,.2)',
+      border: 'rgba(176,123,255,.4)',
+      onClick: () => void handleCopilot(),
     },
     {
       key: 'reset',
