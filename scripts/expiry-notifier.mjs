@@ -274,6 +274,7 @@ export function collectDueItems(
   reviewIntervalMonths,
   leadDays = 0,
   screeningIntervalMonths = 0,
+  reviewRisk = '',
 ) {
   const items = [];
   const dayMs = 86400000;
@@ -312,6 +313,8 @@ export function collectDueItems(
       type: 'review',
       kind: 'Periodic review',
       person: null,
+      risk: reviewRisk,
+      months: reviewIntervalMonths,
     });
   }
 
@@ -345,6 +348,15 @@ export function reviewIntervalForRisk(risk, intervals) {
 /** Normalise an entity name for matching across LLC / L.L.C / spacing/punctuation. */
 export function normalizeEntityName(name) {
   return (name ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/** Canonical display label for a risk rating, or null when unknown. */
+function riskLabel(risk) {
+  const r = (risk ?? '').toLowerCase();
+  if (r.includes('high')) return 'HIGH RISK';
+  if (r.includes('medium') || r.includes('moderate')) return 'MEDIUM RISK';
+  if (r.includes('low')) return 'LOW RISK';
+  return null;
 }
 
 /**
@@ -406,6 +418,9 @@ export function buildRenewalTask(companyName, customerCode, item, permalink) {
       name = `🔄 Periodic review due — ${companyName} (due ${when})`;
       lead = `The periodic CDD review/refresh for ${companyName} is due as of ${when}. Please re-screen the customer, refresh the assessment, and record the outcome.`;
     }
+    // Risk rating goes in the body, not the title.
+    const label = riskLabel(item.risk);
+    if (label) lead = `Risk rating: ${label} (${item.months}-month cycle). ${lead}`;
   } else if (item.type === 'screening') {
     const since = item.lastScreened ? ` (last screened ${formatDate(item.lastScreened)})` : '';
     name = `🔁 Re-screen — ${companyName} (screening due ${when})`;
@@ -600,6 +615,7 @@ export async function main(env = process.env, log = console) {
       reviewMonths,
       cfg.leadDays,
       cfg.screeningIntervalMonths,
+      risk,
     );
     for (const item of items) {
       due.push({

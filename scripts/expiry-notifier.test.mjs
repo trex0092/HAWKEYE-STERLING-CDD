@@ -209,6 +209,40 @@ describe('dedup keys + idempotency', () => {
     const item = { type: 'review', date: new Date(Date.UTC(2019, 1, 1)) };
     expect(makeDedupKey('CAS-VER-0042', item)).toBe('CAS-VER-0042|review|2019-02-01');
   });
+
+  it('puts the risk rating in the review body, not the title', () => {
+    const item = {
+      type: 'review',
+      kind: 'Periodic review',
+      person: null,
+      status: 'expired',
+      daysUntil: -10,
+      risk: 'High',
+      months: 1,
+      date: new Date(Date.UTC(2026, 5, 11)),
+      dedupKey: 'CAS-VER-0042|review|2026-06-11',
+    };
+    const task = buildRenewalTask('Acme Bullion DMCC', 'CAS-VER-0042', item, null);
+    expect(task.name).toBe('🔄 Periodic review due — Acme Bullion DMCC (due 11 Jun 2026)');
+    expect(task.name).not.toContain('['); // no risk tag in the title
+    expect(task.notes).toContain('Risk rating: HIGH RISK (1-month cycle).');
+  });
+
+  it('omits the risk line when the rating is unknown', () => {
+    const item = {
+      type: 'review',
+      kind: 'Periodic review',
+      person: null,
+      status: 'expired',
+      daysUntil: -10,
+      risk: '',
+      months: 12,
+      date: new Date(Date.UTC(2026, 5, 11)),
+      dedupKey: 'CAS-VER-0042|review|2026-06-11',
+    };
+    const task = buildRenewalTask('Acme Bullion DMCC', 'CAS-VER-0042', item, null);
+    expect(task.notes).not.toContain('Risk rating:');
+  });
 });
 
 describe('selectStaleTasks (auto-close when renewed)', () => {
