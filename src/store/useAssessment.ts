@@ -445,6 +445,18 @@ export const useAssessment = create<AssessmentState>()(
 
       // Human oversight: commit an AI draft only after the analyst reviews it.
       acceptAiNarrative: (text, model) => {
+        const user = get().currentUser ?? DEFAULT_USER;
+        if (
+          !authorizeAction(
+            { action: 'ai-accept', permission: 'ai:accept' },
+            { user, sessionActive: true },
+          ).allow
+        ) {
+          set((s) => ({
+            activity: [makeActivity(`AI accept denied for role ${user.role}.`), ...s.activity],
+          }));
+          return;
+        }
         record({
           actor: get().currentUser?.id ?? 'analyst',
           role: get().currentUser?.role,
@@ -472,7 +484,19 @@ export const useAssessment = create<AssessmentState>()(
           ...saved(),
         })),
 
-      setOverrideBand: (band) =>
+      setOverrideBand: (band) => {
+        const user = get().currentUser ?? DEFAULT_USER;
+        if (
+          !authorizeAction(
+            { action: 'band-override', permission: 'band:override' },
+            { user, sessionActive: true },
+          ).allow
+        ) {
+          set((s) => ({
+            activity: [makeActivity(`Band override denied for role ${user.role}.`), ...s.activity],
+          }));
+          return;
+        }
         set((s) => ({
           overrideBand: band,
           activity: [
@@ -484,10 +508,22 @@ export const useAssessment = create<AssessmentState>()(
             ...s.activity,
           ],
           ...saved(),
-        })),
+        }));
+      },
 
       completeAssessment: () =>
         set((s) => {
+          const user = s.currentUser ?? DEFAULT_USER;
+          if (
+            !authorizeAction(
+              { action: 'assessment-complete', permission: 'assessment:complete' },
+              { user, sessionActive: true, resource: { incomplete: false } },
+            ).allow
+          ) {
+            return {
+              activity: [makeActivity(`Complete denied for role ${user.role}.`), ...s.activity],
+            };
+          }
           const n = s.versions.length + 1;
           const entry: VersionEntry = {
             ver: String(n).padStart(2, '0'),
@@ -509,6 +545,17 @@ export const useAssessment = create<AssessmentState>()(
 
       reassess: () =>
         set((s) => {
+          const user = s.currentUser ?? DEFAULT_USER;
+          if (
+            !authorizeAction(
+              { action: 'reassess', permission: 'assessment:edit' },
+              { user, sessionActive: true },
+            ).allow
+          ) {
+            return {
+              activity: [makeActivity(`Re-assess denied for role ${user.role}.`), ...s.activity],
+            };
+          }
           const date = todayStr();
           return {
             sanctions: s.sanctions.map((r) => ({ ...r, date })),
@@ -660,3 +707,20 @@ export const useAssessment = create<AssessmentState>()(
     },
   ),
 );
+
+/**
+ * AUDIT/TRACE: auto-seal the activity log. Whenever new entries appear, chain-hash
+ * any unsealed ones (SHA-256) so tamper-evidence is automatic, not button-only.
+ * Guarded against its own write (sealing flips the flag) so it cannot loop.
+ */
+let sealing = false;
+useAssessment.subscribe((state, prev) => {
+  if (state.activity === prev.activity || sealing) return;
+  if (!state.activity.some((e) => e.hash === undefined)) return;
+  sealing = true;
+  void Promise.resolve()
+    .then(() => state.sealAuditLog())
+    .finally(() => {
+      sealing = false;
+    });
+});

@@ -6,18 +6,22 @@
  * records a finding or changes a risk band; the analyst reads it and enters the
  * structured results in §04. Self-contained: it manages its own request state.
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAssessment } from '@/store/useAssessment';
 import { useUI } from '@/store/useUI';
 import { useToast } from '@/store/useToast';
 import { Modal } from '@/components/ui/Modal';
 import { requestCopilot } from '@/lib/integrations/aiCopilot';
+import { suggestTypologies } from '@/lib/governance/typologyIndex';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 
 export function AiTriageModal() {
   const close = useUI((s) => s.closeModal);
   const logActivity = useAssessment((s) => s.logActivity);
+  const consent = useAssessment((s) => s.consent);
+  const setConsent = useAssessment((s) => s.setConsent);
+  const role = useAssessment((s) => s.currentRole());
   const showToast = useToast((s) => s.show);
 
   const [raw, setRaw] = useState('');
@@ -28,10 +32,20 @@ export function AiTriageModal() {
   const [ungrounded, setUngrounded] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // VDB: advisory typology suggestions from the pasted text (never auto-applied).
+  const suggestions = useMemo(() => suggestTypologies(raw, role), [raw, role]);
+
+  const reasonText = (reason: string, detail?: string) => {
+    if (reason === 'not-configured') return 'not configured';
+    if (reason === 'consent-required') return 'enable AI consent (Activity Log → Governance)';
+    if (reason === 'dlp-blocked') return `blocked — secret detected (${detail ?? ''})`;
+    return detail ?? 'failed';
+  };
+
   const summarize = async () => {
     if (!raw.trim()) return;
     setStatus('loading');
-    const result = await requestCopilot('adverse-triage', raw.trim());
+    const result = await requestCopilot('adverse-triage', raw.trim(), { consent });
     if (result.ok) {
       setSummary(result.value.draft);
       setModel(result.value.model);
@@ -41,7 +55,7 @@ export function AiTriageModal() {
       logActivity(`AI adverse-media triage drafted (${result.value.model}) — analyst review.`);
     } else {
       setStatus('error');
-      setError(result.reason === 'not-configured' ? 'not configured' : (result.detail ?? 'failed'));
+      setError(reasonText(result.reason, result.detail));
     }
   };
 
@@ -92,13 +106,42 @@ export function AiTriageModal() {
           />
         </label>
 
+        {suggestions.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Possible typologies:</span>
+            {suggestions.map((s) => (
+              <span
+                key={s.id}
+                title={`similarity ${(s.score * 100).toFixed(0)}%`}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(130,95,210,.3)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                {s.label}
+              </span>
+            ))}
+            <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>(advisory only)</span>
+          </div>
+        )}
+
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }}>
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+          <span style={{ color: 'var(--text-secondary)' }}>
+            I confirm a lawful basis to process this data with the AI (GDPR).
+          </span>
+        </label>
+
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
             type="button"
             className="hk-btn-add"
             onClick={summarize}
-            disabled={!raw.trim() || status === 'loading'}
-            style={{ opacity: !raw.trim() || status === 'loading' ? 0.5 : 1 }}
+            disabled={!raw.trim() || status === 'loading' || !consent}
+            style={{ opacity: !raw.trim() || status === 'loading' || !consent ? 0.5 : 1 }}
           >
             {status === 'loading' ? 'Summarising…' : 'Summarise'}
           </button>

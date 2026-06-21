@@ -148,7 +148,9 @@ export function Sidebar() {
     });
     copilotBegin();
     openModal('ai-copilot');
-    const result = await requestCopilot('narrative-polish', narrativeToSource(narrative));
+    const result = await requestCopilot('narrative-polish', narrativeToSource(narrative), {
+      consent: s.consent,
+    });
     if (result.ok) {
       copilotSucceed(result.value);
       logActivity(
@@ -157,6 +159,12 @@ export function Sidebar() {
     } else if (result.reason === 'not-configured') {
       copilotFail('not configured');
       logActivity('AI Co-pilot not configured — kept deterministic narrative.');
+    } else if (result.reason === 'consent-required') {
+      copilotFail('consent required — enable AI consent in Activity Log → Governance');
+      logActivity('AI Co-pilot blocked — GDPR consent not recorded.');
+    } else if (result.reason === 'dlp-blocked') {
+      copilotFail(`blocked by DLP — secret detected (${result.detail ?? ''})`);
+      logActivity(`AI Co-pilot blocked by DLP: ${result.detail ?? 'secret detected'}.`);
     } else {
       copilotFail(result.detail ?? 'request failed');
       logActivity(`AI Co-pilot failed: ${result.detail ?? 'request failed'}.`);

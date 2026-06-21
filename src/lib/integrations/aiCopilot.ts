@@ -15,6 +15,8 @@
 import type { NarrativeParagraph } from '@/lib/narrative';
 import { record } from '@/lib/governance/telemetry';
 import { scoreAiOutput } from '@/lib/governance/aiRisk';
+import { consentGate } from '@/lib/governance/gdpr';
+import { scanOutbound } from '@/lib/security/dlp';
 
 /** Bundled serverless route; used when no explicit URL is configured. */
 const DEFAULT_COPILOT_ENDPOINT = '/.netlify/functions/ai-copilot';
@@ -32,9 +34,23 @@ export interface CopilotDraft {
   ungrounded: string[];
 }
 
+export type CopilotReason =
+  | 'not-configured'
+  | 'request-failed'
+  | 'consent-required'
+  | 'dlp-blocked';
+
 export type CopilotResult =
   | { ok: true; value: CopilotDraft }
-  | { ok: false; reason: 'not-configured' | 'request-failed'; detail?: string };
+  | { ok: false; reason: CopilotReason; detail?: string };
+
+/** Per-call options. `consent` gates the GDPR lawful-basis check. */
+export interface CopilotOptions {
+  consent?: boolean;
+}
+
+/** Secret patterns that must never be sent to the model (PII is redacted server-side). */
+const SECRET_KINDS = new Set(['anthropic-key', 'bearer-token', 'private-key']);
 
 /** Flattens deterministic narrative paragraphs into a single grounding source. */
 export function narrativeToSource(paragraphs: NarrativeParagraph[]): string {
@@ -44,8 +60,30 @@ export function narrativeToSource(paragraphs: NarrativeParagraph[]): string {
 /**
  * Asks the co-pilot to rephrase/triage the given source. Returns a DRAFT for the
  * analyst to review — it is never applied automatically.
+ *
+ * Two egress guards run before any network call (GDPR + DLP): the request is
+ * blocked unless lawful-basis consent is recorded, and blocked if a secret
+ * (API key/token) is detected in the outbound text.
  */
-export async function requestCopilot(mode: CopilotMode, source: string): Promise<CopilotResult> {
+export async function requestCopilot(
+  mode: CopilotMode,
+  source: string,
+  opts: CopilotOptions = {},
+): Promise<CopilotResult> {
+  // GDPR: no AI processing of personal data without a recorded lawful basis.
+  if (opts.consent === false) {
+    const gate = consentGate(false);
+    record({ actor: 'system', action: 'ai-call', outcome: 'deny', detail: gate.reason });
+    return { ok: false, reason: 'consent-required', detail: gate.reason };
+  }
+  // DLP: never let a secret leave the boundary, even though PII is redacted server-side.
+  const secrets = scanOutbound(source).filter((f) => SECRET_KINDS.has(f.kind));
+  if (secrets.length) {
+    const kinds = secrets.map((s) => s.kind).join(', ');
+    record({ actor: 'system', action: 'ai-call', outcome: 'deny', detail: `dlp:${kinds}` });
+    return { ok: false, reason: 'dlp-blocked', detail: kinds };
+  }
+
   const endpoint = import.meta.env.VITE_AI_COPILOT_URL || DEFAULT_COPILOT_ENDPOINT;
   // LAT: measure round-trip latency for the performance/monitoring layer.
   const startedAt = Date.now();

@@ -20,6 +20,8 @@ export function ActivityLogModal() {
   const verifyAuditLog = useAssessment((s) => s.verifyAuditLog);
   const exportData = useAssessment((s) => s.exportData);
   const eraseAll = useAssessment((s) => s.eraseAll);
+  const consent = useAssessment((s) => s.consent);
+  const setConsent = useAssessment((s) => s.setConsent);
   const close = useUI((s) => s.closeModal);
   const toast = useToast((s) => s.show);
 
@@ -120,6 +122,12 @@ export function ActivityLogModal() {
             </button>
           )}
         </div>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11.5 }}>
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+          <span style={{ color: 'var(--text-secondary)' }}>
+            GDPR: lawful basis recorded to process data with the AI Co-pilot.
+          </span>
+        </label>
         {integrity && (
           <div role="status" style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
             {integrity}
