@@ -7,7 +7,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useAssessment } from '@/store/useAssessment';
-import { buildReportModel, canExport, type KeyValue } from '@/lib/report';
+import { buildReportModel, canExportAs, type KeyValue } from '@/lib/report';
 import { buildNarrative } from '@/lib/narrative';
 import { PrintExport, Back } from '@/components/icons';
 
@@ -65,9 +65,10 @@ export function Report() {
     })),
   );
   const aiNarrative = useAssessment((s) => s.aiNarrative);
+  const role = useAssessment((s) => s.currentRole());
   const m = buildReportModel(data);
   const narrative = buildNarrative(data);
-  const exportable = canExport(data.signoff);
+  const exportable = canExportAs(data.signoff, role, m.band);
 
   const autoprint = Boolean((location.state as { autoprint?: boolean } | null)?.autoprint);
   const printedRef = useRef(false);

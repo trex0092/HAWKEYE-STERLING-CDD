@@ -13,6 +13,8 @@
  * deterministic narrative — AI is strictly additive and never load-bearing.
  */
 import type { NarrativeParagraph } from '@/lib/narrative';
+import { record } from '@/lib/governance/telemetry';
+import { scoreAiOutput } from '@/lib/governance/aiRisk';
 
 /** Bundled serverless route; used when no explicit URL is configured. */
 const DEFAULT_COPILOT_ENDPOINT = '/.netlify/functions/ai-copilot';
@@ -45,27 +47,76 @@ export function narrativeToSource(paragraphs: NarrativeParagraph[]): string {
  */
 export async function requestCopilot(mode: CopilotMode, source: string): Promise<CopilotResult> {
   const endpoint = import.meta.env.VITE_AI_COPILOT_URL || DEFAULT_COPILOT_ENDPOINT;
+  // LAT: measure round-trip latency for the performance/monitoring layer.
+  const startedAt = Date.now();
   try {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode, source }),
     });
+    const latencyMs = Date.now() - startedAt;
     // 503 = backend reachable but no model key → keep the deterministic narrative.
-    if (res.status === 503) return { ok: false, reason: 'not-configured' };
-    if (!res.ok) return { ok: false, reason: 'request-failed', detail: `HTTP ${res.status}` };
+    if (res.status === 503) {
+      record({
+        actor: 'system',
+        action: 'ai-call',
+        outcome: 'error',
+        detail: 'not-configured',
+        latencyMs,
+      });
+      return { ok: false, reason: 'not-configured' };
+    }
+    if (!res.ok) {
+      record({
+        actor: 'system',
+        action: 'ai-call',
+        outcome: 'error',
+        detail: `HTTP ${res.status}`,
+        latencyMs,
+      });
+      return { ok: false, reason: 'request-failed', detail: `HTTP ${res.status}` };
+    }
     const body = (await res.json()) as Partial<CopilotDraft> & { ok?: boolean };
-    if (!body?.draft) return { ok: false, reason: 'request-failed', detail: 'empty-response' };
-    return {
-      ok: true,
-      value: {
-        draft: body.draft,
-        model: body.model ?? 'unknown',
-        grounded: body.grounded ?? false,
-        ungrounded: body.ungrounded ?? [],
-      },
+    if (!body?.draft) {
+      record({
+        actor: 'system',
+        action: 'ai-call',
+        outcome: 'error',
+        detail: 'empty-response',
+        latencyMs,
+      });
+      return { ok: false, reason: 'request-failed', detail: 'empty-response' };
+    }
+    const value: CopilotDraft = {
+      draft: body.draft,
+      model: body.model ?? 'unknown',
+      grounded: body.grounded ?? false,
+      ungrounded: body.ungrounded ?? [],
     };
+    // LOG/PERF/RISK: record AI-call telemetry (side-effect; result shape unchanged).
+    record({
+      actor: 'system',
+      action: 'ai-call',
+      outcome: 'ok',
+      latencyMs,
+      ai: {
+        model: value.model,
+        grounded: value.grounded,
+        ungroundedCount: value.ungrounded.length,
+        riskScore: scoreAiOutput(value.draft, source).score,
+        latencyMs,
+      },
+    });
+    return { ok: true, value };
   } catch (e) {
+    record({
+      actor: 'system',
+      action: 'ai-call',
+      outcome: 'error',
+      latencyMs: Date.now() - startedAt,
+      detail: e instanceof Error ? e.message : String(e),
+    });
     return {
       ok: false,
       reason: 'request-failed',

@@ -20,6 +20,25 @@ import {
 } from '@/data/labels';
 import { SESSION_DURATION_SECONDS } from '@/lib/auth';
 import type { RiskBand } from '@/lib/risk';
+import { type User, type Role, findUser } from '@/lib/security/identity';
+import { setTelemetrySink, record } from '@/lib/governance/telemetry';
+import { authorizeAction } from '@/lib/governance/policy';
+import { createEncryptedStorage, clearSessionKey } from '@/lib/security/crypto';
+import { eraseLocalData, buildDataExport } from '@/lib/governance/gdpr';
+import {
+  hashEntry,
+  verifyChain,
+  type ChainVerification,
+  type ChainableEntry,
+} from '@/lib/governance/auditChain';
+
+/**
+ * Default session identity for the unscoped prototype: with no SSO/IdP configured
+ * the single operator runs as administrator, preserving full access exactly as
+ * before. A real deployment resolves a narrower role at unlock (see sso.ts), and
+ * RBAC/ABAC (lib/governance/policy.ts) then restrict accordingly.
+ */
+const DEFAULT_USER: User = findUser('admin') ?? { id: 'admin', name: 'Operator', role: 'admin' };
 
 export interface AdminInfo {
   referenceNumber: string;
@@ -96,6 +115,8 @@ export interface ActivityEntry {
   id: number;
   ts: number;
   message: string;
+  /** Tamper-evident chain hash (SHA-256), set by sealAuditLog(). */
+  hash?: string;
 }
 
 /** An AI-assisted narrative the analyst has explicitly reviewed and accepted. */
@@ -197,6 +218,11 @@ export interface AssessmentState {
   // session (not persisted)
   locked: boolean;
   remaining: number;
+  /** Resolved session identity (IAM). Null while locked; set at unlock. */
+  currentUser: User | null;
+
+  /** GDPR lawful-basis/consent flag — required before any AI processing. */
+  consent: boolean;
 
   // assessment (persisted)
   admin: AdminInfo;
@@ -218,8 +244,16 @@ export interface AssessmentState {
 
   // session actions
   tick: () => void;
-  unlock: () => void;
+  unlock: (user?: User) => void;
   lock: () => void;
+  currentRole: () => Role;
+
+  // governance actions
+  setConsent: (value: boolean) => void;
+  eraseAll: () => void;
+  exportData: () => string;
+  sealAuditLog: () => Promise<void>;
+  verifyAuditLog: () => Promise<ChainVerification>;
 
   // assessment actions
   setAdmin: (patch: Partial<AdminInfo>) => void;
@@ -274,12 +308,32 @@ function makeActivity(message: string): ActivityEntry {
   return entry;
 }
 
+/**
+ * Wire structured telemetry (lib/governance/telemetry.ts) to the same best-effort
+ * backend audit sink. This lights up MON / PERF / USAGE / DRIFT / ANOM without any
+ * new integration — the in-memory ring is the source, the optional endpoint a mirror.
+ */
+setTelemetrySink((event) => {
+  const endpoint = import.meta.env.VITE_AUDIT_ENDPOINT;
+  if (!endpoint || typeof fetch === 'undefined') return;
+  void fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'telemetry', ...event }),
+    keepalive: true,
+  }).catch(() => {
+    /* telemetry mirror is best-effort */
+  });
+});
+
 export const useAssessment = create<AssessmentState>()(
   persist(
     (set, get) => ({
       // session
       locked: true,
       remaining: SESSION_DURATION_SECONDS,
+      currentUser: null,
+      consent: false,
 
       // assessment
       admin: freshAdmin(),
@@ -306,8 +360,27 @@ export const useAssessment = create<AssessmentState>()(
           const r = s.remaining > 0 ? s.remaining - 1 : 0;
           return { remaining: r, locked: r === 0 };
         }),
-      unlock: () => set({ locked: false, remaining: SESSION_DURATION_SECONDS }),
-      lock: () => set({ locked: true, remaining: 0 }),
+      unlock: (user) => {
+        const resolved = user ?? DEFAULT_USER;
+        record({
+          actor: resolved.id,
+          role: resolved.role,
+          action: 'session-unlock',
+          outcome: 'ok',
+        });
+        set({ locked: false, remaining: SESSION_DURATION_SECONDS, currentUser: resolved });
+      },
+      lock: () => {
+        // ZTA: drop the session identity and the at-rest encryption key on lock.
+        clearSessionKey();
+        record({
+          actor: get().currentUser?.id ?? 'anonymous',
+          action: 'session-lock',
+          outcome: 'ok',
+        });
+        set({ locked: true, remaining: 0, currentUser: null });
+      },
+      currentRole: () => get().currentUser?.role ?? DEFAULT_USER.role,
 
       // assessment actions (each marks an autosave)
       setAdmin: (patch) => set((s) => ({ admin: { ...s.admin, ...patch }, ...saved() })),
@@ -371,7 +444,14 @@ export const useAssessment = create<AssessmentState>()(
         set((s) => ({ activity: [makeActivity(message), ...s.activity], ...saved() })),
 
       // Human oversight: commit an AI draft only after the analyst reviews it.
-      acceptAiNarrative: (text, model) =>
+      acceptAiNarrative: (text, model) => {
+        record({
+          actor: get().currentUser?.id ?? 'analyst',
+          role: get().currentUser?.role,
+          action: 'ai-accept',
+          outcome: 'ok',
+          ai: { model, accepted: true },
+        });
         set((s) => ({
           aiNarrative: { text, model, acceptedAt: Date.now() },
           activity: [
@@ -379,7 +459,8 @@ export const useAssessment = create<AssessmentState>()(
             ...s.activity,
           ],
           ...saved(),
-        })),
+        }));
+      },
 
       clearAiNarrative: () =>
         set((s) => ({
@@ -439,6 +520,81 @@ export const useAssessment = create<AssessmentState>()(
           };
         }),
 
+      setConsent: (value) =>
+        set((s) => ({
+          consent: value,
+          activity: [
+            makeActivity(
+              value
+                ? 'GDPR consent / lawful basis recorded for AI processing.'
+                : 'GDPR consent withdrawn — AI processing blocked.',
+            ),
+            ...s.activity,
+          ],
+          ...saved(),
+        })),
+
+      // GDPR right to erasure — zero-trust gated to a data:erase holder.
+      eraseAll: () => {
+        const user = get().currentUser ?? DEFAULT_USER;
+        const decision = authorizeAction(
+          { action: 'data-erase', permission: 'data:erase' },
+          { user, sessionActive: !get().locked },
+        );
+        if (!decision.allow) {
+          set((s) => ({
+            activity: [makeActivity(`Erase denied: ${decision.reason}.`), ...s.activity],
+          }));
+          return;
+        }
+        eraseLocalData();
+        set({
+          admin: freshAdmin(),
+          entity: freshEntity(),
+          sanctions: freshSanctions(),
+          adverse: freshAdverse(),
+          pf: freshPf(),
+          persons: [blankPerson(1)],
+          nextId: 2,
+          rba: freshRba(),
+          signoff: freshSignoff(),
+          versions: [],
+          overrideBand: null,
+          completed: false,
+          aiNarrative: null,
+          consent: false,
+          activity: [makeActivity('All local data erased (GDPR right to erasure).')],
+          ...saved(),
+        });
+      },
+
+      // GDPR data portability — zero-trust gated to a data:export holder.
+      exportData: () => {
+        const user = get().currentUser ?? DEFAULT_USER;
+        const decision = authorizeAction(
+          { action: 'data-export', permission: 'data:export' },
+          { user, sessionActive: !get().locked },
+        );
+        if (!decision.allow) return JSON.stringify({ error: decision.reason });
+        return buildDataExport();
+      },
+
+      // AUDIT/TRACE: seal the activity log into a tamper-evident SHA-256 chain.
+      sealAuditLog: async () => {
+        const ordered = [...get().activity].reverse(); // oldest → newest
+        let prev = '';
+        for (const e of ordered) {
+          e.hash = await hashEntry({ id: e.id, ts: e.ts, message: e.message }, prev);
+          prev = e.hash;
+        }
+        set((s) => ({ activity: [...s.activity], ...saved() }));
+      },
+
+      verifyAuditLog: async () => {
+        const ordered: ChainableEntry[] = [...get().activity].reverse();
+        return verifyChain(ordered);
+      },
+
       snapshot: () => {
         const s = get();
         return {
@@ -472,9 +628,13 @@ export const useAssessment = create<AssessmentState>()(
     }),
     {
       name: 'hawkeye-cdd',
-      storage: createJSONStorage(() => localStorage),
-      // Persist assessment data only — never the session gate/clock.
+      // ENC: at-rest encryption via the Web-Crypto storage adapter. Transparent
+      // before unlock (plaintext passthrough + legacy migration), AES-GCM once the
+      // session key is installed at unlock — see src/lib/security/crypto.ts.
+      storage: createJSONStorage(() => createEncryptedStorage()),
+      // Persist assessment data only — never the session gate/clock/identity.
       partialize: (s) => ({
+        consent: s.consent,
         admin: s.admin,
         entity: s.entity,
         sanctions: s.sanctions,

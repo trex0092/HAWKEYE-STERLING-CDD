@@ -137,6 +137,17 @@ redirects, Node 20). To deploy: connect the repository in Netlify, or run
 `netlify deploy --build`. Set any `VITE_*` variables (see `.env.example`) in the
 Netlify site's environment.
 
+## Governance & security controls
+
+The app ships a **code-only** implementation of the AI Governance & Security control set
+(identity/access, data protection, AI risk, monitoring, audit, compliance) using the existing
+stack plus the platform Web Crypto API — no new dependencies or external integrations. Highlights:
+AES-GCM **encryption at rest** for the persisted assessment, optional **TOTP MFA** at the lock
+gate, an **RBAC/ABAC/zero-trust** policy engine, a **tamper-evident audit chain**, AI-output
+**risk/bias/hallucination/threat** scoring, and **GDPR** erase/export/consent. Every block maps
+to its source in [`docs/GOVERNANCE-CONTROLS.md`](docs/GOVERNANCE-CONTROLS.md); the live
+observability panel is in the **Activity Log** modal.
+
 ## Contributing & policies
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, scripts, conventions

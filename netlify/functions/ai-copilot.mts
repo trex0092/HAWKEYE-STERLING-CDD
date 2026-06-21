@@ -21,6 +21,7 @@
  */
 import { redactSensitive, restoreSensitive } from '../../src/lib/ai/redaction';
 import { findUngrounded } from '../../src/lib/ai/grounding';
+import { scanThreats } from '../../src/lib/security/threatIntel';
 import { checkRateLimit, clientKey } from '../shared/rateLimit';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
@@ -90,6 +91,16 @@ export default async (req: Request): Promise<Response> => {
   }
   if (payload.source.length > MAX_INPUT_CHARS) {
     return Response.json({ error: 'source-too-large' }, { status: 413 });
+  }
+
+  // L3 THREAT: reject high-severity prompt-injection/jailbreak in the (untrusted)
+  // source before it reaches the model — defence in depth alongside the client scan.
+  const threat = scanThreats(payload.source);
+  if (threat.worst === 'high') {
+    return Response.json(
+      { error: 'threat-detected', threats: threat.threats.map((t) => t.id) },
+      { status: 422 },
+    );
   }
 
   // L2/L3: strip PII before the text leaves our trust boundary.

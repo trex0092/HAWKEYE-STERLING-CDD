@@ -6,8 +6,15 @@
 import { useState, type CSSProperties } from 'react';
 import { useAssessment } from '@/store/useAssessment';
 import { authenticate } from '@/lib/auth';
+import { verifyTotp, mfaConfigured } from '@/lib/security/totp';
+import { resolveIdentity } from '@/lib/security/sso';
+import { installSessionKey } from '@/lib/security/crypto';
+import { USER_REGISTRY } from '@/lib/security/identity';
 import { OrbitalMedallion } from '@/components/ui/OrbitalMedallion';
 import { LockBadge } from '@/components/icons';
+
+/** Optional TOTP secret — when set, the gate requires a second factor (MFA). */
+const TOTP_SECRET = import.meta.env.VITE_TOTP_SECRET as string | undefined;
 
 const overlay: CSSProperties = {
   position: 'fixed',
@@ -37,6 +44,8 @@ const card: CSSProperties = {
 export function LockGate() {
   const unlock = useAssessment((s) => s.unlock);
   const [passphrase, setPassphrase] = useState('');
+  const [code, setCode] = useState('');
+  const [account, setAccount] = useState('admin');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -44,14 +53,38 @@ export function LockGate() {
     if (busy) return;
     setBusy(true);
     setError(null);
+
+    // Factor 1: passphrase.
     const result = await authenticate(passphrase);
-    setBusy(false);
-    if (result.ok) {
-      setPassphrase('');
-      unlock();
-    } else {
+    if (!result.ok) {
+      setBusy(false);
       setError(result.error ?? 'Unable to unlock.');
+      return;
     }
+
+    // Factor 2 (MFA): TOTP code, only when a secret is configured.
+    if (mfaConfigured(TOTP_SECRET)) {
+      const ok = await verifyTotp(TOTP_SECRET, code);
+      if (!ok) {
+        setBusy(false);
+        setError('Incorrect authentication code.');
+        return;
+      }
+    }
+
+    // Identity (SSO local provider) → session user + at-rest encryption key.
+    const identity = await resolveIdentity(account);
+    if (!identity.ok || !identity.user) {
+      setBusy(false);
+      setError(identity.error ?? 'Could not resolve identity.');
+      return;
+    }
+    await installSessionKey(passphrase);
+
+    setBusy(false);
+    setPassphrase('');
+    setCode('');
+    unlock(identity.user);
   }
 
   return (
@@ -140,9 +173,47 @@ export function LockGate() {
             fontSize: 15,
             padding: '15px 18px',
             borderRadius: 12,
-            marginBottom: error ? 8 : 14,
+            marginBottom: 12,
           }}
         />
+
+        {mfaConfigured(TOTP_SECRET) && (
+          <input
+            type="text"
+            inputMode="numeric"
+            className="hk-input"
+            placeholder="Authentication code (MFA)"
+            aria-label="Authentication code"
+            value={code}
+            onChange={(e) => {
+              setCode(e.target.value);
+              if (error) setError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submit();
+            }}
+            style={{ fontSize: 15, padding: '15px 18px', borderRadius: 12, marginBottom: 12 }}
+          />
+        )}
+
+        <select
+          className="hk-input"
+          aria-label="Sign in as"
+          value={account}
+          onChange={(e) => setAccount(e.target.value)}
+          style={{
+            fontSize: 14,
+            padding: '14px 16px',
+            borderRadius: 12,
+            marginBottom: error ? 8 : 14,
+          }}
+        >
+          {USER_REGISTRY.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name} ({u.role})
+            </option>
+          ))}
+        </select>
 
         {error && (
           <div

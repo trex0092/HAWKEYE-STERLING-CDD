@@ -23,6 +23,8 @@ import {
   screeningEscalation,
   type RiskBand,
 } from '@/lib/risk';
+import { can } from '@/lib/security/rbac';
+import { roleAtLeast, type Role } from '@/lib/security/identity';
 
 /* Light-mode status colours (report palette). */
 function lightResult(v: string): string {
@@ -59,6 +61,18 @@ const or = (value: string, fallback: string = BLANK) => (value.trim() ? value.tr
  */
 export function canExport(signoff: { approvedBy: string }): boolean {
   return signoff.approvedBy.trim() !== '';
+}
+
+/**
+ * RBAC/ABAC-aware export gate (APPROVE + ABAC): export needs the sign-off AND the
+ * `report:export` permission, and an EDD (high-risk) export additionally requires
+ * MLRO authority. Falls back to the sign-off-only gate for the unscoped prototype.
+ */
+export function canExportAs(signoff: { approvedBy: string }, role: Role, band: RiskBand): boolean {
+  if (!canExport(signoff)) return false;
+  if (!can(role, 'report:export')) return false;
+  if (band === 'high' && !roleAtLeast(role, 'mlro')) return false;
+  return true;
 }
 
 export interface KeyValue {
