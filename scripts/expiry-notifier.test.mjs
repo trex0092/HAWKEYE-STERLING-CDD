@@ -5,6 +5,7 @@ import {
   collectDueItems,
   makeDedupKey,
   buildRenewalTask,
+  dailyScreeningTask,
   extractExistingKeys,
   selectStaleTasks,
   addMonths,
@@ -236,6 +237,79 @@ describe('selectStaleTasks (auto-close when renewed)', () => {
   it('protects hand-made tasks whose code is not a real customer (e.g. SAMPLE)', () => {
     const tasks = [{ gid: '5', completed: false, notes: note('SAMPLE|CAS-VER-0042|license|2026-05-30') }];
     expect(selectStaleTasks(tasks, dueKeys, knownCodes)).toEqual([]);
+  });
+});
+
+const SCREENING_SAMPLE = `SECTION 1 - CUSTOMER INFORMATION
+
+Company Name                    : Veritas Metals Trading LLC
+Customer Code                   : CAS-VER-0042
+Date of Registration            : January 10, 2015
+
+SECTION 2 - SANCTIONS SCREENING
+
+UAE Local Terrorist List (EOCN) : Result: Clear | Date: 10 January 2026 | Remarks:
+UN Consolidated (UNSC)          : Result: Clear | Date: 05 February 2026 | Remarks:
+OFAC SDN List                   : Result: Clear | Date: | Remarks:
+
+SECTION 8 - REVIEW & VERSION CONTROL
+
+Ver. 01 | Date: June 01, 2026 | Reviewed By: A | Type: Initial | Summary:
+`;
+
+describe('screening reminders', () => {
+  const today = new Date(Date.UTC(2026, 5, 21)); // 2026-06-21
+
+  it('parseAssessment takes the latest Section 2 screening date, ignoring Ver/registration', () => {
+    const parsed = parseAssessment(SCREENING_SAMPLE, 'Veritas');
+    expect(iso(parsed.lastScreeningDate)).toBe('2026-02-05'); // latest screening, not the Jun Ver. date
+  });
+
+  it('lastScreeningDate is null when no Section 2 dates are present', () => {
+    const blank = parseAssessment('SECTION 2\nOFAC SDN List : Result: | Date: | Remarks:', 'x');
+    expect(blank.lastScreeningDate).toBeNull();
+  });
+
+  it('collectDueItems raises a screening item once the interval has elapsed', () => {
+    const parsed = parseAssessment(SCREENING_SAMPLE, 'Veritas');
+    // last screened 2026-02-05, +1 month = 2026-03-05 ≤ today → due.
+    const items = collectDueItems(parsed, today, 12, 0, 1);
+    const screening = items.find((i) => i.type === 'screening');
+    expect(screening).toBeTruthy();
+    expect(iso(screening.date)).toBe('2026-03-05');
+    expect(iso(screening.lastScreened)).toBe('2026-02-05');
+  });
+
+  it('does not raise screening when recent, or when the interval is 0, or when no date', () => {
+    const recent = parseAssessment(SCREENING_SAMPLE.replace(/2026/g, '2099'), 'Veritas');
+    expect(collectDueItems(recent, today, 12, 0, 1).some((i) => i.type === 'screening')).toBe(false);
+
+    const parsed = parseAssessment(SCREENING_SAMPLE, 'Veritas');
+    expect(collectDueItems(parsed, today, 12, 0, 0).some((i) => i.type === 'screening')).toBe(false);
+  });
+
+  it('buildRenewalTask renders the re-screen narrative', () => {
+    const item = {
+      type: 'screening',
+      kind: 'Screening',
+      person: null,
+      status: 'expired',
+      daysUntil: -100,
+      date: new Date(Date.UTC(2026, 2, 5)),
+      lastScreened: new Date(Date.UTC(2026, 1, 5)),
+      dedupKey: 'CAS-VER-0042|screening|2026-03-05',
+    };
+    const task = buildRenewalTask('Veritas Metals Trading LLC', 'CAS-VER-0042', item, null);
+    expect(task.name).toContain('Re-screen');
+    expect(task.notes).toContain('last screened');
+  });
+
+  it('dailyScreeningTask builds one keyed task per day', () => {
+    const t = dailyScreeningTask(today);
+    expect(t.name).toContain('Daily sanctions/PEP screening (all customers)');
+    expect(t.dedupKey).toBe('SYSTEM|daily-screening|2026-06-21');
+    expect(t.dueOn).toBe('2026-06-21');
+    expect(extractExistingKeys([{ notes: t.notes }]).has(t.dedupKey)).toBe(true);
   });
 });
 
