@@ -6,10 +6,11 @@
  *  - the model is not trusted to invent facts (L4 grounding)
  *  - the client degrades gracefully and never auto-applies output (L5)
  */
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { redactSensitive, restoreSensitive } from '@/lib/ai/redaction';
 import { extractFacts, findUngrounded, isGrounded } from '@/lib/ai/grounding';
 import { requestCopilot, narrativeToSource } from '@/lib/integrations/aiCopilot';
+import { useAssessment } from '@/store/useAssessment';
 
 describe('PII redaction (Layer 2 — data minimisation)', () => {
   it('redacts Emirates ID, email, dates and passport-style identifiers', () => {
@@ -129,5 +130,43 @@ describe('co-pilot client (Layer 5 — human oversight & graceful fallback)', ()
     vi.stubGlobal('fetch', fetchMock);
     const result = await requestCopilot('narrative-polish', 'source text');
     expect(result).toEqual({ ok: false, reason: 'request-failed', detail: 'HTTP 502' });
+  });
+});
+
+describe('accepted AI narrative in the assessment store (Layers 5/6)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useAssessment.getState().reset();
+    useAssessment.setState({ activity: [], aiNarrative: null });
+  });
+
+  it('defaults to no AI narrative (deterministic narrative is authoritative)', () => {
+    expect(useAssessment.getState().aiNarrative).toBeNull();
+  });
+
+  it('accepts an analyst-reviewed draft and records it with the model id', () => {
+    useAssessment.getState().acceptAiNarrative('Reviewed prose.', 'claude-haiku-4-5-20251001');
+    const s = useAssessment.getState();
+    expect(s.aiNarrative).toMatchObject({
+      text: 'Reviewed prose.',
+      model: 'claude-haiku-4-5-20251001',
+    });
+    // Acceptance is auditable.
+    expect(s.activity[0].message).toContain('AI-assisted narrative accepted');
+    expect(s.activity[0].message).toContain('claude-haiku-4-5-20251001');
+  });
+
+  it('clears the AI narrative back to the deterministic one', () => {
+    useAssessment.getState().acceptAiNarrative('Reviewed prose.', 'm');
+    useAssessment.getState().clearAiNarrative();
+    const s = useAssessment.getState();
+    expect(s.aiNarrative).toBeNull();
+    expect(s.activity[0].message).toContain('reverted to deterministic');
+  });
+
+  it('drops any AI narrative when the assessment is reset', () => {
+    useAssessment.getState().acceptAiNarrative('Reviewed prose.', 'm');
+    useAssessment.getState().reset();
+    expect(useAssessment.getState().aiNarrative).toBeNull();
   });
 });

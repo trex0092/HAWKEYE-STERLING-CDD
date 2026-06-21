@@ -10,19 +10,19 @@ Last reviewed: 2026-06-21 · Owner: Compliance / MLRO
 
 ## AI-001 · Compliance Co-pilot — Narrative polish
 
-| Field                      | Value                                                                                                                                       |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**                 | Active (opt-in; disabled unless `ANTHROPIC_API_KEY` is set)                                                                                 |
-| **Purpose**                | Rephrase the deterministic compliance narrative into more fluent prose as a **draft** for the analyst.                                      |
-| **Model**                  | `claude-haiku-4-5-20251001` (pinned; override via `AI_COPILOT_MODEL`)                                                                       |
-| **Provider**               | Anthropic API (server-side, via Netlify Function)                                                                                           |
-| **Risk tier**              | **Limited risk / human-in-the-loop.** Advisory only; cannot set the risk band, decision, or finalise a report.                              |
-| **Inputs**                 | The app-generated narrative text only. PII (passport, Emirates ID, DOB, email) is redacted before the call — see `src/lib/ai/redaction.ts`. |
-| **Authoritative fallback** | The deterministic narrative (`src/lib/narrative.ts`). Used whenever AI is unconfigured or fails.                                            |
-| **Human control point**    | Output is a labelled DRAFT downloaded for review; the analyst manually decides whether to use it. Logged to the activity trail.             |
-| **Assurance**              | Grounding / no-fabrication check (`src/lib/ai/grounding.ts`) + golden tests (`src/test/ai-copilot.test.ts`), run in CI.                     |
-| **Rollback**               | Unset `ANTHROPIC_API_KEY` (instantly reverts to deterministic narrative).                                                                   |
-| **Code**                   | `netlify/functions/ai-copilot.mts`, `src/lib/integrations/aiCopilot.ts`                                                                     |
+| Field                      | Value                                                                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**                 | Active (opt-in; disabled unless `ANTHROPIC_API_KEY` is set)                                                                                                                                 |
+| **Purpose**                | Rephrase the deterministic compliance narrative into more fluent prose as a **draft** for the analyst.                                                                                      |
+| **Model**                  | `claude-haiku-4-5-20251001` (pinned; override via `AI_COPILOT_MODEL`)                                                                                                                       |
+| **Provider**               | Anthropic API (server-side, via Netlify Function)                                                                                                                                           |
+| **Risk tier**              | **Limited risk / human-in-the-loop.** Advisory only; cannot set the risk band, decision, or finalise a report.                                                                              |
+| **Inputs**                 | The app-generated narrative text only. PII (passport, Emirates ID, DOB, email) is redacted before the call — see `src/lib/ai/redaction.ts`.                                                 |
+| **Authoritative fallback** | The deterministic narrative (`src/lib/narrative.ts`). Used whenever AI is unconfigured or fails.                                                                                            |
+| **Human control point**    | Output opens in a review modal; the analyst **Accepts / edits / Discards** it. Accept inserts it in the report labelled AI-assisted; nothing is auto-applied. Logged to the activity trail. |
+| **Assurance**              | Grounding / no-fabrication check (`src/lib/ai/grounding.ts`) + golden tests (`src/test/ai-copilot.test.ts`), run in CI.                                                                     |
+| **Rollback**               | Unset `ANTHROPIC_API_KEY` (instantly reverts to deterministic narrative).                                                                                                                   |
+| **Code**                   | `netlify/functions/ai-copilot.mts`, `src/lib/integrations/aiCopilot.ts`                                                                                                                     |
 
 ## AI-002 · Compliance Co-pilot — Adverse-media triage
 
@@ -46,14 +46,14 @@ Last reviewed: 2026-06-21 · Owner: Compliance / MLRO
 
 ## Layer-by-layer coverage
 
-| Layer                               | How it is met                                                                          | Where                                                                         |
-| ----------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 1 · Discovery & Inventory           | This register                                                                          | `docs/AI-REGISTER.md`                                                         |
-| 2 · Data Governance                 | PII redaction before any model call; minimal inputs; no training on data               | `src/lib/ai/redaction.ts`                                                     |
-| 3 · Security & Resilience           | Key server-side only; untrusted-text fencing; timeout + size caps; 503 → safe fallback | `netlify/functions/ai-copilot.mts`                                            |
-| 4 · Model & Agent Assurance         | Pinned model id; grounding check; golden eval tests in CI                              | `src/lib/ai/grounding.ts`, `src/test/ai-copilot.test.ts`                      |
-| 5 · Human Oversight                 | Draft-only output; analyst accept/discard; never mutates the report; activity-logged   | `src/lib/integrations/aiCopilot.ts`, `src/components/workstation/Sidebar.tsx` |
-| 6 · Governance / Compliance / Audit | Model id + outcome logged; AI-assistance disclosure; regulatory mapping                | `docs/COMPLIANCE-NOTES.md`, activity log                                      |
+| Layer                               | How it is met                                                                           | Where                                                                                       |
+| ----------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1 · Discovery & Inventory           | This register                                                                           | `docs/AI-REGISTER.md`                                                                       |
+| 2 · Data Governance                 | PII redaction before any model call; minimal inputs; no training on data                | `src/lib/ai/redaction.ts`                                                                   |
+| 3 · Security & Resilience           | Key server-side only; untrusted-text fencing; timeout + size caps; 503 → safe fallback  | `netlify/functions/ai-copilot.mts`                                                          |
+| 4 · Model & Agent Assurance         | Pinned model id; grounding check; golden eval tests in CI                               | `src/lib/ai/grounding.ts`, `src/test/ai-copilot.test.ts`                                    |
+| 5 · Human Oversight                 | In-app Accept / edit / Discard review modal; never sets band/decision; activity-logged  | `AiCopilotModal.tsx`, `src/store/useAiCopilot.ts`, `src/components/workstation/Sidebar.tsx` |
+| 6 · Governance / Compliance / Audit | Model id + outcome logged; AI-assistance disclosure printed on the report; reg. mapping | `src/pages/Report.tsx`, `docs/COMPLIANCE-NOTES.md`, activity log                            |
 
 ## Regulatory mapping (summary)
 

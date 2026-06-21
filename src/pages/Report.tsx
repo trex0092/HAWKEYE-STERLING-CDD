@@ -64,6 +64,7 @@ export function Report() {
       overrideBand: s.overrideBand,
     })),
   );
+  const aiNarrative = useAssessment((s) => s.aiNarrative);
   const m = buildReportModel(data);
   const narrative = buildNarrative(data);
 
@@ -422,27 +423,62 @@ export function Report() {
         <div className="hk-report-page">
           <div className="hk-r-body">
             <RSectionHead index="10" title="COMPLIANCE NARRATIVE" />
-            <div style={{ marginBottom: 16, fontSize: 11, color: '#6b7280', lineHeight: 1.5 }}>
-              Auto-drafted from the assessment inputs to support review. Verify and edit before
-              relying on it; blank fields read as &ldquo;not yet recorded&rdquo; rather than invented
-              detail.
-            </div>
-            {narrative.map((p) => (
-              <div key={p.heading} style={{ marginBottom: 14 }}>
+            {aiNarrative ? (
+              <>
                 <div
                   style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
-                    fontSize: 12.5,
-                    color: '#15171f',
-                    marginBottom: 4,
+                    marginBottom: 16,
+                    fontSize: 11,
+                    color: '#6b7280',
+                    lineHeight: 1.5,
+                    padding: '8px 11px',
+                    borderRadius: 6,
+                    border: '1px solid #d8c7a3',
+                    background: '#fbf6e9',
                   }}
                 >
-                  {p.heading}
+                  <strong>AI-assisted narrative</strong> — drafted by {aiNarrative.model} and
+                  reviewed and accepted by the analyst. It records the analyst&rsquo;s inputs and
+                  does not change the risk band or decision.
                 </div>
-                <div style={{ fontSize: 11.5, color: '#15171f', lineHeight: 1.6 }}>{p.body}</div>
-              </div>
-            ))}
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    color: '#15171f',
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {aiNarrative.text}
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ marginBottom: 16, fontSize: 11, color: '#6b7280', lineHeight: 1.5 }}>
+                  Auto-drafted from the assessment inputs to support review. Verify and edit before
+                  relying on it; blank fields read as &ldquo;not yet recorded&rdquo; rather than
+                  invented detail.
+                </div>
+                {narrative.map((p) => (
+                  <div key={p.heading} style={{ marginBottom: 14 }}>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-display)',
+                        fontWeight: 700,
+                        fontSize: 12.5,
+                        color: '#15171f',
+                        marginBottom: 4,
+                      }}
+                    >
+                      {p.heading}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#15171f', lineHeight: 1.6 }}>
+                      {p.body}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
 
           <div className="hk-r-footer">

@@ -12,8 +12,9 @@ import { effectiveBand, paletteForBand, screeningEscalation, type RiskBand } fro
 import { formatClock } from '@/lib/format';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
 import { requestCopilot, narrativeToSource } from '@/lib/integrations/aiCopilot';
+import { useAiCopilot } from '@/store/useAiCopilot';
 import { buildNarrative } from '@/lib/narrative';
-import { downloadJson, downloadText } from '@/lib/download';
+import { downloadJson } from '@/lib/download';
 import { OrbitalMedallion } from '@/components/ui/OrbitalMedallion';
 import { ActionCell } from '@/components/ui/ActionCell';
 import {
@@ -68,6 +69,9 @@ export function Sidebar() {
   const logActivity = useAssessment((s) => s.logActivity);
 
   const openModal = useUI((s) => s.openModal);
+  const copilotBegin = useAiCopilot((s) => s.begin);
+  const copilotSucceed = useAiCopilot((s) => s.succeed);
+  const copilotFail = useAiCopilot((s) => s.fail);
   const overrideOpen = useUI((s) => s.overrideOpen);
   const toggleOverride = useUI((s) => s.toggleOverride);
   const closeOverride = useUI((s) => s.closeOverride);
@@ -123,9 +127,10 @@ export function Sidebar() {
     }
   };
 
-  // AI Co-pilot: rephrase the deterministic narrative into a DRAFT the analyst
-  // reviews. It never touches the assessment or report — the draft is downloaded
-  // for manual review, and the deterministic narrative remains authoritative.
+  // AI Co-pilot: rephrase the deterministic narrative into a DRAFT, then open the
+  // review modal where the analyst Accepts/edits/Discards it (Layer 5 oversight).
+  // It never sets the band or decision; the deterministic narrative stays the
+  // authoritative fallback when AI is unconfigured or fails.
   const handleCopilot = async () => {
     const s = useAssessment.getState();
     const narrative = buildNarrative({
@@ -140,29 +145,20 @@ export function Sidebar() {
       versions: s.versions,
       overrideBand: s.overrideBand,
     });
-    showToast('AI Co-pilot drafting…');
+    copilotBegin();
+    openModal('ai-copilot');
     const result = await requestCopilot('narrative-polish', narrativeToSource(narrative));
     if (result.ok) {
-      const { draft, model, grounded, ungrounded } = result.value;
-      const header =
-        `AI-ASSISTED DRAFT — review before use. Model: ${model}. ` +
-        `Grounding: ${grounded ? 'no new facts detected' : `REVIEW — possible added facts: ${ungrounded.join(', ')}`}.\n` +
-        `This draft is advisory only and does not replace the deterministic compliance narrative.\n\n`;
-      downloadText(`ai-narrative-draft-${reference || 'assessment'}.txt`, header + draft);
+      copilotSucceed(result.value);
       logActivity(
-        `AI Co-pilot drafted narrative (${model}) — ${grounded ? 'grounded' : `flagged: ${ungrounded.join(', ') || 'review'}`}; exported for analyst review.`,
-      );
-      showToast(
-        grounded
-          ? 'AI draft exported for review.'
-          : 'AI draft exported — flagged possible added facts; review carefully.',
+        `AI Co-pilot drafted narrative (${result.value.model}) — ${result.value.grounded ? 'grounded' : `flagged: ${result.value.ungrounded.join(', ') || 'review'}`}; awaiting analyst review.`,
       );
     } else if (result.reason === 'not-configured') {
+      copilotFail('not configured');
       logActivity('AI Co-pilot not configured — kept deterministic narrative.');
-      showToast('AI Co-pilot not configured — using deterministic narrative.');
     } else {
+      copilotFail(result.detail ?? 'request failed');
       logActivity(`AI Co-pilot failed: ${result.detail ?? 'request failed'}.`);
-      showToast(`AI Co-pilot failed: ${result.detail ?? 'request failed'}.`);
     }
   };
 

@@ -99,6 +99,15 @@ export interface ActivityEntry {
   message: string;
 }
 
+/** An AI-assisted narrative the analyst has explicitly reviewed and accepted. */
+export interface AiNarrative {
+  /** The accepted (possibly analyst-edited) prose. */
+  text: string;
+  /** Pinned model id that produced the original draft (for the audit trail). */
+  model: string;
+  acceptedAt: number;
+}
+
 /** A serialisable snapshot of just the assessment data (for the register). */
 export interface AssessmentSnapshot {
   admin: AdminInfo;
@@ -206,6 +215,8 @@ export interface AssessmentState {
   overrideBand: RiskBand | null;
   completed: boolean;
   lastSavedAt: number | null;
+  /** Analyst-accepted AI-assisted narrative; null means use the deterministic one. */
+  aiNarrative: AiNarrative | null;
 
   // session actions
   tick: () => void;
@@ -228,6 +239,8 @@ export interface AssessmentState {
 
   // wired workflow actions
   logActivity: (message: string) => void;
+  acceptAiNarrative: (text: string, model: string) => void;
+  clearAiNarrative: () => void;
   setOverrideBand: (band: RiskBand | null) => void;
   completeAssessment: () => void;
   reassess: () => void;
@@ -264,6 +277,7 @@ export const useAssessment = create<AssessmentState>()(
       overrideBand: null,
       completed: false,
       lastSavedAt: null,
+      aiNarrative: null,
 
       // session actions
       // The session clock only runs while unlocked; it auto-locks when it hits 0.
@@ -328,6 +342,7 @@ export const useAssessment = create<AssessmentState>()(
           rba: freshRba(),
           overrideBand: null,
           completed: false,
+          aiNarrative: null,
           activity: [makeActivity('Assessment reset to clean defaults.'), ...s.activity],
           ...saved(),
         })),
@@ -335,6 +350,27 @@ export const useAssessment = create<AssessmentState>()(
       // wired workflow actions
       logActivity: (message) =>
         set((s) => ({ activity: [makeActivity(message), ...s.activity], ...saved() })),
+
+      // Human oversight: commit an AI draft only after the analyst reviews it.
+      acceptAiNarrative: (text, model) =>
+        set((s) => ({
+          aiNarrative: { text, model, acceptedAt: Date.now() },
+          activity: [
+            makeActivity(`AI-assisted narrative accepted (${model}) — analyst reviewed.`),
+            ...s.activity,
+          ],
+          ...saved(),
+        })),
+
+      clearAiNarrative: () =>
+        set((s) => ({
+          aiNarrative: null,
+          activity: [
+            makeActivity('AI-assisted narrative removed — reverted to deterministic narrative.'),
+            ...s.activity,
+          ],
+          ...saved(),
+        })),
 
       setOverrideBand: (band) =>
         set((s) => ({
@@ -405,6 +441,9 @@ export const useAssessment = create<AssessmentState>()(
       restore: (snap) =>
         set((s) => ({
           ...snap,
+          // A loaded record starts from its deterministic narrative; any prior
+          // AI draft does not carry across assessments.
+          aiNarrative: null,
           activity: [
             makeActivity(`Loaded assessment ${snap.admin.referenceNumber} from register.`),
             ...s.activity,
@@ -431,6 +470,7 @@ export const useAssessment = create<AssessmentState>()(
         overrideBand: s.overrideBand,
         completed: s.completed,
         lastSavedAt: s.lastSavedAt,
+        aiNarrative: s.aiNarrative,
       }),
       onRehydrateStorage: () => (state) => {
         // Keep the activity id sequence ahead of any restored entries.

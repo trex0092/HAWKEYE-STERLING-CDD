@@ -136,10 +136,12 @@ How it maps to the 6 layers of agentic-AI governance:
 - **L4 Assurance** — the model id is pinned; a grounding / no-fabrication check
   (`src/lib/ai/grounding.ts`) flags any fact in the draft absent from the source; golden tests
   (`src/test/ai-copilot.test.ts`) run in CI.
-- **L5 Human oversight** — output is a **labelled DRAFT** the analyst reviews; it never sets the
-  risk band or decision, never edits the report, and every use is written to the activity log.
-- **L6 Audit** — the activity log records the model id and the grounding outcome; the firm should
-  confirm the AI-assistance disclosure wording for exported reports.
+- **L5 Human oversight** — the draft opens in a review modal where the analyst **Accepts, edits, or
+  Discards** it; it never sets the risk band or decision, and is inserted in the report only on
+  explicit Accept. Every step is written to the activity log.
+- **L6 Audit** — the activity log records the model id and the grounding outcome, and the report
+  prints an **AI-assistance disclosure** when an accepted draft is used; the firm should confirm the
+  disclosure wording.
 
 Firm to-do before enabling AI:
 
