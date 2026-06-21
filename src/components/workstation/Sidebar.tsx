@@ -9,6 +9,7 @@ import { useAssessment } from '@/store/useAssessment';
 import { useUI } from '@/store/useUI';
 import { useToast } from '@/store/useToast';
 import { effectiveBand, paletteForBand, screeningEscalation, type RiskBand } from '@/lib/risk';
+import { canExport } from '@/lib/report';
 import { formatClock } from '@/lib/format';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
 import { requestCopilot, narrativeToSource } from '@/lib/integrations/aiCopilot';
@@ -171,7 +172,13 @@ export function Sidebar() {
       bg: 'rgba(176,123,255,.1)',
       bgHover: 'rgba(176,123,255,.2)',
       border: 'rgba(176,123,255,.4)',
-      onClick: () => navigate('/report', { state: { autoprint: true } }),
+      onClick: () => {
+        if (!canExport(useAssessment.getState().signoff)) {
+          showToast('Approval required — name the approving officer (§08) before exporting.');
+          return;
+        }
+        navigate('/report', { state: { autoprint: true } });
+      },
     },
     {
       key: 'complete',

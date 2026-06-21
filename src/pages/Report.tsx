@@ -7,7 +7,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useAssessment } from '@/store/useAssessment';
-import { buildReportModel, type KeyValue } from '@/lib/report';
+import { buildReportModel, canExport, type KeyValue } from '@/lib/report';
 import { buildNarrative } from '@/lib/narrative';
 import { PrintExport, Back } from '@/components/icons';
 
@@ -67,12 +67,13 @@ export function Report() {
   const aiNarrative = useAssessment((s) => s.aiNarrative);
   const m = buildReportModel(data);
   const narrative = buildNarrative(data);
+  const exportable = canExport(data.signoff);
 
   const autoprint = Boolean((location.state as { autoprint?: boolean } | null)?.autoprint);
   const printedRef = useRef(false);
 
   useEffect(() => {
-    if (!autoprint || printedRef.current) return;
+    if (!autoprint || printedRef.current || !exportable) return;
     printedRef.current = true;
     let cancelled = false;
     const run = async () => {
@@ -91,7 +92,7 @@ export function Report() {
     return () => {
       cancelled = true;
     };
-  }, [autoprint, navigate, location.pathname]);
+  }, [autoprint, navigate, location.pathname, exportable]);
 
   const SANC_COLS = 'minmax(0,3fr) 100px 110px';
   const ADV_COLS = 'minmax(0,1fr) 100px';
@@ -116,10 +117,29 @@ export function Report() {
           type="button"
           className="hk-toolbar-btn hk-toolbar-btn--primary"
           onClick={() => window.print()}
+          disabled={!exportable}
+          title={
+            exportable ? undefined : 'Approval required — name the approving officer (§08) first.'
+          }
+          style={exportable ? undefined : { opacity: 0.5, cursor: 'not-allowed' }}
         >
           <PrintExport size={14} /> Print / Export PDF
         </button>
       </div>
+      {!exportable && (
+        <div
+          role="status"
+          style={{
+            margin: '0 auto 12px',
+            maxWidth: 880,
+            fontSize: 12.5,
+            color: '#b8860b',
+            textAlign: 'center',
+          }}
+        >
+          Export is locked until an approving officer is named in the sign-off (§08).
+        </div>
+      )}
 
       <div className="hk-report-pages">
         {/* PAGE 1 */}

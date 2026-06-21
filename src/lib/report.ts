@@ -52,6 +52,15 @@ export const REPORT_DISCLAIMER =
 
 const or = (value: string, fallback: string = BLANK) => (value.trim() ? value.trim() : fallback);
 
+/**
+ * Approval gate (Layer 5 — Human Oversight): the report may only be exported once
+ * an approving officer is named in the sign-off (§08). Keeps an unreviewed
+ * assessment from leaving the workstation as a finished-looking PDF.
+ */
+export function canExport(signoff: { approvedBy: string }): boolean {
+  return signoff.approvedBy.trim() !== '';
+}
+
 export interface KeyValue {
   k: string;
   v: string;

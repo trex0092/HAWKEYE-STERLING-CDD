@@ -99,13 +99,6 @@ function PersonCard({
         />
         <LabeledText
           labelSm
-          label="GENDER"
-          value={person.gender}
-          onChange={(v) => set({ gender: v })}
-          inputStyle={textStyle}
-        />
-        <LabeledText
-          labelSm
           mono
           label="DATE OF BIRTH"
           placeholder="dd/mm/yyyy"

@@ -76,9 +76,10 @@ assessment before any real use:
   no concurrency control, last-write-wins across tabs).
 - **Evidence capture.** Document/evidence upload is not implemented; the form records
   status fields only.
-- **Personal data.** Some person-level fields (e.g. gender, nationality) are collected
-  for identity records; confirm collection is justified and minimised under the
-  applicable data-protection law. None of these fields feed the risk band.
+- **Personal data.** Person-level fields (e.g. nationality, passport, Emirates ID) are
+  collected for identity records; confirm collection is justified and minimised under the
+  applicable data-protection law. None of these fields feed the risk band. The unused
+  `gender` field has been removed (data minimisation).
 
 ## Decisions applied (follow-up round)
 
@@ -90,8 +91,8 @@ These reflect the firm's instructions for this round:
 | Records-retention period         | Stated as firm policy: a maximum of 10 years                                           | Confirm min vs max (AML retention is usually a minimum) |
 | Sanctions/PEP/adverse hit → band | **Auto-escalate to EDD** with an on-screen alert + matching report note                | Confirm rule (Pending handling, downgrade policy)       |
 | Screening coverage               | OFAC, UN, UK, EU, UAE (sanctions §03) + worldwide PEP (§05) + adverse media (§04)      | All already present; these drive the escalation rule    |
-| GENDER field                     | Kept (recorded, never used in scoring)                                                 | Review under data-minimisation rules                    |
-| Access control                   | Demo-only client-side passphrase                                                       | Add backend auth + change the passphrase                |
+| GENDER field                     | **Removed** (was recorded but never used in scoring)                                   | Data-minimisation applied                               |
+| Access control                   | Client-side passphrase; backend seam wired (`VITE_AUTH_ENDPOINT`)                      | Set the endpoint + change the passphrase for production |
 | Sanctions/PF labels              | Kept (real, standard list names)                                                       | Confirm they match your firm's list set                 |
 | Backend persistence              | Not now (browser `localStorage` only)                                                  | Build if shared/durable records are needed              |
 | Document/evidence upload         | Not now (status fields only)                                                           | Build if document capture is required                   |

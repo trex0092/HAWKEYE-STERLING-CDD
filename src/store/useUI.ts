@@ -1,7 +1,7 @@
 /** Transient UI state: which modal is open, and the analyst-override popover. */
 import { create } from 'zustand';
 
-export type ModalKind = 'register' | 'activity' | 'ai-copilot' | null;
+export type ModalKind = 'register' | 'activity' | 'ai-copilot' | 'ai-triage' | null;
 
 interface UIState {
   modal: ModalKind;
