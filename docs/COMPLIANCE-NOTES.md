@@ -118,3 +118,34 @@ be decided by the tool — they need firm-specific knowledge or qualified sign-o
 - [ ] **Run a browser accessibility + Lighthouse audit** (CI has a Lighthouse job).
 - [ ] **Run secret/SAST scans** (gitleaks / semgrep) if used; CodeQL and
       Dependency-Review already run in CI.
+
+## AI governance (Compliance Co-pilot)
+
+The product ships an **optional, opt-in AI Co-pilot** that drafts a polished compliance
+narrative. It is disabled unless `ANTHROPIC_API_KEY` is configured server-side. Every AI
+capability is inventoried in [`AI-REGISTER.md`](./AI-REGISTER.md). Design intent: AI is
+**advisory and additive only** — the deterministic engine remains authoritative.
+
+How it maps to the 6 layers of agentic-AI governance:
+
+- **L1 Inventory** — `docs/AI-REGISTER.md` lists each capability, model, owner, risk tier, rollback.
+- **L2 Data** — PII (passport, Emirates ID, DOB, email) is redacted before any model call
+  (`src/lib/ai/redaction.ts`); only the narrative text is sent; no training on data.
+- **L3 Security** — the API key is server-side only (Netlify env, never `VITE_`); pasted text is
+  fenced as untrusted data; calls are time- and size-bounded; a 503 falls back to deterministic prose.
+- **L4 Assurance** — the model id is pinned; a grounding / no-fabrication check
+  (`src/lib/ai/grounding.ts`) flags any fact in the draft absent from the source; golden tests
+  (`src/test/ai-copilot.test.ts`) run in CI.
+- **L5 Human oversight** — output is a **labelled DRAFT** the analyst reviews; it never sets the
+  risk band or decision, never edits the report, and every use is written to the activity log.
+- **L6 Audit** — the activity log records the model id and the grounding outcome; the firm should
+  confirm the AI-assistance disclosure wording for exported reports.
+
+Firm to-do before enabling AI:
+
+- [ ] **Decide whether to enable the Co-pilot** and, if so, set `ANTHROPIC_API_KEY` in Netlify only.
+- [ ] **Confirm the data-processing basis** for sending narrative text to the model provider
+      (review the provider's data-handling / no-training terms against firm policy).
+- [ ] **Confirm the AI-assistance disclosure** wording that must appear on any AI-assisted output
+      (EU AI Act limited-risk transparency).
+- [ ] **Assign an AI owner** and a review cadence for `AI-REGISTER.md` and the eval tests.

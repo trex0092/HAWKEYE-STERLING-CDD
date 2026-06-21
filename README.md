@@ -86,15 +86,16 @@ unlock.
 The assessment autosaves to `localStorage` (the rail shows the last-saved time);
 the session lock always re-engages on reload. Right-rail actions:
 
-| Action                | Behaviour                                                             |
-| --------------------- | --------------------------------------------------------------------- |
-| `PRINT / EXPORT PDF`  | Opens the report and triggers print.                                  |
-| `COMPLETE ASSESSMENT` | Appends an auto-numbered, timestamped entry to the version log (§09). |
-| `REGISTER`            | Save/load assessments to a local register (modal).                    |
-| `ACTIVITY LOG`        | Shows the recorded activity timeline (modal).                         |
-| `SEND TO ASANA`       | Creates an Asana task (named for the entity, body = auto-drafted narrative) via the bundled function; exports JSON if unconfigured. |
-| `RESET`               | Restores clean screening/risk defaults.                               |
-| `RE-ASSESS`           | Re-screens all sanctions lists (stamps today).                        |
+| Action                 | Behaviour                                                                                                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PRINT / EXPORT PDF`   | Opens the report and triggers print.                                                                                                                                                            |
+| `COMPLETE ASSESSMENT`  | Appends an auto-numbered, timestamped entry to the version log (§09).                                                                                                                           |
+| `REGISTER`             | Save/load assessments to a local register (modal).                                                                                                                                              |
+| `ACTIVITY LOG`         | Shows the recorded activity timeline (modal).                                                                                                                                                   |
+| `SEND TO ASANA`        | Creates an Asana task (named for the entity, body = auto-drafted narrative) via the bundled function; exports JSON if unconfigured.                                                             |
+| `AI NARRATIVE (DRAFT)` | **Optional, governed AI.** Asks the Co-pilot to polish the narrative into a reviewable DRAFT (downloaded, never auto-applied); falls back to the deterministic narrative if AI is unconfigured. |
+| `RESET`                | Restores clean screening/risk defaults.                                                                                                                                                         |
+| `RE-ASSESS`            | Re-screens all sanctions lists (stamps today).                                                                                                                                                  |
 
 The **▶ Analyst Override** control under the diligence pill lets an analyst pin
 the band (CDD/SDD/EDD) over the jurisdiction-derived value; it drives the avatar,
@@ -154,6 +155,12 @@ Netlify site's environment.
 - **Visual fidelity** was matched by transcribing the design's exact tokens and
   verified via the test suite; this environment can't run a browser to screenshot,
   so a quick manual pass in `npm run dev` is recommended.
+- **AI Co-pilot (optional, governed)** — drafts a polished narrative via the bundled
+  `netlify/functions/ai-copilot.mts` (Anthropic, server-side key). It is **off** unless
+  `ANTHROPIC_API_KEY` is set, output is a reviewable DRAFT only, and PII is redacted before
+  any model call. Every AI capability is inventoried in
+  [`docs/AI-REGISTER.md`](docs/AI-REGISTER.md); governance details in
+  [`docs/COMPLIANCE-NOTES.md`](docs/COMPLIANCE-NOTES.md).
 
 ## License
 

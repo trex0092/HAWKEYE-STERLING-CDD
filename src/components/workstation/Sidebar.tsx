@@ -1,6 +1,6 @@
 /**
  * Right rail: band-driven avatar medallion, Required-Diligence pill (+ analyst
- * override popover), and the 7 wired action cells + autosave stamp. The effective
+ * override popover), and the 8 wired action cells + autosave stamp. The effective
  * band = analyst override ?? jurisdiction-derived band.
  */
 import { useNavigate } from 'react-router-dom';
@@ -11,8 +11,9 @@ import { useToast } from '@/store/useToast';
 import { effectiveBand, paletteForBand, screeningEscalation, type RiskBand } from '@/lib/risk';
 import { formatClock } from '@/lib/format';
 import { buildAsanaTask, sendToAsana } from '@/lib/integrations/asana';
+import { requestCopilot, narrativeToSource } from '@/lib/integrations/aiCopilot';
 import { buildNarrative } from '@/lib/narrative';
-import { downloadJson } from '@/lib/download';
+import { downloadJson, downloadText } from '@/lib/download';
 import { OrbitalMedallion } from '@/components/ui/OrbitalMedallion';
 import { ActionCell } from '@/components/ui/ActionCell';
 import {
@@ -26,6 +27,7 @@ import {
   Diligence,
   Override,
   Alert,
+  AiCopilot,
 } from '@/components/icons';
 
 interface CellConfig {
@@ -121,6 +123,49 @@ export function Sidebar() {
     }
   };
 
+  // AI Co-pilot: rephrase the deterministic narrative into a DRAFT the analyst
+  // reviews. It never touches the assessment or report — the draft is downloaded
+  // for manual review, and the deterministic narrative remains authoritative.
+  const handleCopilot = async () => {
+    const s = useAssessment.getState();
+    const narrative = buildNarrative({
+      admin: s.admin,
+      entity: s.entity,
+      sanctions: s.sanctions,
+      adverse: s.adverse,
+      pf: s.pf,
+      persons: s.persons,
+      rba: s.rba,
+      signoff: s.signoff,
+      versions: s.versions,
+      overrideBand: s.overrideBand,
+    });
+    showToast('AI Co-pilot drafting…');
+    const result = await requestCopilot('narrative-polish', narrativeToSource(narrative));
+    if (result.ok) {
+      const { draft, model, grounded, ungrounded } = result.value;
+      const header =
+        `AI-ASSISTED DRAFT — review before use. Model: ${model}. ` +
+        `Grounding: ${grounded ? 'no new facts detected' : `REVIEW — possible added facts: ${ungrounded.join(', ')}`}.\n` +
+        `This draft is advisory only and does not replace the deterministic compliance narrative.\n\n`;
+      downloadText(`ai-narrative-draft-${reference || 'assessment'}.txt`, header + draft);
+      logActivity(
+        `AI Co-pilot drafted narrative (${model}) — ${grounded ? 'grounded' : `flagged: ${ungrounded.join(', ') || 'review'}`}; exported for analyst review.`,
+      );
+      showToast(
+        grounded
+          ? 'AI draft exported for review.'
+          : 'AI draft exported — flagged possible added facts; review carefully.',
+      );
+    } else if (result.reason === 'not-configured') {
+      logActivity('AI Co-pilot not configured — kept deterministic narrative.');
+      showToast('AI Co-pilot not configured — using deterministic narrative.');
+    } else {
+      logActivity(`AI Co-pilot failed: ${result.detail ?? 'request failed'}.`);
+      showToast(`AI Co-pilot failed: ${result.detail ?? 'request failed'}.`);
+    }
+  };
+
   const cells: CellConfig[] = [
     {
       key: 'print',
@@ -174,6 +219,16 @@ export function Sidebar() {
       bgHover: 'rgba(122,166,255,.2)',
       border: 'rgba(122,166,255,.4)',
       onClick: () => void handleAsana(),
+    },
+    {
+      key: 'copilot',
+      icon: <AiCopilot size={ICON} />,
+      label: 'AI NARRATIVE (DRAFT)',
+      color: '#b07bff',
+      bg: 'rgba(176,123,255,.1)',
+      bgHover: 'rgba(176,123,255,.2)',
+      border: 'rgba(176,123,255,.4)',
+      onClick: () => void handleCopilot(),
     },
     {
       key: 'reset',

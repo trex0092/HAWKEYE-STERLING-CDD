@@ -25,4 +25,5 @@ export {
   ShieldCheck as Diligence,
   ArrowLeft as Back,
   TriangleAlert as Alert,
+  Sparkles as AiCopilot,
 } from 'lucide-react';
