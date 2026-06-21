@@ -344,10 +344,10 @@ export function extractExistingKeys(tasks) {
 }
 
 /**
- * Pick the renewal tasks that should be auto-closed because their underlying
- * date has been renewed (or cleared) and is no longer due. Returns the gids of
- * OPEN, notifier-created tasks (those carrying a `dedup-key:`) whose key is no
- * longer in `dueKeys`. Guarded by `knownCodes` (the customer codes we actually
+ * Pick the renewal tasks that should be deleted because their underlying date
+ * has been renewed (or cleared) and is no longer due. Returns the gids of OPEN,
+ * notifier-created tasks (those carrying a `dedup-key:`) whose key is no longer
+ * in `dueKeys`. Guarded by `knownCodes` (the customer codes we actually
  * scanned) so hand-made tasks like the "[SAMPLE]" one are never touched.
  */
 export function selectStaleTasks(existingTasks, dueKeys, knownCodes) {
@@ -404,15 +404,14 @@ async function createTask(data, token) {
   return res.json();
 }
 
-async function completeTask(gid, token) {
+async function deleteTask(gid, token) {
   const res = await fetch(`${ASANA_API}/tasks/${gid}`, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data: { completed: true } }),
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
-    throw new Error(`Asana complete task ${gid} failed: HTTP ${res.status} ${detail}`.trim());
+    throw new Error(`Asana delete task ${gid} failed: HTTP ${res.status} ${detail}`.trim());
   }
   return res.json();
 }
@@ -507,24 +506,24 @@ export async function main(env = process.env, log = console) {
     log.info(`Created: ${task.name}`);
   }
 
-  // Auto-close renewal tasks whose underlying date is no longer due (renewed).
+  // Delete renewal tasks whose underlying date is no longer due (renewed).
   const staleGids = selectStaleTasks(existing, dueKeys, knownCodes);
-  let closed = 0;
+  let deleted = 0;
   for (const gid of staleGids) {
     const name = existing.find((t) => t.gid === gid)?.name ?? gid;
     if (cfg.dryRun) {
-      log.info(`[dry-run] would close: ${name}`);
-      closed += 1;
+      log.info(`[dry-run] would delete: ${name}`);
+      deleted += 1;
       continue;
     }
-    await completeTask(gid, cfg.token);
-    closed += 1;
-    log.info(`Closed (renewed): ${name}`);
+    await deleteTask(gid, cfg.token);
+    deleted += 1;
+    log.info(`Deleted (renewed): ${name}`);
   }
 
   log.info(
     `Done. ${created} created${cfg.dryRun ? ' (dry-run)' : ''}, ${skipped} already filed, ` +
-      `${closed} closed${cfg.dryRun ? ' (dry-run)' : ''}.`,
+      `${deleted} deleted${cfg.dryRun ? ' (dry-run)' : ''}.`,
   );
 }
 
