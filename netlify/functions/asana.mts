@@ -14,6 +14,8 @@
  * to exporting the task as JSON.
  */
 
+import { checkRateLimit, clientKey } from '../shared/rateLimit';
+
 const ASANA_API = 'https://app.asana.com/api/1.0';
 
 interface AsanaTaskPayload {
@@ -27,6 +29,15 @@ interface AsanaTaskPayload {
 export default async (req: Request): Promise<Response> => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'method-not-allowed' }, { status: 405 });
+  }
+
+  // L3: throttle abuse (20 task creations/min per client).
+  const limit = checkRateLimit(`asana:${clientKey(req)}`, 20, 60_000);
+  if (!limit.allowed) {
+    return Response.json(
+      { error: 'rate-limited' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } },
+    );
   }
 
   const token = process.env.ASANA_TOKEN ?? process.env.ASANA_PAT;

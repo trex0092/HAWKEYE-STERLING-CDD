@@ -21,6 +21,7 @@
  */
 import { redactSensitive, restoreSensitive } from '../../src/lib/ai/redaction';
 import { findUngrounded } from '../../src/lib/ai/grounding';
+import { checkRateLimit, clientKey } from '../shared/rateLimit';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
@@ -58,6 +59,15 @@ const SYSTEM_PROMPTS: Record<Mode, string> = {
 export default async (req: Request): Promise<Response> => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'method-not-allowed' }, { status: 405 });
+  }
+
+  // L3: throttle abuse / runaway loops (10 AI calls/min per client).
+  const limit = checkRateLimit(`ai:${clientKey(req)}`, 10, 60_000);
+  if (!limit.allowed) {
+    return Response.json(
+      { error: 'rate-limited' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } },
+    );
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

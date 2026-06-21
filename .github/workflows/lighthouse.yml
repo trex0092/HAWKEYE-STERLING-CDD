@@ -1,7 +1,7 @@
 name: Lighthouse
 
 # Audits performance / accessibility / best-practices / SEO on every PR.
-# Thresholds are "warn" (see lighthouserc.json), so they report without blocking.
+# Thresholds are "error" (see lighthouserc.json), so a regression fails the check.
 
 on:
   pull_request:

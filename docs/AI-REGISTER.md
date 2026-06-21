@@ -28,7 +28,7 @@ Last reviewed: 2026-06-21 · Owner: Compliance / MLRO
 
 | Field                            | Value                                                                                           |
 | -------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Status**                       | Available (same backend, `mode: 'adverse-triage'`); not yet surfaced in the UI                  |
+| **Status**                       | Active — surfaced via the **AI triage** button in §04 (`AiTriageModal.tsx`)                     |
 | **Purpose**                      | Summarise analyst-pasted raw adverse-media results into themed findings as a **suggestion**.    |
 | **Model / Provider / Risk tier** | As AI-001. Cannot record a finding or change a band — the analyst enters the structured result. |
 | **Inputs**                       | Analyst-pasted text, fenced as untrusted data; PII redacted before the call.                    |
@@ -46,14 +46,14 @@ Last reviewed: 2026-06-21 · Owner: Compliance / MLRO
 
 ## Layer-by-layer coverage
 
-| Layer                               | How it is met                                                                           | Where                                                                                       |
-| ----------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| 1 · Discovery & Inventory           | This register                                                                           | `docs/AI-REGISTER.md`                                                                       |
-| 2 · Data Governance                 | PII redaction before any model call; minimal inputs; no training on data                | `src/lib/ai/redaction.ts`                                                                   |
-| 3 · Security & Resilience           | Key server-side only; untrusted-text fencing; timeout + size caps; 503 → safe fallback  | `netlify/functions/ai-copilot.mts`                                                          |
-| 4 · Model & Agent Assurance         | Pinned model id; grounding check; golden eval tests in CI                               | `src/lib/ai/grounding.ts`, `src/test/ai-copilot.test.ts`                                    |
-| 5 · Human Oversight                 | In-app Accept / edit / Discard review modal; never sets band/decision; activity-logged  | `AiCopilotModal.tsx`, `src/store/useAiCopilot.ts`, `src/components/workstation/Sidebar.tsx` |
-| 6 · Governance / Compliance / Audit | Model id + outcome logged; AI-assistance disclosure printed on the report; reg. mapping | `src/pages/Report.tsx`, `docs/COMPLIANCE-NOTES.md`, activity log                            |
+| Layer                               | How it is met                                                                                   | Where                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1 · Discovery & Inventory           | This register                                                                                   | `docs/AI-REGISTER.md`                                                                       |
+| 2 · Data Governance                 | PII redaction before any model call; minimal inputs; no training on data                        | `src/lib/ai/redaction.ts`                                                                   |
+| 3 · Security & Resilience           | Key server-side only; untrusted-text fencing; per-IP rate limit; timeout + caps; 503 → fallback | `netlify/functions/ai-copilot.mts`, `netlify/shared/rateLimit.ts`                           |
+| 4 · Model & Agent Assurance         | Pinned model id; grounding check; golden evals in CI + weekly drift workflow                    | `src/lib/ai/grounding.ts`, `src/test/ai-copilot.test.ts`, `.github/workflows/ai-evals.yml`  |
+| 5 · Human Oversight                 | In-app Accept / edit / Discard review modal; never sets band/decision; activity-logged          | `AiCopilotModal.tsx`, `src/store/useAiCopilot.ts`, `src/components/workstation/Sidebar.tsx` |
+| 6 · Governance / Compliance / Audit | Model id + outcome logged; AI-assistance disclosure printed on the report; reg. mapping         | `src/pages/Report.tsx`, `docs/COMPLIANCE-NOTES.md`, activity log                            |
 
 ## Regulatory mapping (summary)
 

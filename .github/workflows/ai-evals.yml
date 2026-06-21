@@ -1,0 +1,36 @@
+name: AI evals
+
+# Governance Layer 4 (Model & Agent Assurance): run the AI Co-pilot assurance
+# tests — PII redaction, grounding / no-fabrication, and the human-oversight
+# guardrails — on a schedule (drift watch) and whenever the AI code changes.
+
+on:
+  schedule:
+    # Weekly, Monday 05:00 UTC.
+    - cron: '0 5 * * 1'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/lib/ai/**'
+      - 'src/lib/integrations/aiCopilot.ts'
+      - 'src/store/useAiCopilot.ts'
+      - 'netlify/functions/ai-copilot.mts'
+      - 'src/test/ai-copilot.test.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run AI assurance evals
+        run: npx vitest run src/test/ai-copilot.test.ts

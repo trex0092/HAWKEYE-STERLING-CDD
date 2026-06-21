@@ -61,7 +61,6 @@ export interface Person {
   shares: string;
   type: string;
   nationality: string;
-  gender: string;
   dob: string;
   passportNo: string;
   passportExpiry: string;
@@ -132,7 +131,6 @@ function blankPerson(id: number): Person {
     shares: '',
     type: 'Individual',
     nationality: '',
-    gender: '',
     dob: '',
     passportNo: '',
     passportExpiry: '',
@@ -251,8 +249,29 @@ export interface AssessmentState {
 /** Marks the data as freshly autosaved (persist middleware writes on every set). */
 const saved = () => ({ lastSavedAt: Date.now() });
 
+/**
+ * Optional, fire-and-forget mirror of each activity entry to a backend audit log
+ * (Layer 6). Off unless `VITE_AUDIT_ENDPOINT` is set; failures are swallowed so
+ * the in-app log never depends on it. Replace the localStorage trail with this
+ * when a durable, cross-device audit store is available.
+ */
+function mirrorToAudit(entry: ActivityEntry): void {
+  const endpoint = import.meta.env.VITE_AUDIT_ENDPOINT;
+  if (!endpoint || typeof fetch === 'undefined') return;
+  void fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry),
+    keepalive: true,
+  }).catch(() => {
+    /* audit mirror is best-effort; the local log remains the source of truth */
+  });
+}
+
 function makeActivity(message: string): ActivityEntry {
-  return { id: activitySeq++, ts: Date.now(), message };
+  const entry: ActivityEntry = { id: activitySeq++, ts: Date.now(), message };
+  mirrorToAudit(entry);
+  return entry;
 }
 
 export const useAssessment = create<AssessmentState>()(
