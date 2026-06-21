@@ -38,6 +38,8 @@ export function readConfig(env = process.env) {
     token: env.ASANA_TOKEN ?? env.ASANA_PAT ?? '',
     // Source project holding the customer assessments.
     sourceProjectGid: env.ASANA_PROJECT_GID ?? '1214107620220121',
+    // Project holding per-customer risk assessments (risk rating source).
+    riskProjectGid: env.RISK_PROJECT_GID ?? '1215653768729951',
     // Project the renewal follow-up tasks are filed under ("Compliance Renewals").
     renewalsProjectGid: env.RENEWALS_PROJECT_GID ?? '1215884707932023',
     // Who the follow-up tasks are assigned to (account owner by default).
@@ -340,6 +342,44 @@ export function reviewIntervalForRisk(risk, intervals) {
   return intervals.default;
 }
 
+/** Normalise an entity name for matching across LLC / L.L.C / spacing/punctuation. */
+export function normalizeEntityName(name) {
+  return (name ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Pull `{ legalName, risk }` from a per-customer risk-assessment task, or null
+ * when it's a blank template (title says "Template", or the Legal Name is still
+ * a `[placeholder]`).
+ */
+export function parseRiskTask(task) {
+  const name = task.name ?? '';
+  const notes = task.notes ?? '';
+  if (/template/i.test(name)) return null;
+  const legalMatch = /legal name\s*:\s*(.+)/i.exec(notes);
+  const legalName = legalMatch ? legalMatch[1].trim() : '';
+  if (!legalName || legalName.includes('[')) return null;
+  let risk = '';
+  const rc = /risk classification\s*:\s*([a-z ]+)/i.exec(notes);
+  if (rc) risk = rc[1].trim();
+  if (!risk) {
+    const m = /(low|medium|high)\s*risk/i.exec(name);
+    if (m) risk = m[1];
+  }
+  if (!risk) return null;
+  return { legalName, risk };
+}
+
+/** Map of normalised legal name → risk classification, skipping templates. */
+export function buildRiskMap(tasks) {
+  const map = new Map();
+  for (const t of tasks) {
+    const parsed = parseRiskTask(t);
+    if (parsed) map.set(normalizeEntityName(parsed.legalName), parsed.risk);
+  }
+  return map;
+}
+
 /** Stable key: customer | type [| person] | date. Date keeps renewals distinct. */
 export function makeDedupKey(customerCode, item) {
   const parts = [customerCode, item.type];
@@ -530,6 +570,14 @@ export async function main(env = process.env, log = console) {
   );
   log.info(`Read ${tasks.length} customer records.`);
 
+  // Per-customer risk ratings (matched by company name) drive the review cadence.
+  let riskMap = new Map();
+  if (cfg.riskProjectGid) {
+    const riskTasks = await fetchAllTasks(cfg.riskProjectGid, 'name,notes', cfg.token);
+    riskMap = buildRiskMap(riskTasks);
+    log.info(`Read ${riskMap.size} per-customer risk rating(s).`);
+  }
+
   // Build the full list of due items across all customers, plus the set of
   // customer codes we scanned (used to scope auto-close to real records).
   const due = [];
@@ -542,7 +590,10 @@ export async function main(env = process.env, log = console) {
       ?.display_value;
     parsed.license = parseDate(columnExpiry) ?? parsed.license;
     knownCodes.add(parsed.customerCode);
-    const reviewMonths = reviewIntervalForRisk(parsed.riskClassification, cfg.reviewIntervals);
+    // Risk rating: per-customer Risk Assessments task (by name) wins, else the
+    // description's Section 6, else the default cadence.
+    const risk = riskMap.get(normalizeEntityName(parsed.companyName)) ?? parsed.riskClassification;
+    const reviewMonths = reviewIntervalForRisk(risk, cfg.reviewIntervals);
     const items = collectDueItems(
       parsed,
       today,

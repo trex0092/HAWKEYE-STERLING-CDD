@@ -7,6 +7,9 @@ import {
   buildRenewalTask,
   dailyScreeningTask,
   reviewIntervalForRisk,
+  parseRiskTask,
+  buildRiskMap,
+  normalizeEntityName,
   extractExistingKeys,
   selectStaleTasks,
   addMonths,
@@ -335,6 +338,39 @@ describe('risk-based CDD review cadence', () => {
       'x',
     );
     expect(parsed.riskClassification).toBe('High');
+  });
+});
+
+describe('risk ratings from the Risk Assessments project', () => {
+  const templateTask = {
+    name: 'COMPLIANCE STATEMENT — LOW RISK (CDD) | Hawkeye Sterling LLC | Template',
+    notes: 'Legal Name            : [Full Legal Entity Name]\nRisk Classification   : LOW RISK',
+  };
+  const realTask = {
+    name: 'COMPLIANCE STATEMENT — HIGH RISK (EDD) | Acme Bullion DMCC',
+    notes:
+      'Legal Name            : Acme Bullion DMCC\nTrade Licence / Reg.  : 12345\nRisk Classification   : HIGH RISK',
+  };
+
+  it('skips blank templates and placeholder legal names', () => {
+    expect(parseRiskTask(templateTask)).toBeNull();
+  });
+
+  it('parses a real per-customer risk task', () => {
+    expect(parseRiskTask(realTask)).toEqual({ legalName: 'Acme Bullion DMCC', risk: 'HIGH RISK' });
+  });
+
+  it('builds a name→risk map that matches across LLC / L.L.C / spacing', () => {
+    const map = buildRiskMap([templateTask, realTask]);
+    expect(map.size).toBe(1);
+    expect(map.get(normalizeEntityName('Acme Bullion D.M.C.C'))).toBe('HIGH RISK');
+    expect(map.get(normalizeEntityName('  acme   bullion dmcc '))).toBe('HIGH RISK');
+  });
+
+  it('the mapped risk drives the review interval (High → 1 month)', () => {
+    const map = buildRiskMap([realTask]);
+    const risk = map.get(normalizeEntityName('Acme Bullion DMCC'));
+    expect(reviewIntervalForRisk(risk, { high: 1, medium: 3, low: 6, default: 12 })).toBe(1);
   });
 });
 
