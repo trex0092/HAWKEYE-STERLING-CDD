@@ -20,7 +20,7 @@ jobs:
       # Non-blocking: needs "Allow GitHub Actions to create and approve pull
       # requests" (Settings → Actions → General). Until that's on, this no-ops
       # instead of failing the run.
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         continue-on-error: true
         with:
           release-type: node
