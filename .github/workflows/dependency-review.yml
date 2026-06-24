@@ -15,7 +15,7 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Dependency Review
         # Advisory: won't block PRs. Becomes a real gate once the repo's
         # Dependency Graph is enabled (Settings → Code security).
