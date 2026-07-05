@@ -1,5 +1,14 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Security vulnerability
+  - name: 🔒 Security vulnerability
     url: https://github.com/trex0092/hawkeye-sterling-cdd/security/advisories/new
     about: Please report security issues privately, not as public issues.
+  - name: 💬 Questions & discussions
+    url: https://github.com/trex0092/hawkeye-sterling-cdd/discussions
+    about: Ask questions and discuss ideas with the community.
+  - name: 🆘 Support & getting help
+    url: https://github.com/trex0092/hawkeye-sterling-cdd/blob/main/SUPPORT.md
+    about: Read the support guide before opening an issue.
+  - name: 📖 Documentation
+    url: https://github.com/trex0092/hawkeye-sterling-cdd#readme
+    about: Setup, screens, scripts, and how the app maps to the design.
