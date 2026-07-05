@@ -1,0 +1,10 @@
+# Security contact information for Hawkeye Sterling CDD.
+# Follows RFC 9116 — https://www.rfc-editor.org/rfc/rfc9116
+# Please report vulnerabilities privately; do not open a public issue.
+
+Contact: https://github.com/trex0092/hawkeye-sterling-cdd/security/advisories/new
+Contact: mailto:hawkeye.sterling.v2@gmail.com
+Policy: https://github.com/trex0092/hawkeye-sterling-cdd/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: https://hawkeye-sterling-cdd.netlify.app/.well-known/security.txt
+Expires: 2027-07-05T00:00:00.000Z
