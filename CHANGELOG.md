@@ -25,6 +25,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Code of Conduct enforcement contact and Community Impact Guidelines.
 - Conventional Commits PR-title validation (`pr-title.yml` workflow) to keep
   `main` history parseable by release-please and the release-notes grouping.
+- OpenSSF Scorecard supply-chain analysis (`scorecard.yml` workflow) with a
+  README badge and results published to code scanning.
+- Question issue form (`.github/ISSUE_TEMPLATE/question.yml`) and matching
+  `question` label.
 - CodeQL code-scanning workflow.
 - Netlify deployment config (`netlify.toml`) with SPA redirects.
 

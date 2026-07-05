@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/ci.yml/badge.svg)](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/codeql.yml/badge.svg)](https://github.com/trex0092/hawkeye-sterling-cdd/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/trex0092/hawkeye-sterling-cdd/badge)](https://securityscorecards.dev/viewer/?uri=github.com/trex0092/hawkeye-sterling-cdd)
 ![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-3ddc84)
 [![Live on Netlify](https://img.shields.io/badge/live-Netlify-36e0d0)](https://hawkeye-sterling-cdd.netlify.app)

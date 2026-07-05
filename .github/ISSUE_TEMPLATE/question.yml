@@ -1,0 +1,39 @@
+name: Question
+description: Ask a usage, configuration, or compliance-policy question
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Please check the README, `docs/COMPLIANCE-NOTES.md` and existing issues
+        first. **Do not include real customer, counterparty, or PII data** — use
+        redacted or synthetic examples. For security vulnerabilities, use private
+        reporting instead (see `SECURITY.md`).
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to do, and what's unclear?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Setup / running locally
+        - Configuration (VITE_* / env)
+        - Risk band / jurisdiction map
+        - Report / export
+        - Compliance policy / governance
+        - Deployment (Netlify)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Version/commit, environment, and anything you've already tried.
+    validations:
+      required: false
