@@ -50,4 +50,8 @@ npm run lint && npm run typecheck && npm run test && npm run build
 
 - Target `main`; keep PRs focused and reviewable.
 - Fill in the PR template; link any related issue.
+- **PR titles must follow [Conventional Commits](https://www.conventionalcommits.org/)**
+  (e.g. `feat: …`, `fix: …`, `docs: …`) — the title becomes the squash-merge
+  commit subject and drives automated versioning and release notes. A CI check
+  enforces this.
 - All CI checks must pass before merge.

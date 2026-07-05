@@ -23,6 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`labels.yml`) so every label referenced by labeling, release notes and
   stale automation exists and stays consistent.
 - Code of Conduct enforcement contact and Community Impact Guidelines.
+- Conventional Commits PR-title validation (`pr-title.yml` workflow) to keep
+  `main` history parseable by release-please and the release-notes grouping.
 - CodeQL code-scanning workflow.
 - Netlify deployment config (`netlify.toml`) with SPA redirects.
 
