@@ -1,0 +1,28 @@
+name: Sync labels
+
+# Reconciles the repository's labels to the canonical set in .github/labels.yml
+# so the labels referenced by the labeler, release notes and stale workflows
+# always exist. Runs when the label set changes and can be triggered manually.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/labels.yml'
+      - '.github/workflows/labels.yml'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Sync labels from .github/labels.yml
+        uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          yaml-file: .github/labels.yml
+          # Keep labels not listed in the file (e.g. Dependabot/GitHub defaults).
+          skip-delete: true

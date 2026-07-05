@@ -19,6 +19,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `labeler.yml` workflow), scheduled stale issue/PR housekeeping
   (`stale.yml` workflow), and grouped auto-generated release notes
   (`.github/release.yml`).
+- Canonical label set (`.github/labels.yml`) with a sync workflow
+  (`labels.yml`) so every label referenced by labeling, release notes and
+  stale automation exists and stays consistent.
 - Code of Conduct enforcement contact and Community Impact Guidelines.
 - CodeQL code-scanning workflow.
 - Netlify deployment config (`netlify.toml`) with SPA redirects.
