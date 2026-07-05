@@ -29,6 +29,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   README badge and results published to code scanning.
 - Least-privilege `permissions` and a cancel-in-progress `concurrency` block on
   the CI workflow (Scorecard Token-Permissions hardening + CI-minute savings).
+- RFC 9116 `security.txt` published at `/.well-known/security.txt` with the
+  private disclosure contacts and policy link.
 - Question issue form (`.github/ISSUE_TEMPLATE/question.yml`) and matching
   `question` label.
 - CodeQL code-scanning workflow.

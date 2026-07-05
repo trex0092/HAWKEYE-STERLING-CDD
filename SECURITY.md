@@ -26,6 +26,9 @@ We aim to acknowledge reports within **3 business days** and to provide a
 remediation timeline after triage. Please allow reasonable time for a fix before
 any public disclosure.
 
+A machine-readable contact is also published per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116)
+at [`/.well-known/security.txt`](public/.well-known/security.txt).
+
 ## Handling notes
 
 - No secrets are committed to this repository. Configuration (passphrase, auth
