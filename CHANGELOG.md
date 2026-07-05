@@ -27,6 +27,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `main` history parseable by release-please and the release-notes grouping.
 - OpenSSF Scorecard supply-chain analysis (`scorecard.yml` workflow) with a
   README badge and results published to code scanning.
+- Least-privilege `permissions` and a cancel-in-progress `concurrency` block on
+  the CI workflow (Scorecard Token-Permissions hardening + CI-minute savings).
 - Question issue form (`.github/ISSUE_TEMPLATE/question.yml`) and matching
   `question` label.
 - CodeQL code-scanning workflow.
