@@ -52,6 +52,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `npm audit` now reports **0 vulnerabilities** (the esbuild dev-server advisory
   chain is resolved by Vite 8 / Vitest 4).
+- **Pinned every GitHub Action to a full commit SHA** (OpenSSF Scorecard
+  Pinned-Dependencies), with a version comment on each pin.
+- Added **`step-security/harden-runner`** (egress-policy: audit) to the workflows
+  that check out and execute repository code (CI, CodeQL, Lighthouse, AI evals,
+  expiry notifier).
+- Fixed the OpenSSF Scorecard workflow, which referenced a non-existent
+  `ossf/scorecard-action@v2` ref and failed on every run; it is now pinned to
+  `v2.4.3`.
 
 ## [1.0.0] - 2026-06-17
 
