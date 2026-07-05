@@ -1,0 +1,41 @@
+name: PR title
+
+# Validates that pull request titles follow Conventional Commits. Squash-merges
+# use the PR title as the commit subject, so this keeps main's history parseable
+# by release-please (versioning + CHANGELOG) and the grouped release notes.
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed Conventional Commit types (aligned with CONTRIBUTING.md and
+          # the release-notes categories in .github/release.yml).
+          types: |
+            feat
+            fix
+            docs
+            chore
+            ci
+            build
+            refactor
+            perf
+            test
+            style
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" should start lower-case, e.g.
+            "feat: add analyst override" not "feat: Add analyst override".
