@@ -1,0 +1,73 @@
+# Canonical label set for the repository, synced by .github/workflows/labels.yml.
+# These back the issue templates, Dependabot, PR auto-labeling (.github/labeler.yml)
+# and grouped release notes (.github/release.yml), so the whole triage system stays
+# consistent. Edit here — the sync workflow reconciles the repository to match.
+
+# ── Type ──────────────────────────────────────────────────────────────────────
+- name: bug
+  color: d73a4a
+  description: Something isn't working
+- name: fix
+  color: d73a4a
+  description: A bug fix
+- name: enhancement
+  color: a2eeef
+  description: New feature or request
+- name: feature
+  color: a2eeef
+  description: New capability
+- name: documentation
+  color: 0075ca
+  description: Documentation and governance docs
+- name: chore
+  color: fef2c0
+  description: Maintenance and housekeeping
+- name: security
+  color: b60205
+  description: Security-related; exempt from stale
+- name: breaking-change
+  color: b60205
+  description: Backwards-incompatible change
+
+# ── Area ──────────────────────────────────────────────────────────────────────
+- name: frontend
+  color: 5319e7
+  description: UI components, pages, and styles
+- name: risk-logic
+  color: 8250df
+  description: Core risk derivation, data, and store
+- name: netlify
+  color: 36e0d0
+  description: Netlify functions and deploy config
+- name: ci
+  color: bfd4f2
+  description: CI/CD workflows
+- name: github-actions
+  color: bfd4f2
+  description: GitHub Actions and automation
+- name: tests
+  color: c2e0c6
+  description: Test suite changes
+- name: governance
+  color: 1d76db
+  description: Governance, policy, and community health
+- name: dependencies
+  color: 0366d6
+  description: Dependency updates
+
+# ── Status ────────────────────────────────────────────────────────────────────
+- name: stale
+  color: cccccc
+  description: No recent activity; will be closed automatically
+- name: pinned
+  color: 006b75
+  description: Exempt from stale automation
+- name: blocked
+  color: e11d21
+  description: Blocked on external work; exempt from stale
+- name: in-progress
+  color: fbca04
+  description: Being actively worked on; exempt from stale
+- name: ignore-for-release
+  color: ededed
+  description: Omit from auto-generated release notes
