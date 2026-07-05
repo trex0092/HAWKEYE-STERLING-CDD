@@ -25,6 +25,9 @@
 - name: security
   color: b60205
   description: Security-related; exempt from stale
+- name: question
+  color: d876e3
+  description: A question or request for guidance
 - name: breaking-change
   color: b60205
   description: Backwards-incompatible change
