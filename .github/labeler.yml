@@ -1,0 +1,67 @@
+# Path-based auto-labeling for pull requests (actions/labeler@v5).
+# Keeps labels consistent with the issue templates, Dependabot, and
+# .github/release.yml categories.
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'docs/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+
+github-actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+          - '.github/dependabot.yml'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
+
+governance:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'GOVERNANCE.md'
+          - 'CODE_OF_CONDUCT.md'
+          - 'CONTRIBUTING.md'
+          - 'SECURITY.md'
+          - 'SUPPORT.md'
+          - '.github/CODEOWNERS'
+          - 'docs/GOVERNANCE-CONTROLS.md'
+          - 'docs/COMPLIANCE-NOTES.md'
+          - 'docs/AI-REGISTER.md'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/components/**'
+          - 'src/pages/**'
+          - 'src/styles/**'
+          - 'index.html'
+
+risk-logic:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/lib/**'
+          - 'src/data/**'
+          - 'src/store/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/test/**'
+          - '**/*.test.ts'
+          - '**/*.test.tsx'
+
+netlify:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'netlify/**'
+          - 'netlify.toml'

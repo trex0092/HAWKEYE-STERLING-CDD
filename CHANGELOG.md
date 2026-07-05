@@ -11,6 +11,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Project metadata and community health files: `LICENSE` (proprietary),
   `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates,
   `CODEOWNERS`, Dependabot, `.editorconfig`, `.nvmrc`, `CHANGELOG.md`.
+- Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
+  control) and `SUPPORT.md` (how to get help), linked from the README.
+- Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,
+  core risk logic, and server-side integrations.
+- Repository automation: PR auto-labeling (`.github/labeler.yml` +
+  `labeler.yml` workflow), scheduled stale issue/PR housekeeping
+  (`stale.yml` workflow), and grouped auto-generated release notes
+  (`.github/release.yml`).
+- Code of Conduct enforcement contact and Community Impact Guidelines.
 - CodeQL code-scanning workflow.
 - Netlify deployment config (`netlify.toml`) with SPA redirects.
 

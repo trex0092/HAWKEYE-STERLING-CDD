@@ -1,0 +1,20 @@
+name: Labeler
+
+# Applies path-based labels to pull requests using .github/labeler.yml.
+# pull_request_target lets forked PRs be labelled with a read-scoped default token.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          sync-labels: true

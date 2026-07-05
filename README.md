@@ -148,12 +148,19 @@ gate, an **RBAC/ABAC/zero-trust** policy engine, a **tamper-evident audit chain*
 to its source in [`docs/GOVERNANCE-CONTROLS.md`](docs/GOVERNANCE-CONTROLS.md); the live
 observability panel is in the **Activity Log** modal.
 
-## Contributing & policies
+## Contributing & governance
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, scripts, conventions
+- [`GOVERNANCE.md`](GOVERNANCE.md) — roles, decision-making, change control
 - [`SECURITY.md`](SECURITY.md) — vulnerability reporting
-- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
-- [`CHANGELOG.md`](CHANGELOG.md)
+- [`SUPPORT.md`](SUPPORT.md) — where to get help
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) — community standards & enforcement
+- [`CHANGELOG.md`](CHANGELOG.md) — release history
+
+Repository governance is enforced in-repo: branch changes clear CI
+(lint · typecheck · test · build), CodeQL and Dependency Review; a code-owner
+review is required via [`.github/CODEOWNERS`](.github/CODEOWNERS); pull requests
+are auto-labelled and the backlog is kept tidy by scheduled stale housekeeping.
 
 ## Notes & next steps
 
