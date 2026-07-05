@@ -1,2 +1,31 @@
-# Default owners for everything in the repo.
-* @trex0092
+# Code owners for Hawkeye Sterling CDD.
+#
+# Each line maps a path pattern to its owner(s). When a pull request touches a
+# matching path, the owner is automatically requested for review. The last
+# matching pattern takes precedence. See:
+# https://docs.github.com/articles/about-code-owners
+
+# Default owner for everything in the repo.
+*                       @trex0092
+
+# Governance, policy & community health files.
+/GOVERNANCE.md          @trex0092
+/CODE_OF_CONDUCT.md     @trex0092
+/CONTRIBUTING.md        @trex0092
+/SECURITY.md            @trex0092
+/SUPPORT.md             @trex0092
+/LICENSE                @trex0092
+
+# CI/CD, dependency and repository automation.
+/.github/               @trex0092
+
+# Compliance, AI governance & control documentation.
+/docs/                  @trex0092
+
+# Core risk & compliance logic (change carefully — see GOVERNANCE.md).
+/src/lib/               @trex0092
+/src/data/              @trex0092
+/src/store/             @trex0092
+
+# Server-side integrations (Netlify functions, AI co-pilot).
+/netlify/               @trex0092
