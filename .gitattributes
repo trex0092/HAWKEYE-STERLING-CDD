@@ -1,0 +1,32 @@
+# Normalize line endings to LF on check-in; auto-detect text vs binary.
+* text=auto eol=lf
+
+# Explicit text files (kept LF).
+*.ts    text
+*.tsx   text
+*.js    text
+*.mjs   text eol=lf
+*.mts   text
+*.json  text
+*.css   text
+*.html  text
+*.md    text
+*.yml   text
+*.yaml  text
+*.svg   text
+*.sh    text eol=lf
+
+# Binary assets — never normalize.
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.pdf   binary
+
+# Generated / vendored files — exclude from language stats and collapse in diffs.
+package-lock.json               linguist-generated=true
+docs/design-handoff/*.dc.html   linguist-vendored=true
