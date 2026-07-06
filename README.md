@@ -157,6 +157,7 @@ observability panel is in the **Activity Log** modal.
 - [`SUPPORT.md`](SUPPORT.md) — where to get help
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) — community standards & enforcement
 - [`CHANGELOG.md`](CHANGELOG.md) — release history
+- [`docs/REPOSITORY-HARDENING.md`](docs/REPOSITORY-HARDENING.md) — admin settings checklist
 
 Repository governance is enforced in-repo: branch changes clear CI
 (lint · typecheck · test · build), CodeQL and Dependency Review; a code-owner

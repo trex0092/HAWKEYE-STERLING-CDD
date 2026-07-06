@@ -60,6 +60,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed the OpenSSF Scorecard workflow, which referenced a non-existent
   `ossf/scorecard-action@v2` ref and failed on every run; it is now pinned to
   `v2.4.3`.
+- Added [`docs/REPOSITORY-HARDENING.md`](docs/REPOSITORY-HARDENING.md), an
+  auditable checklist of the admin-only repository settings (branch protection,
+  code security features, Discussions, presentation) that complete the setup.
 
 ## [1.0.0] - 2026-06-17
 
