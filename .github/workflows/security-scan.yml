@@ -1,0 +1,94 @@
+name: Security scan
+
+# Aggressive, continuously-run security scanning that feeds the repository's
+# Security dashboard (code scanning):
+#   • Trivy    — dependency vulnerabilities + IaC/config misconfigurations
+#   • Zizmor   — static security audit of the GitHub Actions workflows themselves
+#   • SBOM     — CycloneDX software bill of materials, published as an artifact
+#
+# Scanners report into code scanning (SARIF) rather than hard-failing the build,
+# so findings are triaged from the Security tab. Flip Trivy's exit-code / Zizmor's
+# continue-on-error once the findings are baselined to make them blocking gates.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1' # weekly, Monday 06:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    name: Trivy vulnerability & misconfig scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Run Trivy (filesystem)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: fs
+          scanners: vuln,misconfig
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: '0' # report-only; findings surface in the Security tab
+
+      - name: Upload Trivy results to code scanning
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
+
+  zizmor:
+    name: Zizmor workflow security audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Run zizmor
+        # Advisory: uploads SARIF to code scanning without blocking until baselined.
+        continue-on-error: true
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+        with:
+          persona: pedantic
+
+  sbom:
+    name: SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+          artifact-name: sbom.cyclonedx.json
