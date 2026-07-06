@@ -24,6 +24,7 @@ npm run dev                  # http://localhost:5173  (unlock passphrase: "sterl
 | `npm run build`     | Type-check + production build |
 | `npm run preview`   | Serve the production build    |
 | `npm run test`      | Vitest suite                  |
+| `npm run coverage`  | Vitest with coverage + floors |
 | `npm run lint`      | ESLint                        |
 | `npm run format`    | Prettier (write)              |
 | `npm run typecheck` | `tsc --noEmit`                |

@@ -31,6 +31,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added an importable branch-protection ruleset
   (`.github/rulesets/main-branch-protection.json`) so protecting `main` is a
   one-click **Settings → Rules → Import** rather than a manual form.
+- Added **test coverage** (`@vitest/coverage-v8`): an `npm run coverage` script,
+  a coverage config with regression-guard thresholds, and CI now runs the suite
+  with coverage enforced (current: ~75% statements / 61% branches).
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,

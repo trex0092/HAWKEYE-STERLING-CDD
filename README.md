@@ -52,6 +52,7 @@ Other scripts:
 npm run build        # type-check + production build
 npm run preview      # serve the production build
 npm run test         # run the Vitest suite
+npm run coverage     # Vitest with coverage report + thresholds
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint
 npm run format       # prettier --write
