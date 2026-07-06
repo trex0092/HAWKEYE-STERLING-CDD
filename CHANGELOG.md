@@ -33,7 +33,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   one-click **Settings → Rules → Import** rather than a manual form.
 - Added **test coverage** (`@vitest/coverage-v8`): an `npm run coverage` script,
   a coverage config with regression-guard thresholds, and CI now runs the suite
-  with coverage enforced (current: ~75% statements / 61% branches).
+  with coverage enforced.
+- Added 17 unit tests for previously under-covered modules (`lib/download`,
+  `store/useToast`, `lib/governance/escalation`, `store/useAiCopilot`), lifting
+  overall coverage to ~77% statements / ~62% branches (149 tests total) and
+  raising the enforced floors accordingly.
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,
