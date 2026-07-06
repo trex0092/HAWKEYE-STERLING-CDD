@@ -48,6 +48,10 @@ can merge:
 Dependencies are kept current automatically via **Dependabot**; patch and minor
 updates auto-merge once checks pass, while majors are reviewed manually.
 
+The repository-side controls are complemented by a small set of admin **settings**
+(branch protection, code security features, Discussions) recorded in
+[`docs/REPOSITORY-HARDENING.md`](docs/REPOSITORY-HARDENING.md).
+
 ## Branching & releases
 
 - Development targets `main`; work happens on `feature/*`, `fix/*`, or `chore/*`
