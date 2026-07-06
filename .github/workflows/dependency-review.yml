@@ -1,8 +1,9 @@
 name: Dependency Review
 
 # Flags vulnerable or disallowed-licence dependencies introduced by a PR.
-# Note: on a private repo this requires the Dependency Graph to be enabled
-# (Settings → Code security → Dependency graph — free).
+# Advisory until the Dependency Graph is enabled (Settings → Code security — free):
+# the action errors without it, so it must not block. Once enabled, drop
+# continue-on-error below to make this a real gate.
 
 on:
   pull_request:
@@ -10,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write # post the review summary comment on failure
 
 jobs:
   dependency-review:
@@ -19,8 +21,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Dependency Review
-        # Advisory: won't block PRs. Becomes a real gate once the repo's
-        # Dependency Graph is enabled (Settings → Code security).
+        # Advisory until Dependency Graph is enabled (see header). Then remove this.
         continue-on-error: true
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:

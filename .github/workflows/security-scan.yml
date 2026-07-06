@@ -6,9 +6,9 @@ name: Security scan
 #   • Zizmor   — static security audit of the GitHub Actions workflows themselves
 #   • SBOM     — CycloneDX software bill of materials, published as an artifact
 #
-# Scanners report into code scanning (SARIF) rather than hard-failing the build,
-# so findings are triaged from the Security tab. Flip Trivy's exit-code / Zizmor's
-# continue-on-error once the findings are baselined to make them blocking gates.
+# Zizmor is a BLOCKING gate: a new insecure workflow fails CI. Trivy stays
+# advisory (SARIF into the Security tab) so a transient upstream CVE doesn't
+# block unrelated PRs — Dependabot + Dependency Review gate dependencies.
 
 on:
   push:
@@ -77,8 +77,7 @@ jobs:
           persist-credentials: false
 
       - name: Run zizmor
-        # Advisory: uploads SARIF to code scanning without blocking until baselined.
-        continue-on-error: true
+        # Blocking gate: fails CI on a workflow-security finding (baseline is clean).
         uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
 
   sbom:
