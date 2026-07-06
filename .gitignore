@@ -31,3 +31,6 @@ pnpm-debug.log*
 
 # TS build info
 *.tsbuildinfo
+
+# Test coverage output
+coverage
