@@ -11,6 +11,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Project metadata and community health files: `LICENSE` (proprietary),
   `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates,
   `CODEOWNERS`, Dependabot, `.editorconfig`, `.nvmrc`, `CHANGELOG.md`.
+- `.gitattributes` — LF line-ending normalization and Linguist markers
+  (`package-lock.json` generated, design `*.dc.html` vendored).
+- Workflow linting via `actionlint` (`actionlint.yml`), which lints the
+  Actions workflows on any change to `.github/workflows/**`.
+- Documentation issue form (`.github/ISSUE_TEMPLATE/documentation.yml`).
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,

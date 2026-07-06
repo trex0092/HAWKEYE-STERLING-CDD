@@ -1,0 +1,30 @@
+name: Documentation
+description: Report a docs problem or suggest a docs improvement
+labels: [documentation]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        For README, CONTRIBUTING, GOVERNANCE, SECURITY, or the compliance docs
+        under `docs/`. **Do not include real customer, counterparty, or PII
+        data** — use redacted or synthetic examples.
+  - type: input
+    id: location
+    attributes:
+      label: Which document or page?
+      placeholder: e.g. README.md → "Getting started", or docs/COMPLIANCE-NOTES.md
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong or missing?
+      description: Describe the inaccuracy, gap, or improvement.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested wording (optional)
+    validations:
+      required: false
