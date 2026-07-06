@@ -28,6 +28,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   upstream CVE can't block unrelated PRs; Dependency Review stays advisory until
   the Dependency Graph repository setting is enabled (then drop its
   `continue-on-error`).
+- Added an importable branch-protection ruleset
+  (`.github/rulesets/main-branch-protection.json`) so protecting `main` is a
+  one-click **Settings → Rules → Import** rather than a manual form.
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,
