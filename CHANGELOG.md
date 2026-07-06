@@ -38,6 +38,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `store/useToast`, `lib/governance/escalation`, `store/useAiCopilot`), lifting
   overall coverage to ~77% statements / ~62% branches (149 tests total) and
   raising the enforced floors accordingly.
+- Added 10 component tests for the reusable `Modal`/`Toaster` primitives and the
+  Section 01/08 form sections, taking coverage to ~78% statements / ~63% branches
+  (159 tests) and raising the floors again.
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,
