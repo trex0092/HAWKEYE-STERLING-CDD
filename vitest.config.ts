@@ -28,10 +28,10 @@ export default defineConfig({
       ],
       // Floors set below current coverage to prevent regression without churn.
       thresholds: {
-        statements: 74,
-        branches: 58,
-        functions: 72,
-        lines: 74,
+        statements: 76,
+        branches: 60,
+        functions: 74,
+        lines: 76,
       },
     },
   },
