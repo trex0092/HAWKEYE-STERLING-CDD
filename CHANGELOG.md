@@ -23,6 +23,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Hardened all workflows against their own Zizmor audit: `persist-credentials: false`
   on every checkout, justified `dangerous-triggers` ignores on the intentional
   `pull_request_target` workflows, and a `concurrency` guard on the scan workflow.
+- Promoted **Zizmor** and **Dependency Review** from advisory to **blocking gates**
+  — an insecure workflow or a high-severity vulnerable dependency now fails CI.
+  (Trivy stays advisory so a transient upstream CVE can't block unrelated PRs.)
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,
