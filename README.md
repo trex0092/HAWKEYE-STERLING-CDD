@@ -35,7 +35,9 @@ runtime.
 - **CSS design tokens** — `src/styles/*` (variables, keyframes, component classes)
 - **Vitest + Testing Library** — runtime tests
 - **ESLint + Prettier** — linting/formatting
-- **GitHub Actions** — CI (lint·typecheck·test·build), CodeQL, Dependency Review, Lighthouse, Dependabot (+ auto-merge), and release-please
+- **GitHub Actions** — CI (lint·typecheck·test·build), CodeQL (security-extended),
+  Trivy, Zizmor, OpenSSF Scorecard, SBOM, Dependency Review, actionlint,
+  Lighthouse, Dependabot (+ auto-merge), and release-please
 
 ## Getting started
 

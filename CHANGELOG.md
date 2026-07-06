@@ -16,6 +16,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Workflow linting via `actionlint` (`actionlint.yml`), which lints the
   Actions workflows on any change to `.github/workflows/**`.
 - Documentation issue form (`.github/ISSUE_TEMPLATE/documentation.yml`).
+- Aggressive security-scanning suite (`security-scan.yml`): **Trivy**
+  (dependency + IaC/misconfig), **Zizmor** (GitHub Actions security audit), and a
+  **CycloneDX SBOM** artifact — all reporting into the code-scanning dashboard.
+- Deepened **CodeQL** to the `security-extended,security-and-quality` query suites.
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,
