@@ -20,6 +20,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (dependency + IaC/misconfig), **Zizmor** (GitHub Actions security audit), and a
   **CycloneDX SBOM** artifact — all reporting into the code-scanning dashboard.
 - Deepened **CodeQL** to the `security-extended,security-and-quality` query suites.
+- Hardened all workflows against their own Zizmor audit: `persist-credentials: false`
+  on every checkout, justified `dangerous-triggers` ignores on the intentional
+  `pull_request_target` workflows, and a `concurrency` guard on the scan workflow.
 - Governance compliance files: `GOVERNANCE.md` (roles, decision-making, change
   control) and `SUPPORT.md` (how to get help), linked from the README.
 - Path-scoped `CODEOWNERS` covering governance docs, CI/CD, compliance docs,

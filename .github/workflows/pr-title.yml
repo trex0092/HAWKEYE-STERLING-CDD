@@ -5,6 +5,7 @@ name: PR title
 # by release-please (versioning + CHANGELOG) and the grouped release notes.
 
 on:
+  # zizmor: ignore[dangerous-triggers] — reads the PR title via API; never checks out or runs PR code.
   pull_request_target:
     types: [opened, edited, reopened, synchronize]
 

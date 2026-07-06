@@ -4,6 +4,7 @@ name: Labeler
 # pull_request_target lets forked PRs be labelled with a read-scoped default token.
 
 on:
+  # zizmor: ignore[dangerous-triggers] — labels only; never checks out or runs PR code.
   pull_request_target:
     types: [opened, synchronize, reopened]
 

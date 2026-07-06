@@ -5,6 +5,7 @@ name: Dependabot auto-merge
 # (Recommended: protect `main` with the `build` check so the merge waits for CI.)
 # Major updates are left open for manual review.
 
+# zizmor: ignore[dangerous-triggers] — gated on actor == dependabot[bot]; never checks out or runs PR code.
 on: pull_request_target
 
 permissions:
