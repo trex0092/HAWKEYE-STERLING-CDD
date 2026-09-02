@@ -1,7 +1,7 @@
 {
   "name": "hawkeye-sterling-cdd",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Hawkeye Sterling — Customer & Counterparty Due Diligence (CDD) compliance workstation",
   "license": "UNLICENSED",
